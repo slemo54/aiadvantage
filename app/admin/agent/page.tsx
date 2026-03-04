@@ -1,14 +1,541 @@
+"use client";
+
+import { useState, useEffect } from "react";
+import {
+  Search,
+  FileText,
+  PenTool,
+  Sparkles,
+  Send,
+  ChevronRight,
+  CheckCircle2,
+  Loader2,
+  AlertCircle,
+  Circle,
+  Play,
+  ArrowRight,
+  BookOpen,
+  Clock,
+} from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Textarea } from "@/components/ui/textarea";
+import { StatusBadge } from "@/components/admin/status-badge";
+import { CATEGORIES } from "@/lib/constants";
+import { getNextState } from "@/lib/ai/pipeline";
+import type { WorkflowState, CategoryKey } from "@/lib/constants";
+
+// ─── Types ─────────────────────────────────────────────────────────────────
+
+interface PipelineArticle {
+  id: string;
+  title: string;
+  status: WorkflowState;
+  category: CategoryKey;
+  created_at: string;
+}
+
+interface ActivityLog {
+  id: string;
+  timestamp: string;
+  message: string;
+  type: "info" | "success" | "error";
+}
+
+// ─── Constants ──────────────────────────────────────────────────────────────
+
+const PIPELINE_ARTICLES: PipelineArticle[] = [
+  {
+    id: "1",
+    title: "Claude 4 vs GPT-5: Confronto Completo",
+    status: "drafting",
+    category: "tools",
+    created_at: "2026-03-08",
+  },
+  {
+    id: "2",
+    title: "AI nella Sanità 2025",
+    status: "humanizing",
+    category: "casi_duso",
+    created_at: "2026-03-07",
+  },
+  {
+    id: "3",
+    title: "Automazione per PMI",
+    status: "reviewing",
+    category: "ai_news",
+    created_at: "2026-03-06",
+  },
+  {
+    id: "4",
+    title: "Guida LLM per Sviluppatori",
+    status: "ready",
+    category: "tutorial",
+    created_at: "2026-03-05",
+  },
+];
+
+const PIPELINE_STEPS = [
+  {
+    id: "researching",
+    label: "Perplexity",
+    sublabel: "Discovery",
+    Icon: Search,
+  },
+  {
+    id: "drafting",
+    label: "Kimi",
+    sublabel: "Structuring",
+    Icon: FileText,
+  },
+  {
+    id: "humanizing",
+    label: "Claude",
+    sublabel: "Drafting",
+    Icon: PenTool,
+  },
+  {
+    id: "reviewing",
+    label: "Gemini",
+    sublabel: "Review",
+    Icon: Sparkles,
+  },
+  {
+    id: "ready",
+    label: "Pubblica",
+    sublabel: "Publish",
+    Icon: Send,
+  },
+] as const;
+
+const PLACEHOLDER_IDEAS = [
+  { id: "idea-1", topic: "Come Claude Code sta cambiando lo sviluppo software" },
+  { id: "idea-2", topic: "AI Act europeo: impatto sulle startup italiane" },
+  { id: "idea-3", topic: "I migliori LLM open source del 2026" },
+];
+
+// ─── Helper ─────────────────────────────────────────────────────────────────
+
+function getStepStatus(
+  stepId: string,
+  articles: PipelineArticle[]
+): "idle" | "running" | "done" | "error" {
+  const count = articles.filter((a) => a.status === stepId).length;
+  if (count > 0) return "running";
+  return "idle";
+}
+
+function getStepCount(stepId: string, articles: PipelineArticle[]): number {
+  return articles.filter((a) => a.status === stepId).length;
+}
+
+function StepStatusIcon({ status }: { status: "idle" | "running" | "done" | "error" }) {
+  if (status === "running") return <Loader2 className="h-4 w-4 animate-spin text-indigo-400" />;
+  if (status === "done") return <CheckCircle2 className="h-4 w-4 text-green-400" />;
+  if (status === "error") return <AlertCircle className="h-4 w-4 text-red-400" />;
+  return <Circle className="h-4 w-4 text-muted-foreground" />;
+}
+
+function formatLogDate(iso: string) {
+  const d = new Date(iso);
+  return d.toLocaleTimeString("it-IT", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+}
+
+// ─── Main Component ─────────────────────────────────────────────────────────
+
 export default function AgentPage() {
+  const [articles, setArticles] = useState<PipelineArticle[]>(PIPELINE_ARTICLES);
+  const [advancingId, setAdvancingId] = useState<string | null>(null);
+  const [newTopic, setNewTopic] = useState("");
+  const [selectedIdea, setSelectedIdea] = useState("");
+  const [isGeneratingIdeas, setIsGeneratingIdeas] = useState(false);
+  const [isGeneratingDraft, setIsGeneratingDraft] = useState(false);
+  const [logs, setLogs] = useState<ActivityLog[]>([]);
+
+  // Load logs from localStorage on mount
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem("pipeline_logs");
+      if (stored) setLogs(JSON.parse(stored) as ActivityLog[]);
+    } catch {
+      // ignore parse errors
+    }
+  }, []);
+
+  function addLog(message: string, type: ActivityLog["type"] = "info") {
+    const entry: ActivityLog = {
+      id: `${Date.now()}-${Math.random()}`,
+      timestamp: new Date().toISOString(),
+      message,
+      type,
+    };
+    setLogs((prev) => {
+      const updated = [entry, ...prev].slice(0, 50);
+      try {
+        localStorage.setItem("pipeline_logs", JSON.stringify(updated));
+      } catch {
+        // ignore storage errors
+      }
+      return updated;
+    });
+  }
+
+  async function handleAdvance(article: PipelineArticle) {
+    const next = getNextState(article.status);
+    if (!next) return;
+    setAdvancingId(article.id);
+    addLog(`Avanzamento "${article.title}": ${article.status} → ${next}`);
+    // Simulate async work
+    await new Promise((r) => setTimeout(r, 800));
+    setArticles((prev) =>
+      prev.map((a) => (a.id === article.id ? { ...a, status: next } : a))
+    );
+    addLog(`"${article.title}" ora è in stato: ${next}`, "success");
+    setAdvancingId(null);
+  }
+
+  async function handlePublish(article: PipelineArticle) {
+    setAdvancingId(article.id);
+    addLog(`Pubblicazione di "${article.title}"...`);
+    await new Promise((r) => setTimeout(r, 1000));
+    setArticles((prev) =>
+      prev.map((a) => (a.id === article.id ? { ...a, status: "published" } : a))
+    );
+    addLog(`"${article.title}" pubblicato con successo!`, "success");
+    setAdvancingId(null);
+  }
+
+  async function handleGenerateIdeas() {
+    if (!newTopic.trim()) return;
+    setIsGeneratingIdeas(true);
+    addLog(`Invio topic a Perplexity: "${newTopic}"`);
+    try {
+      await fetch("/api/cron/generate-ideas", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ topic: newTopic }),
+      });
+      addLog("Ricerca avviata con successo", "success");
+      setNewTopic("");
+    } catch {
+      addLog("Errore durante la ricerca topic", "error");
+    } finally {
+      setIsGeneratingIdeas(false);
+    }
+  }
+
+  async function handleGenerateDraft() {
+    if (!selectedIdea) return;
+    setIsGeneratingDraft(true);
+    addLog(`Generazione bozza per idea: ${selectedIdea}`);
+    try {
+      await fetch("/api/workflow/draft", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ideaId: selectedIdea }),
+      });
+      addLog("Bozza generata con successo", "success");
+      setSelectedIdea("");
+    } catch {
+      addLog("Errore durante la generazione bozza", "error");
+    } finally {
+      setIsGeneratingDraft(false);
+    }
+  }
+
+  function clearLogs() {
+    setLogs([]);
+    try {
+      localStorage.removeItem("pipeline_logs");
+    } catch {
+      // ignore
+    }
+  }
+
+  const activeArticles = articles.filter((a) => a.status !== "published");
+
   return (
-    <div>
-      <h1 className="mb-6 text-3xl font-bold">Assistente AI</h1>
-      <div className="rounded-lg border border-border p-8 text-center">
-        <p className="text-muted-foreground">
-          L&apos;interfaccia chat AI verrà implementata in una sessione futura.
-        </p>
-        <p className="mt-2 text-sm text-muted-foreground">
-          Permetterà di interagire con la pipeline AI per generare e raffinare contenuti.
-        </p>
+    <div className="space-y-6">
+      {/* Header */}
+      <header className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">AI Pipeline</h1>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Gestisci il flusso automatizzato Perplexity → Kimi → Claude → Gemini
+          </p>
+        </div>
+        <Badge variant="outline" className="gap-1.5 px-3 py-1.5 text-sm">
+          <span className="h-2 w-2 rounded-full bg-green-400 inline-block" />
+          {activeArticles.length} articoli attivi
+        </Badge>
+      </header>
+
+      {/* Pipeline Visualizer */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Stato Pipeline</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-start gap-0 overflow-x-auto pb-2">
+            {PIPELINE_STEPS.map((step, idx) => {
+              const status = getStepStatus(step.id, articles);
+              const count = getStepCount(step.id, articles);
+              const { Icon } = step;
+              return (
+                <div key={step.id} className="flex items-center">
+                  {/* Step card */}
+                  <div
+                    className={[
+                      "flex min-w-[120px] flex-col items-center gap-2 rounded-xl border p-4 transition-colors",
+                      status === "running"
+                        ? "border-indigo-500/50 bg-indigo-500/10"
+                        : "border-border bg-card",
+                    ].join(" ")}
+                  >
+                    <div
+                      className={[
+                        "flex h-10 w-10 items-center justify-center rounded-full",
+                        status === "running"
+                          ? "bg-indigo-500/20"
+                          : "bg-muted",
+                      ].join(" ")}
+                    >
+                      <Icon
+                        className={[
+                          "h-5 w-5",
+                          status === "running"
+                            ? "text-indigo-400"
+                            : "text-muted-foreground",
+                        ].join(" ")}
+                      />
+                    </div>
+                    <div className="text-center">
+                      <p className="text-sm font-semibold">{step.label}</p>
+                      <p className="text-xs text-muted-foreground">{step.sublabel}</p>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <StepStatusIcon status={status} />
+                      {count > 0 && (
+                        <Badge variant="secondary" className="h-5 px-1.5 text-xs">
+                          {count}
+                        </Badge>
+                      )}
+                    </div>
+                  </div>
+                  {/* Arrow connector */}
+                  {idx < PIPELINE_STEPS.length - 1 && (
+                    <ChevronRight className="mx-1 h-5 w-5 flex-shrink-0 text-muted-foreground" />
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Articles in Pipeline */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Articoli in Lavorazione</CardTitle>
+        </CardHeader>
+        <CardContent className="p-0">
+          {activeArticles.length === 0 ? (
+            <div className="px-6 py-10 text-center text-sm text-muted-foreground">
+              Nessun articolo in lavorazione.
+            </div>
+          ) : (
+            <div className="divide-y divide-border">
+              {activeArticles.map((article) => {
+                const category = CATEGORIES[article.category];
+                const next = getNextState(article.status);
+                const isAdvancing = advancingId === article.id;
+
+                return (
+                  <div
+                    key={article.id}
+                    className="flex flex-col gap-3 px-6 py-4 sm:flex-row sm:items-center sm:justify-between"
+                  >
+                    {/* Info */}
+                    <div className="min-w-0 flex-1 space-y-1">
+                      <p className="truncate font-medium">{article.title}</p>
+                      <div className="flex flex-wrap items-center gap-2">
+                        <StatusBadge status={article.status} />
+                        <Badge
+                          variant="outline"
+                          className="text-xs"
+                          style={{
+                            borderColor: category.accent,
+                            color: category.accent,
+                          }}
+                        >
+                          {category.label}
+                        </Badge>
+                        <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                          <Clock className="h-3 w-3" />
+                          {article.created_at}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Actions */}
+                    <div className="flex shrink-0 gap-2">
+                      {article.status === "ready" ? (
+                        <Button
+                          size="sm"
+                          className="gap-1.5 bg-green-600 hover:bg-green-700"
+                          disabled={isAdvancing}
+                          onClick={() => handlePublish(article)}
+                        >
+                          {isAdvancing ? (
+                            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                          ) : (
+                            <Send className="h-3.5 w-3.5" />
+                          )}
+                          Pubblica
+                        </Button>
+                      ) : (
+                        next && (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="gap-1.5"
+                            disabled={isAdvancing}
+                            onClick={() => handleAdvance(article)}
+                          >
+                            {isAdvancing ? (
+                              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                            ) : (
+                              <ArrowRight className="h-3.5 w-3.5" />
+                            )}
+                            Avanza
+                          </Button>
+                        )
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Manual Controls */}
+      <div className="grid gap-4 md:grid-cols-3">
+        {/* 1. Nuova Ricerca Topic */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-sm">
+              <Search className="h-4 w-4 text-indigo-400" />
+              Nuova Ricerca Topic
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <Textarea
+              placeholder="Inserisci un topic da esplorare con Perplexity..."
+              value={newTopic}
+              onChange={(e) => setNewTopic(e.target.value)}
+              className="min-h-[80px] resize-none text-sm"
+            />
+            <Button
+              size="sm"
+              className="w-full gap-1.5"
+              disabled={!newTopic.trim() || isGeneratingIdeas}
+              onClick={handleGenerateIdeas}
+            >
+              {isGeneratingIdeas ? (
+                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+              ) : (
+                <Play className="h-3.5 w-3.5" />
+              )}
+              Avvia Ricerca
+            </Button>
+          </CardContent>
+        </Card>
+
+        {/* 2. Genera Bozza da Idea */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-sm">
+              <BookOpen className="h-4 w-4 text-indigo-400" />
+              Genera Bozza da Idea
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <select
+              value={selectedIdea}
+              onChange={(e) => setSelectedIdea(e.target.value)}
+              className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            >
+              <option value="">Seleziona un&apos;idea...</option>
+              {PLACEHOLDER_IDEAS.map((idea) => (
+                <option key={idea.id} value={idea.id}>
+                  {idea.topic}
+                </option>
+              ))}
+            </select>
+            <Button
+              size="sm"
+              className="w-full gap-1.5"
+              disabled={!selectedIdea || isGeneratingDraft}
+              onClick={handleGenerateDraft}
+            >
+              {isGeneratingDraft ? (
+                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+              ) : (
+                <PenTool className="h-3.5 w-3.5" />
+              )}
+              Genera Bozza
+            </Button>
+          </CardContent>
+        </Card>
+
+        {/* 3. Log Attività */}
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between">
+            <CardTitle className="flex items-center gap-2 text-sm">
+              <FileText className="h-4 w-4 text-indigo-400" />
+              Log Attività
+            </CardTitle>
+            {logs.length > 0 && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-7 px-2 text-xs text-muted-foreground hover:text-foreground"
+                onClick={clearLogs}
+              >
+                Svuota
+              </Button>
+            )}
+          </CardHeader>
+          <CardContent>
+            {logs.length === 0 ? (
+              <p className="text-xs text-muted-foreground">Nessuna attività registrata.</p>
+            ) : (
+              <ul className="max-h-[120px] space-y-1 overflow-y-auto">
+                {logs.map((log) => (
+                  <li key={log.id} className="flex items-start gap-2 text-xs">
+                    <span className="shrink-0 font-mono text-muted-foreground">
+                      {formatLogDate(log.timestamp)}
+                    </span>
+                    <span
+                      className={
+                        log.type === "success"
+                          ? "text-green-400"
+                          : log.type === "error"
+                            ? "text-red-400"
+                            : "text-foreground"
+                      }
+                    >
+                      {log.message}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

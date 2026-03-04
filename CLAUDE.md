@@ -1,4 +1,4 @@
-# IlVantaggioAI — Istruzioni Progetto
+ # IlVantaggioAI — Istruzioni Progetto
 
 ## Overview
 Blog italiano sull'AI con workflow editoriale automatizzato (Perplexity → Kimi → Claude → Gemini).

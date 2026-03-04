@@ -1,15 +1,18 @@
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Loader2 } from "lucide-react";
 import { CATEGORIES } from "@/lib/constants";
 import { StatusBadge } from "./status-badge";
 import type { Idea } from "@/lib/types";
 
 interface IdeaCardProps {
   idea: Idea;
+  onSelect?: (id: string) => void;
+  isSelecting?: boolean;
 }
 
-export function IdeaCard({ idea }: IdeaCardProps) {
+export function IdeaCard({ idea, onSelect, isSelecting = false }: IdeaCardProps) {
   const category = CATEGORIES[idea.category];
 
   return (
@@ -30,8 +33,24 @@ export function IdeaCard({ idea }: IdeaCardProps) {
           <span>Freshness: {idea.freshness_score}%</span>
           {idea.source_url && <span>&middot; Ha fonte</span>}
         </div>
-        <Button size="sm" className="w-full">
-          Seleziona
+        <Button
+          size="sm"
+          className="w-full"
+          disabled={isSelecting || idea.status === "selected" || idea.status === "used"}
+          onClick={() => onSelect?.(idea.id)}
+        >
+          {isSelecting ? (
+            <>
+              <Loader2 className="mr-2 h-3 w-3 animate-spin" />
+              Selezione...
+            </>
+          ) : idea.status === "selected" ? (
+            "Selezionata"
+          ) : idea.status === "used" ? (
+            "Usata"
+          ) : (
+            "Seleziona"
+          )}
         </Button>
       </CardContent>
     </Card>
