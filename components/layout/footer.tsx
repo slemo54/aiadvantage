@@ -1,189 +1,124 @@
 "use client";
 
-import Link from "next/link";
 import { motion } from "framer-motion";
-import { Mail, ArrowUpRight, Heart } from "lucide-react";
-import { SITE_NAME } from "@/lib/constants";
+import Link from "next/link";
+import { Sparkles, Github, Twitter, Linkedin, Instagram } from "lucide-react";
 
-const EXPLORE_LINKS = [
-  { href: "/blog?category=ai_news", label: "AI News" },
-  { href: "/blog?category=casi_duso", label: "Case Studies" },
-  { href: "/blog?category=web_dev", label: "Dev Resource" },
-  { href: "/blog?category=tools", label: "Benchmarks" },
-];
-
-const CONNECT_LINKS = [
-  { href: "/about", label: "About Anselmo" },
-  { href: "https://twitter.com", label: "Twitter (X)" },
-  { href: "https://linkedin.com", label: "LinkedIn" },
-  { href: "/contact", label: "Contact" },
-];
-
-const LEGAL_LINKS = [
-  { href: "/privacy", label: "Privacy Policy" },
-  { href: "/terms", label: "Terms of Service" },
-];
-
-const containerVariants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.1,
-      delayChildren: 0.1,
-    },
-  },
-};
-
-const itemVariants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.5 },
-  },
+const footerLinks = {
+  explore: [
+    { label: "Home", href: "/" },
+    { label: "Blog", href: "/blog" },
+    { label: "About", href: "/about" },
+    { label: "Contact", href: "/contact" },
+  ],
+  categories: [
+    { label: "AI News", href: "/blog?category=ai_news" },
+    { label: "Casi d'uso", href: "/blog?category=use_cases" },
+    { label: "Tools", href: "/blog?category=tools" },
+    { label: "Tutorials", href: "/blog?category=tutorials" },
+  ],
+  social: [
+    { label: "Twitter", href: "#", icon: Twitter },
+    { label: "LinkedIn", href: "#", icon: Linkedin },
+    { label: "Instagram", href: "#", icon: Instagram },
+    { label: "GitHub", href: "#", icon: Github },
+  ],
 };
 
 export function Footer() {
-  const currentYear = new Date().getFullYear();
-
   return (
-    <footer className="border-t border-zinc-800 bg-zinc-950">
-      <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
-        <motion.div
-          variants={containerVariants}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true }}
-          className="grid gap-10 sm:grid-cols-2 lg:grid-cols-4"
-        >
+    <footer className="bg-white border-t border-gray-100">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-16">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-8 lg:gap-12">
           {/* Brand */}
-          <motion.div variants={itemVariants} className="col-span-1 lg:col-span-1">
-            <motion.div whileHover={{ x: 5 }} transition={{ duration: 0.2 }}>
-              <Link href="/" className="mb-4 flex items-center gap-2 text-lg font-bold">
-                <motion.div
-                  className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-600"
-                  whileHover={{ rotate: 5, scale: 1.1 }}
-                  transition={{ duration: 0.2 }}
-                >
-                  <Mail className="h-4 w-4 text-white" />
-                </motion.div>
-                <span className="text-white">{SITE_NAME}</span>
-                <span className="text-indigo-400">.it</span>
-              </Link>
-            </motion.div>
-            <p className="mb-6 text-sm leading-relaxed text-zinc-500">
-              Bridging the gap between cutting-edge AI research and practical
-              implementation for modern developers and tech leaders.
+          <div className="col-span-2 md:col-span-1">
+            <Link href="/" className="flex items-center gap-2 mb-4">
+              <div className="w-8 h-8 bg-[#3B5BFF] rounded-lg flex items-center justify-center">
+                <Sparkles className="w-5 h-5 text-white" />
+              </div>
+              <span className="text-xl font-bold text-gray-900">AI Advantage</span>
+            </Link>
+            <p className="text-gray-500 text-sm mb-6">
+              Il tuo punto di riferimento per l&apos;intelligenza artificiale in italiano.
             </p>
-            {/* Newsletter mini signup */}
-            <div className="flex gap-2">
-              <input
-                type="email"
-                placeholder="Your email"
-                className="h-9 flex-1 rounded-lg border border-zinc-800 bg-zinc-900 px-3 text-sm text-zinc-300 placeholder:text-zinc-600 focus:border-indigo-500 focus:outline-none"
-              />
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className="h-9 rounded-lg bg-indigo-600 px-4 text-sm font-medium text-white hover:bg-indigo-500"
-              >
-                Join
-              </motion.button>
+            {/* Social Links */}
+            <div className="flex gap-3">
+              {footerLinks.social.map((item) => (
+                <motion.a
+                  key={item.label}
+                  href={item.href}
+                  whileHover={{ scale: 1.1, y: -2 }}
+                  className="w-9 h-9 rounded-full bg-gray-100 flex items-center justify-center text-gray-600 hover:bg-[#3B5BFF] hover:text-white transition-colors"
+                >
+                  <item.icon className="w-4 h-4" />
+                </motion.a>
+              ))}
             </div>
-          </motion.div>
+          </div>
 
           {/* Explore */}
-          <motion.div variants={itemVariants}>
-            <h4 className="mb-4 text-xs font-semibold uppercase tracking-wider text-zinc-400">
-              Explore
-            </h4>
+          <div>
+            <h3 className="font-semibold text-gray-900 mb-4">Esplora</h3>
             <ul className="space-y-3">
-              {EXPLORE_LINKS.map((link) => (
-                <li key={link.href}>
-                  <motion.div whileHover={{ x: 3 }} transition={{ duration: 0.2 }}>
-                    <Link
-                      href={link.href}
-                      className="group flex items-center gap-1 text-sm text-zinc-500 transition-colors hover:text-zinc-200"
-                    >
-                      {link.label}
-                      <ArrowUpRight className="h-3 w-3 opacity-0 group-hover:opacity-100 transition-opacity" />
-                    </Link>
-                  </motion.div>
-                </li>
-              ))}
-            </ul>
-          </motion.div>
-
-          {/* Connect */}
-          <motion.div variants={itemVariants}>
-            <h4 className="mb-4 text-xs font-semibold uppercase tracking-wider text-zinc-400">
-              Connect
-            </h4>
-            <ul className="space-y-3">
-              {CONNECT_LINKS.map((link) => (
-                <li key={link.href}>
-                  <motion.div whileHover={{ x: 3 }} transition={{ duration: 0.2 }}>
-                    <Link
-                      href={link.href}
-                      className="group flex items-center gap-1 text-sm text-zinc-500 transition-colors hover:text-zinc-200"
-                    >
-                      {link.label}
-                      <ArrowUpRight className="h-3 w-3 opacity-0 group-hover:opacity-100 transition-opacity" />
-                    </Link>
-                  </motion.div>
-                </li>
-              ))}
-            </ul>
-          </motion.div>
-
-          {/* Admin / Hidden */}
-          <motion.div variants={itemVariants}>
-            <h4 className="mb-4 text-xs font-semibold uppercase tracking-wider text-zinc-400">
-              Admin
-            </h4>
-            <ul className="space-y-3">
-              <li>
-                <motion.div whileHover={{ x: 3 }} transition={{ duration: 0.2 }}>
+              {footerLinks.explore.map((link) => (
+                <li key={link.label}>
                   <Link
-                    href="/admin"
-                    className="text-xs text-zinc-700 transition-colors hover:text-zinc-500"
+                    href={link.href}
+                    className="text-gray-500 hover:text-[#3B5BFF] transition-colors text-sm"
                   >
-                    Dashboard
+                    {link.label}
                   </Link>
-                </motion.div>
-              </li>
+                </li>
+              ))}
             </ul>
-          </motion.div>
-        </motion.div>
-
-        {/* Bottom bar */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.5, delay: 0.3 }}
-          className="mt-12 flex flex-col items-center justify-between gap-4 border-t border-zinc-800/60 pt-8 sm:flex-row"
-        >
-          <p className="text-xs text-zinc-600">
-            &copy; {currentYear} {SITE_NAME}. All rights reserved.
-          </p>
-          <div className="flex items-center gap-6">
-            {LEGAL_LINKS.map((link) => (
-              <motion.div key={link.href} whileHover={{ y: -1 }}>
-                <Link
-                  href={link.href}
-                  className="text-xs text-zinc-600 transition-colors hover:text-zinc-400"
-                >
-                  {link.label}
-                </Link>
-              </motion.div>
-            ))}
           </div>
-          <p className="flex items-center gap-1 text-xs text-zinc-600">
-            Made with <Heart className="h-3 w-3 text-red-500" /> in Italy
+
+          {/* Categories */}
+          <div>
+            <h3 className="font-semibold text-gray-900 mb-4">Categorie</h3>
+            <ul className="space-y-3">
+              {footerLinks.categories.map((link) => (
+                <li key={link.label}>
+                  <Link
+                    href={link.href}
+                    className="text-gray-500 hover:text-[#3B5BFF] transition-colors text-sm"
+                  >
+                    {link.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Newsletter Mini */}
+          <div>
+            <h3 className="font-semibold text-gray-900 mb-4">Resta aggiornato</h3>
+            <p className="text-gray-500 text-sm mb-4">
+              Iscriviti per ricevere le ultime novità sull&apos;AI.
+            </p>
+            <Link
+              href="/#newsletter"
+              className="inline-flex items-center text-[#3B5BFF] font-medium text-sm hover:underline"
+            >
+              Iscriviti ora →
+            </Link>
+          </div>
+        </div>
+
+        {/* Bottom */}
+        <div className="mt-12 pt-8 border-t border-gray-100 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <p className="text-gray-400 text-sm">
+            © {new Date().getFullYear()} AI Advantage. Tutti i diritti riservati.
           </p>
-        </motion.div>
+          <div className="flex gap-6 text-sm">
+            <Link href="#" className="text-gray-400 hover:text-gray-600">
+              Privacy Policy
+            </Link>
+            <Link href="#" className="text-gray-400 hover:text-gray-600">
+              Terms of Service
+            </Link>
+          </div>
+        </div>
       </div>
     </footer>
   );

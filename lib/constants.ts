@@ -2,12 +2,12 @@ export const SITE_NAME = "IlVantaggioAI";
 export const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://ilvantaggioai.it";
 
 export const CATEGORIES = {
-  casi_duso: { label: "Casi d'Uso", color: "green", accent: "#22c55e" },
-  ai_news: { label: "AI News", color: "blue", accent: "#3b82f6" },
-  web_dev: { label: "Web Dev", color: "orange", accent: "#f97316" },
-  tools: { label: "Tools", color: "purple", accent: "#a855f7" },
-  tutorial: { label: "Tutorial", color: "cyan", accent: "#06b6d4" },
-  opinioni: { label: "Opinioni", color: "rose", accent: "#f43f5e" },
+  casi_duso: { label: "Casi d'Uso", color: "green", accent: "#22c55e", icon: "💡" },
+  ai_news: { label: "AI News", color: "blue", accent: "#3b82f6", icon: "🤖" },
+  web_dev: { label: "Web Dev", color: "orange", accent: "#f97316", icon: "💻" },
+  tools: { label: "Tools", color: "purple", accent: "#a855f7", icon: "🛠️" },
+  tutorial: { label: "Tutorial", color: "cyan", accent: "#06b6d4", icon: "📚" },
+  opinioni: { label: "Opinioni", color: "rose", accent: "#f43f5e", icon: "💬" },
 } as const;
 
 export type CategoryKey = keyof typeof CATEGORIES;

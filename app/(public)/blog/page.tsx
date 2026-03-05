@@ -4,41 +4,25 @@ import { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { useSearchParams } from "next/navigation";
-import {
-  Search,
-  Filter,
-  Grid3X3,
-  List,
-  ArrowRight,
-  TrendingUp,
-  Sparkles,
-} from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Search, Filter, Grid3X3, List, ArrowRight, Sparkles } from "lucide-react";
 import { ArticleCard, ArticleCardSkeleton } from "@/components/blog/article-card";
 import { CATEGORIES } from "@/lib/constants";
 import type { Article } from "@/lib/types";
 import type { CategoryKey } from "@/lib/constants";
-import { AnimatedHeroBackground } from "@/components/animations/animated-hero";
+import { FadeIn } from "@/components/animations/motion";
 
 // ─── Extended placeholder data ────────────────────────────────────────────────
 
-interface ArticleMeta {
-  gradient: string;
-  author: string;
-  readTime: number;
-}
-
-const ARTICLE_META: Record<string, ArticleMeta> = {
-  "1": { gradient: "from-emerald-800 to-teal-700", author: "Anselmo", readTime: 8 },
-  "2": { gradient: "from-blue-900 to-indigo-800", author: "Anselmo", readTime: 6 },
-  "3": { gradient: "from-cyan-800 to-blue-700", author: "Anselmo", readTime: 5 },
-  "4": { gradient: "from-emerald-900 to-green-800", author: "Anselmo", readTime: 10 },
-  "5": { gradient: "from-slate-800 to-zinc-700", author: "Anselmo", readTime: 7 },
-  "6": { gradient: "from-orange-900 to-amber-800", author: "Anselmo", readTime: 9 },
-  "7": { gradient: "from-purple-900 to-violet-800", author: "Anselmo", readTime: 12 },
-  "8": { gradient: "from-rose-900 to-pink-800", author: "Anselmo", readTime: 6 },
-  "9": { gradient: "from-indigo-900 to-blue-800", author: "Anselmo", readTime: 8 },
+const ARTICLE_META: Record<string, { author: string; readTime: number }> = {
+  "1": { author: "Anselmo", readTime: 8 },
+  "2": { author: "Anselmo", readTime: 6 },
+  "3": { author: "Anselmo", readTime: 5 },
+  "4": { author: "Anselmo", readTime: 10 },
+  "5": { author: "Anselmo", readTime: 7 },
+  "6": { author: "Anselmo", readTime: 9 },
+  "7": { author: "Anselmo", readTime: 12 },
+  "8": { author: "Anselmo", readTime: 6 },
+  "9": { author: "Anselmo", readTime: 8 },
 };
 
 const PLACEHOLDER_ARTICLES: Article[] = [
@@ -51,7 +35,8 @@ const PLACEHOLDER_ARTICLES: Article[] = [
     category: "casi_duso",
     freshness_score: 95,
     hero_image_url: null,
-    meta_description: "Discover how to deploy Llama 3 for internal data processing without compromising privacy.",
+    meta_description:
+      "Discover how to deploy Llama 3 for internal data processing without compromising privacy.",
     keywords: ["LLM", "privacy", "enterprise"],
     published_at: "2026-03-01T10:00:00Z",
     created_at: "2026-03-01T08:00:00Z",
@@ -66,7 +51,8 @@ const PLACEHOLDER_ARTICLES: Article[] = [
     category: "ai_news",
     freshness_score: 90,
     hero_image_url: null,
-    meta_description: "A comprehensive look at the foundation models dominating the market this year.",
+    meta_description:
+      "A comprehensive look at the foundation models dominating the market this year.",
     keywords: ["AI", "report", "generative"],
     published_at: "2026-02-28T10:00:00Z",
     created_at: "2026-02-28T08:00:00Z",
@@ -81,7 +67,8 @@ const PLACEHOLDER_ARTICLES: Article[] = [
     category: "web_dev",
     freshness_score: 88,
     hero_image_url: null,
-    meta_description: "Architecting your frontend to handle real-time generative streaming responses.",
+    meta_description:
+      "Architecting your frontend to handle real-time generative streaming responses.",
     keywords: ["API", "web", "scalable"],
     published_at: "2026-02-25T10:00:00Z",
     created_at: "2026-02-25T08:00:00Z",
@@ -96,7 +83,8 @@ const PLACEHOLDER_ARTICLES: Article[] = [
     category: "casi_duso",
     freshness_score: 91,
     hero_image_url: null,
-    meta_description: "Practical implementations of diagnostic AI currently saving lives in clinics.",
+    meta_description:
+      "Practical implementations of diagnostic AI currently saving lives in clinics.",
     keywords: ["healthcare", "AI", "diagnostic"],
     published_at: "2026-02-20T10:00:00Z",
     created_at: "2026-02-20T08:00:00Z",
@@ -111,7 +99,8 @@ const PLACEHOLDER_ARTICLES: Article[] = [
     category: "ai_news",
     freshness_score: 85,
     hero_image_url: null,
-    meta_description: "Why the next shift in AI isn't better models, but autonomous agents.",
+    meta_description:
+      "Why the next shift in AI isn't better models, but autonomous agents.",
     keywords: ["agents", "workflow", "autonomous"],
     published_at: "2026-02-15T10:00:00Z",
     created_at: "2026-02-15T08:00:00Z",
@@ -123,10 +112,11 @@ const PLACEHOLDER_ARTICLES: Article[] = [
     slug: "mastering-jetbrains-mono-modern-dev",
     content_html: null,
     status: "published",
-    category: "web_dev",
+    category: "tutorial",
     freshness_score: 82,
     hero_image_url: null,
-    meta_description: "A deep dive into why typography matters for coding speed and legibility.",
+    meta_description:
+      "A deep dive into why typography matters for coding speed and legibility.",
     keywords: ["typography", "devtools", "fonts"],
     published_at: "2026-02-10T10:00:00Z",
     created_at: "2026-02-10T08:00:00Z",
@@ -141,7 +131,8 @@ const PLACEHOLDER_ARTICLES: Article[] = [
     category: "tutorial",
     freshness_score: 94,
     hero_image_url: null,
-    meta_description: "Quando conviene usare modelli locali e quando il cloud è la scelta migliore.",
+    meta_description:
+      "Quando conviene usare modelli locali e quando il cloud è la scelta migliore.",
     keywords: ["LLM", "tutorial", "privacy"],
     published_at: "2026-02-05T10:00:00Z",
     created_at: "2026-02-05T08:00:00Z",
@@ -156,7 +147,8 @@ const PLACEHOLDER_ARTICLES: Article[] = [
     category: "opinioni",
     freshness_score: 87,
     hero_image_url: null,
-    meta_description: "Un'analisi critica su bias, fairness e responsabilità nei sistemi AI.",
+    meta_description:
+      "Un'analisi critica su bias, fairness e responsabilità nei sistemi AI.",
     keywords: ["etica", "bias", "fairness"],
     published_at: "2026-02-01T10:00:00Z",
     created_at: "2026-02-01T08:00:00Z",
@@ -171,7 +163,8 @@ const PLACEHOLDER_ARTICLES: Article[] = [
     category: "tools",
     freshness_score: 93,
     hero_image_url: null,
-    meta_description: "Come Cursor sta rivoluzionando il modo in cui scriviamo codice.",
+    meta_description:
+      "Come Cursor sta rivoluzionando il modo in cui scriviamo codice.",
     keywords: ["cursor", "IDE", "coding"],
     published_at: "2026-01-28T10:00:00Z",
     created_at: "2026-01-28T08:00:00Z",
@@ -200,16 +193,18 @@ function CategoryBadge({
       className={[
         "flex shrink-0 items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium transition-all",
         isActive
-          ? "border-transparent text-white"
-          : "border-zinc-700 text-zinc-400 hover:border-zinc-500 hover:text-zinc-200",
+          ? "border-transparent text-white shadow-lg"
+          : "border-gray-200 text-gray-600 hover:border-[#3B5BFF] hover:text-[#3B5BFF] bg-white",
       ].join(" ")}
       style={isActive ? { backgroundColor: category.accent } : {}}
     >
       {category.label}
-      <span className={[
-        "rounded-full px-2 py-0.5 text-xs",
-        isActive ? "bg-white/20" : "bg-zinc-800 text-zinc-500"
-      ].join(" ")}>
+      <span
+        className={[
+          "rounded-full px-2 py-0.5 text-xs",
+          isActive ? "bg-white/20" : "bg-gray-100 text-gray-500",
+        ].join(" ")}
+      >
         {count}
       </span>
     </motion.button>
@@ -233,8 +228,8 @@ function ViewModeButton({
       className={[
         "flex h-9 w-9 items-center justify-center rounded-lg transition-all",
         active
-          ? "bg-indigo-600 text-white"
-          : "bg-zinc-800 text-zinc-400 hover:bg-zinc-700 hover:text-white",
+          ? "bg-[#3B5BFF] text-white shadow-md shadow-blue-500/25"
+          : "bg-white border border-gray-200 text-gray-500 hover:border-[#3B5BFF] hover:text-[#3B5BFF]",
       ].join(" ")}
     >
       <Icon className="h-4 w-4" />
@@ -249,7 +244,9 @@ function BlogContent() {
   const categoryParam = searchParams.get("category") as CategoryKey | null;
 
   const [articles, setArticles] = useState<Article[]>(PLACEHOLDER_ARTICLES);
-  const [activeCategory, setActiveCategory] = useState<CategoryKey | "all">(categoryParam || "all");
+  const [activeCategory, setActiveCategory] = useState<CategoryKey | "all">(
+    categoryParam || "all"
+  );
   const [searchQuery, setSearchQuery] = useState("");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [isLoading, setIsLoading] = useState(true);
@@ -257,8 +254,11 @@ function BlogContent() {
   useEffect(() => {
     async function loadArticles() {
       try {
-        const categoryFilter = activeCategory !== "all" ? `&category=${activeCategory}` : "";
-        const res = await fetch(`/api/articles?status=published&limit=24${categoryFilter}`);
+        const categoryFilter =
+          activeCategory !== "all" ? `&category=${activeCategory}` : "";
+        const res = await fetch(
+          `/api/articles?status=published&limit=24${categoryFilter}`
+        );
         if (!res.ok) throw new Error("fetch failed");
         const data = (await res.json()) as { articles?: Article[] };
         if (Array.isArray(data.articles) && data.articles.length > 0) {
@@ -274,77 +274,79 @@ function BlogContent() {
   }, [activeCategory]);
 
   // Calculate category counts
-  const categoryCounts = (Object.keys(CATEGORIES) as CategoryKey[]).reduce((acc, key) => {
-    acc[key] = articles.filter(a => a.category === key).length;
-    return acc;
-  }, {} as Record<CategoryKey, number>);
+  const categoryCounts = (Object.keys(CATEGORIES) as CategoryKey[]).reduce(
+    (acc, key) => {
+      acc[key] = articles.filter((a) => a.category === key).length;
+      return acc;
+    },
+    {} as Record<CategoryKey, number>
+  );
 
   // Filter articles
   let filteredArticles = articles;
 
   if (activeCategory !== "all") {
-    filteredArticles = filteredArticles.filter(a => a.category === activeCategory);
+    filteredArticles = filteredArticles.filter(
+      (a) => a.category === activeCategory
+    );
   }
 
   if (searchQuery.trim()) {
     const query = searchQuery.toLowerCase();
-    filteredArticles = filteredArticles.filter(a =>
-      a.title.toLowerCase().includes(query) ||
-      a.meta_description?.toLowerCase().includes(query) ||
-      a.keywords.some(k => k.toLowerCase().includes(query))
+    filteredArticles = filteredArticles.filter(
+      (a) =>
+        a.title.toLowerCase().includes(query) ||
+        a.meta_description?.toLowerCase().includes(query) ||
+        a.keywords.some((k) => k.toLowerCase().includes(query))
     );
   }
 
-  const categoryList = (Object.entries(CATEGORIES) as [CategoryKey, typeof CATEGORIES[CategoryKey]][]).map(
-    ([key, cat]) => ({ key, label: cat.label, accent: cat.accent })
-  );
+  const categoryList = (
+    Object.entries(CATEGORIES) as [CategoryKey, (typeof CATEGORIES)[CategoryKey]][]
+  ).map(([key, cat]) => ({ key, label: cat.label, accent: cat.accent }));
 
   return (
-    <div className="min-h-screen bg-zinc-950">
+    <div className="min-h-screen bg-gray-50">
       {/* Header Section */}
-      <section className="relative overflow-hidden border-b border-zinc-800">
-        <AnimatedHeroBackground gradient="from-indigo-900/30 via-zinc-950 to-zinc-950" />
-        
+      <section className="relative overflow-hidden bg-white border-b border-gray-100">
+        {/* Background decorations */}
+        <div className="absolute inset-0 -z-10">
+          <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-blue-50 rounded-full blur-3xl" />
+          <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-purple-50 rounded-full blur-3xl" />
+        </div>
+
         <div className="relative mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            className="mb-8"
-          >
-            <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-indigo-500/30 bg-indigo-900/20 px-4 py-1.5 text-xs font-medium text-indigo-300">
+          <FadeIn className="mb-8">
+            <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-blue-100 bg-blue-50 px-4 py-1.5 text-xs font-medium text-[#3B5BFF]">
               <Sparkles className="h-3.5 w-3.5" />
               Esplora la Knowledge Base AI
             </div>
-            <h1 className="mb-4 text-4xl font-bold text-white sm:text-5xl">Blog</h1>
-            <p className="max-w-2xl text-lg text-zinc-400">
+            <h1 className="mb-4 text-4xl font-bold text-gray-900 sm:text-5xl">
+              Blog
+            </h1>
+            <p className="max-w-2xl text-lg text-gray-600">
               Esplora articoli su Intelligenza Artificiale, casi d&apos;uso reali,
               tutorial pratici e analisi del settore.
             </p>
-          </motion.div>
+          </FadeIn>
 
           {/* Search and Filters */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.1 }}
-            className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between"
-          >
+          <FadeIn delay={0.1} className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             {/* Search */}
             <div className="relative max-w-md flex-1">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-500" />
-              <Input
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+              <input
                 type="search"
                 placeholder="Cerca articoli..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="h-11 border-zinc-700 bg-zinc-900/80 pl-10 text-sm text-zinc-300 placeholder:text-zinc-500 focus:border-indigo-500 focus:ring-indigo-500/20"
+                className="w-full h-11 rounded-xl border border-gray-200 bg-white pl-10 pr-4 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-[#3B5BFF] focus:ring-2 focus:ring-blue-100 transition-all"
               />
             </div>
 
             {/* View Mode Toggle */}
             <div className="flex items-center gap-2">
-              <span className="mr-2 text-xs text-zinc-500">Vista:</span>
+              <span className="mr-2 text-xs text-gray-500">Vista:</span>
               <ViewModeButton
                 active={viewMode === "grid"}
                 onClick={() => setViewMode("grid")}
@@ -356,15 +358,15 @@ function BlogContent() {
                 icon={List}
               />
             </div>
-          </motion.div>
+          </FadeIn>
         </div>
       </section>
 
       {/* Category Filters */}
-      <section className="sticky top-16 z-30 border-b border-zinc-800 bg-zinc-950/95 backdrop-blur-md">
+      <section className="sticky top-16 lg:top-20 z-30 border-b border-gray-200 bg-white/95 backdrop-blur-md">
         <div className="mx-auto max-w-7xl px-4 py-3 sm:px-6 lg:px-8">
           <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-hide">
-            <Filter className="h-4 w-4 shrink-0 text-zinc-500" />
+            <Filter className="h-4 w-4 shrink-0 text-gray-400" />
             <motion.button
               onClick={() => setActiveCategory("all")}
               whileHover={{ scale: 1.05 }}
@@ -372,8 +374,8 @@ function BlogContent() {
               className={[
                 "shrink-0 rounded-full border px-4 py-2 text-sm font-medium transition-all",
                 activeCategory === "all"
-                  ? "border-indigo-500 bg-indigo-600 text-white"
-                  : "border-zinc-700 text-zinc-400 hover:border-zinc-500 hover:text-zinc-200",
+                  ? "bg-[#3B5BFF] text-white border-transparent shadow-md shadow-blue-500/25"
+                  : "border-gray-200 text-gray-600 hover:border-[#3B5BFF] hover:text-[#3B5BFF] bg-white",
               ].join(" ")}
             >
               Tutti
@@ -402,13 +404,12 @@ function BlogContent() {
           animate={{ opacity: 1 }}
           className="mb-6 flex items-center justify-between"
         >
-          <p className="text-sm text-zinc-500">
-            <span className="font-medium text-white">{filteredArticles.length}</span> articoli trovati
+          <p className="text-sm text-gray-500">
+            <span className="font-medium text-gray-900">
+              {filteredArticles.length}
+            </span>{" "}
+            articoli trovati
           </p>
-          <div className="flex items-center gap-2 text-sm text-zinc-500">
-            <TrendingUp className="h-4 w-4" />
-            <span>Ordinati per: Più recenti</span>
-          </div>
         </motion.div>
 
         {/* Grid View */}
@@ -423,22 +424,21 @@ function BlogContent() {
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
-              className="rounded-xl border border-zinc-800 py-16 text-center"
+              className="rounded-2xl border border-gray-200 bg-white py-16 text-center"
             >
-              <p className="text-zinc-500">Nessun articolo trovato.</p>
-              <Button
-                variant="link"
-                onClick={() => { setActiveCategory("all"); setSearchQuery(""); }}
-                className="mt-2 text-indigo-400"
+              <p className="text-gray-500">Nessun articolo trovato.</p>
+              <button
+                onClick={() => {
+                  setActiveCategory("all");
+                  setSearchQuery("");
+                }}
+                className="mt-4 text-[#3B5BFF] font-medium hover:underline"
               >
                 Cancella filtri
-              </Button>
+              </button>
             </motion.div>
           ) : (
-            <motion.div
-              layout
-              className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3"
-            >
+            <motion.div layout className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {filteredArticles.map((article, index) => (
                 <ArticleCard
                   key={article.id}
@@ -462,29 +462,38 @@ function BlogContent() {
               >
                 <Link
                   href={`/blog/${article.slug}`}
-                  className="group flex flex-col gap-4 rounded-xl border border-zinc-800 bg-zinc-900/50 p-4 transition-all hover:border-indigo-500/30 hover:bg-zinc-900 sm:flex-row sm:items-center"
+                  className="group flex flex-col gap-4 rounded-2xl border border-gray-200 bg-white p-4 transition-all hover:border-[#3B5BFF]/30 hover:shadow-lg sm:flex-row sm:items-center"
                 >
-                  <div className={`h-24 w-full shrink-0 rounded-lg bg-gradient-to-br ${ARTICLE_META[article.id]?.gradient || "from-indigo-900 to-violet-900"} sm:w-32`} />
+                  <div
+                    className="h-24 w-full shrink-0 rounded-xl sm:w-32 flex items-center justify-center text-3xl"
+                    style={{ backgroundColor: CATEGORIES[article.category].accent + "20" }}
+                  >
+                    {CATEGORIES[article.category].icon}
+                  </div>
                   <div className="flex-1">
                     <div className="mb-2 flex items-center gap-2">
                       <span
                         className="rounded-full px-2 py-0.5 text-xs font-semibold text-white"
-                        style={{ backgroundColor: CATEGORIES[article.category].accent }}
+                        style={{
+                          backgroundColor: CATEGORIES[article.category].accent,
+                        }}
                       >
                         {CATEGORIES[article.category].label}
                       </span>
-                      <span className="text-xs text-zinc-500">
-                        {new Date(article.published_at || "").toLocaleDateString("it-IT")}
+                      <span className="text-xs text-gray-400">
+                        {new Date(article.published_at || "").toLocaleDateString(
+                          "it-IT"
+                        )}
                       </span>
                     </div>
-                    <h3 className="mb-1 text-lg font-semibold text-white transition-colors group-hover:text-indigo-300">
+                    <h3 className="mb-1 text-lg font-semibold text-gray-900 transition-colors group-hover:text-[#3B5BFF]">
                       {article.title}
                     </h3>
-                    <p className="line-clamp-2 text-sm text-zinc-400">
+                    <p className="line-clamp-2 text-sm text-gray-500">
                       {article.meta_description}
                     </p>
                   </div>
-                  <ArrowRight className="hidden h-5 w-5 text-zinc-600 transition-colors group-hover:text-indigo-400 sm:block" />
+                  <ArrowRight className="hidden h-5 w-5 text-gray-300 transition-colors group-hover:text-[#3B5BFF] sm:block" />
                 </Link>
               </motion.div>
             ))}
@@ -497,17 +506,19 @@ function BlogContent() {
 
 export default function BlogPage() {
   return (
-    <Suspense fallback={
-      <div className="min-h-screen bg-zinc-950">
-        <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {[1, 2, 3, 4, 5, 6].map((i) => (
-              <ArticleCardSkeleton key={i} />
-            ))}
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-gray-50">
+          <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {[1, 2, 3, 4, 5, 6].map((i) => (
+                <ArticleCardSkeleton key={i} />
+              ))}
+            </div>
           </div>
         </div>
-      </div>
-    }>
+      }
+    >
       <BlogContent />
     </Suspense>
   );
