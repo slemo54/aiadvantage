@@ -6,11 +6,19 @@ export async function GET() {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
+  let urlParseable = false;
+  try { new URL(supabaseUrl ?? ""); urlParseable = true; } catch {}
+
   const config = {
     supabase_url_set: Boolean(supabaseUrl),
-    supabase_url_valid: supabaseUrl?.startsWith("https://") ?? false,
+    supabase_url_starts_https: supabaseUrl?.startsWith("https://") ?? false,
+    supabase_url_parseable: urlParseable,
+    supabase_url_length: supabaseUrl?.length ?? 0,
+    supabase_url_last_char_code: supabaseUrl ? supabaseUrl.charCodeAt(supabaseUrl.length - 1) : null,
+    supabase_url_has_trailing_slash: supabaseUrl?.endsWith("/") ?? false,
     service_key_set: Boolean(serviceKey),
     service_key_looks_valid: serviceKey?.startsWith("eyJ") ?? false,
+    service_key_length: serviceKey?.length ?? 0,
     perplexity_key_set: Boolean(process.env.PERPLEXITY_API_KEY),
     cron_secret_set: Boolean(process.env.CRON_SECRET),
     openrouter_key_set: Boolean(process.env.OPENROUTER_API_KEY),
