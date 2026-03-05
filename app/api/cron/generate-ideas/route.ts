@@ -19,9 +19,11 @@ function sanitizeCategory(raw: string): CategoryKey {
 
 export async function POST(request: NextRequest) {
   const authHeader = request.headers.get("authorization");
+
   if (!process.env.CRON_SECRET) {
+    console.error("[cron] CRON_SECRET non configurata");
     return NextResponse.json(
-      { error: "CRON_SECRET non configurata" },
+      { error: "CRON_SECRET non configurata nelle env vars Vercel" },
       { status: 500 }
     );
   }
@@ -29,7 +31,15 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
+  if (!process.env.PERPLEXITY_API_KEY) {
+    return NextResponse.json(
+      { error: "PERPLEXITY_API_KEY non configurata nelle env vars Vercel" },
+      { status: 500 }
+    );
+  }
+
   try {
+    console.log("[cron] Avvio ricerca topic con Perplexity...");
     const research = await researchTopic("");
 
     const supabase = createAdminClient();
