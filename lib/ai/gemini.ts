@@ -75,10 +75,10 @@ async function callImagen(
 }
 
 export async function generateImage(prompt: string): Promise<string | null> {
-  const apiKey = process.env.GOOGLE_AI_API_KEY;
+  const apiKey = process.env.GEMINI_API_KEY ?? process.env.GOOGLE_AI_API_KEY;
   if (!apiKey) {
     throw new Error(
-      "GOOGLE_AI_API_KEY non configurata. Aggiungila nelle variabili d'ambiente."
+      "GEMINI_API_KEY non configurata. Aggiungila nelle variabili d'ambiente."
     );
   }
 
@@ -97,10 +97,10 @@ export async function generateImage(prompt: string): Promise<string | null> {
 }
 
 export async function generateContent(prompt: string): Promise<string> {
-  const apiKey = process.env.GOOGLE_AI_API_KEY;
+  const apiKey = process.env.GEMINI_API_KEY ?? process.env.GOOGLE_AI_API_KEY;
   if (!apiKey) {
     throw new Error(
-      "GOOGLE_AI_API_KEY non configurata. Aggiungila nelle variabili d'ambiente."
+      "GEMINI_API_KEY non configurata. Aggiungila nelle variabili d'ambiente."
     );
   }
 

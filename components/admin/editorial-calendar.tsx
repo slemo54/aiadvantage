@@ -1,14 +1,15 @@
 "use client";
 
-import { useState } from "react";
-import { 
-  ChevronLeft, 
-  ChevronRight, 
-  Clock, 
-  CheckCircle2, 
+import { useState, useEffect, useCallback } from "react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  Clock,
+  CheckCircle2,
   AlertCircle,
   Circle,
-  MoreHorizontal
+  MoreHorizontal,
+  Loader2,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -23,61 +24,22 @@ interface CalendarArticle {
   scheduledDate: Date;
   status: WorkflowState;
   category: CategoryKey;
-  author: string;
 }
 
-// ─── Mock Data ─────────────────────────────────────────────────────────────────
+interface ArticleFromApi {
+  id: string;
+  title: string;
+  status: WorkflowState;
+  category: CategoryKey;
+  scheduled_date: string | null;
+  published_at: string | null;
+  created_at: string;
+}
 
-const MOCK_ARTICLES: CalendarArticle[] = [
-  {
-    id: "1",
-    title: "Claude 3.7: Il nuovo standard per il coding",
-    scheduledDate: new Date(2026, 2, 5),
-    status: "published",
-    category: "ai_news",
-    author: "Anselmo",
-  },
-  {
-    id: "2",
-    title: "Come implementare RAG in produzione",
-    scheduledDate: new Date(2026, 2, 8),
-    status: "ready",
-    category: "tutorial",
-    author: "Anselmo",
-  },
-  {
-    id: "3",
-    title: "AI Act: Guida pratica per startup",
-    scheduledDate: new Date(2026, 2, 12),
-    status: "reviewing",
-    category: "opinioni",
-    author: "Anselmo",
-  },
-  {
-    id: "4",
-    title: "Open Source AI: Il caso Mistral",
-    scheduledDate: new Date(2026, 2, 15),
-    status: "drafting",
-    category: "ai_news",
-    author: "Anselmo",
-  },
-  {
-    id: "5",
-    title: "Automazione workflow con n8n e AI",
-    scheduledDate: new Date(2026, 2, 18),
-    status: "researching",
-    category: "tools",
-    author: "Anselmo",
-  },
-  {
-    id: "6",
-    title: "Futuro del lavoro: AI e creatività",
-    scheduledDate: new Date(2026, 2, 22),
-    status: "idea",
-    category: "casi_duso",
-    author: "Anselmo",
-  },
-];
+interface ArticlesApiResponse {
+  articles: ArticleFromApi[];
+  total: number;
+}
 
 // ─── Helper Functions ─────────────────────────────────────────────────────────
 
@@ -91,6 +53,21 @@ function getFirstDayOfMonth(year: number, month: number): number {
 
 function formatMonthYear(date: Date): string {
   return date.toLocaleDateString("it-IT", { month: "long", year: "numeric" });
+}
+
+function mapApiArticle(a: ArticleFromApi): CalendarArticle | null {
+  // Prefer explicit scheduled_date, then published_at, then created_at
+  const rawDate = a.scheduled_date ?? a.published_at ?? a.created_at;
+  if (!rawDate) return null;
+  const parsed = new Date(rawDate);
+  if (isNaN(parsed.getTime())) return null;
+  return {
+    id: a.id,
+    title: a.title,
+    scheduledDate: parsed,
+    status: a.status,
+    category: a.category,
+  };
 }
 
 function getStatusIcon(status: WorkflowState) {
@@ -111,19 +88,19 @@ function getStatusIcon(status: WorkflowState) {
 
 // ─── Components ───────────────────────────────────────────────────────────────
 
-function CalendarDay({ 
-  date, 
-  articles, 
+function CalendarDay({
+  date,
+  articles,
   isToday,
-  isCurrentMonth 
-}: { 
-  date: Date; 
+  isCurrentMonth,
+}: {
+  date: Date;
   articles: CalendarArticle[];
   isToday: boolean;
   isCurrentMonth: boolean;
 }) {
   return (
-    <div 
+    <div
       className={[
         "min-h-[120px] border-b border-r border-border p-2 transition-colors",
         !isCurrentMonth && "bg-muted/30 text-muted-foreground",
@@ -131,10 +108,13 @@ function CalendarDay({
       ].join(" ")}
     >
       <div className="mb-1 flex items-center justify-between">
-        <span className={[
-          "text-sm font-medium",
-          isToday && "flex h-6 w-6 items-center justify-center rounded-full bg-primary text-primary-foreground",
-        ].join(" ")}>
+        <span
+          className={[
+            "text-sm font-medium",
+            isToday &&
+              "flex h-6 w-6 items-center justify-center rounded-full bg-primary text-primary-foreground",
+          ].join(" ")}
+        >
           {date.getDate()}
         </span>
         {articles.length > 0 && (
@@ -151,9 +131,9 @@ function CalendarDay({
           >
             <div className="mb-1 flex items-center gap-1">
               {getStatusIcon(article.status)}
-              <span 
+              <span
                 className="h-1.5 w-1.5 rounded-full"
-                style={{ backgroundColor: CATEGORIES[article.category].accent }}
+                style={{ backgroundColor: CATEGORIES[article.category]?.accent ?? "#6b7280" }}
               />
             </div>
             <p className="line-clamp-2 font-medium leading-tight text-foreground">
@@ -174,14 +154,59 @@ function CalendarDay({
 // ─── Main Component ───────────────────────────────────────────────────────────
 
 export function EditorialCalendar() {
-  const [currentDate, setCurrentDate] = useState(new Date(2026, 2, 1)); // March 2026
-  const [articles] = useState<CalendarArticle[]>(MOCK_ARTICLES);
+  const today = new Date();
+  const [currentDate, setCurrentDate] = useState(
+    new Date(today.getFullYear(), today.getMonth(), 1)
+  );
+  const [articles, setArticles] = useState<CalendarArticle[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const fetchArticles = useCallback(async () => {
+    setLoading(true);
+    try {
+      // Fetch multiple statuses in parallel
+      const [published, ready, reviewing, drafting] = await Promise.all([
+        fetch("/api/articles?limit=50&status=published").then(
+          (r) => r.json() as Promise<ArticlesApiResponse>
+        ),
+        fetch("/api/articles?limit=50&status=ready").then(
+          (r) => r.json() as Promise<ArticlesApiResponse>
+        ),
+        fetch("/api/articles?limit=50&status=reviewing").then(
+          (r) => r.json() as Promise<ArticlesApiResponse>
+        ),
+        fetch("/api/articles?limit=50&status=drafting").then(
+          (r) => r.json() as Promise<ArticlesApiResponse>
+        ),
+      ]);
+
+      const rawArticles: ArticleFromApi[] = [
+        ...(published.articles ?? []),
+        ...(ready.articles ?? []),
+        ...(reviewing.articles ?? []),
+        ...(drafting.articles ?? []),
+      ];
+
+      const mapped = rawArticles
+        .map(mapApiArticle)
+        .filter((a): a is CalendarArticle => a !== null);
+
+      setArticles(mapped);
+    } catch {
+      // silently show empty calendar on network error
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    void fetchArticles();
+  }, [fetchArticles]);
 
   const year = currentDate.getFullYear();
   const month = currentDate.getMonth();
   const daysInMonth = getDaysInMonth(year, month);
   const firstDay = getFirstDayOfMonth(year, month);
-  const today = new Date();
 
   // Get articles for a specific date
   const getArticlesForDate = (date: Date): CalendarArticle[] => {
@@ -195,7 +220,7 @@ export function EditorialCalendar() {
 
   // Generate calendar days
   const calendarDays: { date: Date; isCurrentMonth: boolean }[] = [];
-  
+
   // Previous month days
   const prevMonthDays = getDaysInMonth(year, month - 1);
   for (let i = firstDay - 1; i >= 0; i--) {
@@ -204,7 +229,7 @@ export function EditorialCalendar() {
       isCurrentMonth: false,
     });
   }
-  
+
   // Current month days
   for (let i = 1; i <= daysInMonth; i++) {
     calendarDays.push({
@@ -212,8 +237,8 @@ export function EditorialCalendar() {
       isCurrentMonth: true,
     });
   }
-  
-  // Next month days
+
+  // Next month days to fill 6 rows
   const remainingDays = 42 - calendarDays.length;
   for (let i = 1; i <= remainingDays; i++) {
     calendarDays.push({
@@ -248,16 +273,23 @@ export function EditorialCalendar() {
               <ChevronRight className="h-4 w-4" />
             </Button>
           </div>
+          {loading && (
+            <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+          )}
         </div>
-        
+
         {/* Legend */}
         <div className="hidden items-center gap-4 text-xs text-muted-foreground lg:flex">
-          {Object.entries(WORKFLOW_LABELS).slice(0, 4).map(([key, label]) => (
-            <div key={key} className="flex items-center gap-1.5">
-              <span className={`h-2 w-2 rounded-full ${WORKFLOW_COLORS[key as WorkflowState]}`} />
-              <span>{label}</span>
-            </div>
-          ))}
+          {Object.entries(WORKFLOW_LABELS)
+            .slice(0, 4)
+            .map(([key, label]) => (
+              <div key={key} className="flex items-center gap-1.5">
+                <span
+                  className={`h-2 w-2 rounded-full ${WORKFLOW_COLORS[key as WorkflowState]}`}
+                />
+                <span>{label}</span>
+              </div>
+            ))}
         </div>
       </div>
 
@@ -294,24 +326,37 @@ export function EditorialCalendar() {
 
       {/* Stats Summary */}
       <div className="border-t border-border bg-card px-6 py-4">
-        <div className="flex flex-wrap items-center gap-6 text-sm">
-          <div className="flex items-center gap-2">
-            <span className="text-muted-foreground">Articoli pianificati:</span>
-            <span className="font-semibold">{articles.length}</span>
+        {loading ? (
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <Loader2 className="h-4 w-4 animate-spin" />
+            Caricamento articoli...
           </div>
-          <div className="flex items-center gap-2">
-            <span className="text-muted-foreground">Da pubblicare:</span>
-            <span className="font-semibold text-green-600">
-              {articles.filter((a) => a.status === "ready").length}
-            </span>
+        ) : (
+          <div className="flex flex-wrap items-center gap-6 text-sm">
+            <div className="flex items-center gap-2">
+              <span className="text-muted-foreground">Articoli nel sistema:</span>
+              <span className="font-semibold">{articles.length}</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-muted-foreground">Da pubblicare:</span>
+              <span className="font-semibold text-green-600">
+                {articles.filter((a) => a.status === "ready").length}
+              </span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-muted-foreground">In revisione:</span>
+              <span className="font-semibold text-purple-600">
+                {articles.filter((a) => a.status === "reviewing").length}
+              </span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-muted-foreground">Pubblicati:</span>
+              <span className="font-semibold text-emerald-600">
+                {articles.filter((a) => a.status === "published").length}
+              </span>
+            </div>
           </div>
-          <div className="flex items-center gap-2">
-            <span className="text-muted-foreground">In revisione:</span>
-            <span className="font-semibold text-purple-600">
-              {articles.filter((a) => a.status === "reviewing").length}
-            </span>
-          </div>
-        </div>
+        )}
       </div>
     </div>
   );

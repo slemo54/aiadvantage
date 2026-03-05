@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
   FileText,
   Eye,
@@ -10,123 +10,165 @@ import {
   Cpu,
   RefreshCw,
   Play,
+  Loader2,
+  AlertCircle,
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import type { CategoryKey, WorkflowState } from "@/lib/constants";
+import { CATEGORIES } from "@/lib/constants";
 
-interface TopicProposal {
+// ─── Types ────────────────────────────────────────────────────────────────────
+
+interface IdeaFromApi {
   id: string;
-  title: string;
-  source: string;
-  trendingScore: number;
+  topic: string;
+  freshness_score: number;
+  category: CategoryKey;
+  source_url: string | null;
+  status: string;
+  created_at: string;
 }
 
-const PLACEHOLDER_PROPOSALS: TopicProposal[] = [
-  {
-    id: "1",
-    title: "OpenAI annuncia il nuovo modello GPT-4.5 con capacita' di ragionamento avanzate",
-    source: "TechCrunch",
-    trendingScore: 98,
-  },
-  {
-    id: "2",
-    title: "La strategia AI di Apple: processing on-device incontra l'intelligenza cloud",
-    source: "The Verge",
-    trendingScore: 85,
-  },
-  {
-    id: "3",
-    title: "L'ascesa dell'AI Open Source: Llama 3 e' il punto di svolta?",
-    source: "Wired",
-    trendingScore: 72,
-  },
+interface IdeasResponse {
+  ideas: IdeaFromApi[];
+  total: number;
+  note?: string;
+}
+
+interface ArticlesResponse {
+  articles: unknown[];
+  total: number;
+}
+
+// ─── Pipeline steps (static config — status comes from real data) ─────────────
+
+const PIPELINE_STEPS: Array<{
+  name: string;
+  status: "idle" | "processing" | "waiting";
+  progress: number;
+}> = [
+  { name: "Perplexity (Discovery)", status: "idle", progress: 100 },
+  { name: "Kimi (Structuring)", status: "waiting", progress: 0 },
+  { name: "Claude (Drafting)", status: "waiting", progress: 0 },
+  { name: "Gemini (Review)", status: "waiting", progress: 0 },
 ];
 
-const PIPELINE_STEPS = [
-  { name: "Perplexity (Discovery)", status: "idle" as const, progress: 100 },
-  { name: "Kimi (Structuring)", status: "processing" as const, progress: 65 },
-  { name: "Claude (Drafting)", status: "waiting" as const, progress: 0 },
-  { name: "Gemini (Review)", status: "waiting" as const, progress: 0 },
-];
+// ─── Helpers ──────────────────────────────────────────────────────────────────
 
 function getTrendingColor(score: number) {
-  if (score >= 90) return "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300";
-  if (score >= 80) return "bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300";
+  if (score >= 90)
+    return "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300";
+  if (score >= 80)
+    return "bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300";
   return "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300";
 }
 
 function getStatusColor(status: "idle" | "processing" | "waiting") {
   switch (status) {
-    case "idle": return "text-green-600 dark:text-green-400";
-    case "processing": return "text-blue-600 dark:text-blue-400";
-    case "waiting": return "text-muted-foreground";
+    case "idle":
+      return "text-green-600 dark:text-green-400";
+    case "processing":
+      return "text-blue-600 dark:text-blue-400";
+    case "waiting":
+      return "text-muted-foreground";
   }
 }
 
 function getStatusLabel(status: "idle" | "processing" | "waiting") {
   switch (status) {
-    case "idle": return "Idle";
-    case "processing": return "Processing...";
-    case "waiting": return "In attesa";
+    case "idle":
+      return "Idle";
+    case "processing":
+      return "Processing...";
+    case "waiting":
+      return "In attesa";
   }
 }
 
 function getProgressColor(status: "idle" | "processing" | "waiting") {
   switch (status) {
-    case "idle": return "bg-primary";
-    case "processing": return "bg-blue-500";
-    case "waiting": return "bg-gray-400";
+    case "idle":
+      return "bg-primary";
+    case "processing":
+      return "bg-blue-500";
+    case "waiting":
+      return "bg-gray-400";
   }
 }
 
+// ─── Article counts by status ─────────────────────────────────────────────────
+
+type StatusCounts = Partial<Record<WorkflowState, number>>;
+
+// ─── Main component ───────────────────────────────────────────────────────────
+
 export default function DashboardPage() {
-  const [countdown, setCountdown] = useState(45 * 60 + 12);
   const [articleTotal, setArticleTotal] = useState<number | null>(null);
+  const [statusCounts, setStatusCounts] = useState<StatusCounts>({});
+  const [ideas, setIdeas] = useState<IdeaFromApi[]>([]);
+  const [ideasLoading, setIdeasLoading] = useState(true);
+  const [ideasError, setIdeasError] = useState<string | null>(null);
   const [crawlLoading, setCrawlLoading] = useState(false);
   const [crawlMessage, setCrawlMessage] = useState<string | null>(null);
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCountdown((prev) => (prev > 0 ? prev - 1 : 0));
-    }, 1000);
-    return () => clearInterval(interval);
-  }, []);
-
-  useEffect(() => {
+  const fetchData = useCallback(async () => {
+    // Fetch total article count
     fetch("/api/articles?limit=1")
       .then((res) => res.json())
-      .then((json: { total?: number }) => {
+      .then((json: ArticlesResponse) => {
         if (typeof json.total === "number") {
           setArticleTotal(json.total);
         }
       })
       .catch(() => {
-        // silently ignore — placeholder will be shown
+        // silently ignore
       });
+
+    // Fetch status breakdown — published articles
+    fetch("/api/articles?status=published&limit=1")
+      .then((res) => res.json())
+      .then((json: ArticlesResponse) => {
+        setStatusCounts((prev) => ({ ...prev, published: json.total ?? 0 }));
+      })
+      .catch(() => {});
+
+    // Fetch new ideas from API
+    setIdeasLoading(true);
+    setIdeasError(null);
+    try {
+      const res = await fetch("/api/ideas?status=new&limit=3");
+      if (!res.ok) throw new Error(`Errore HTTP ${res.status}`);
+      const json = (await res.json()) as IdeasResponse;
+      setIdeas(json.ideas ?? []);
+    } catch (err) {
+      setIdeasError(
+        err instanceof Error ? err.message : "Errore nel caricamento delle idee."
+      );
+    } finally {
+      setIdeasLoading(false);
+    }
   }, []);
 
-  const formatCountdown = (seconds: number) => {
-    const h = Math.floor(seconds / 3600);
-    const m = Math.floor((seconds % 3600) / 60);
-    const s = seconds % 60;
-    return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
-  };
+  useEffect(() => {
+    void fetchData();
+  }, [fetchData]);
 
   async function handleCrawl() {
     setCrawlLoading(true);
     setCrawlMessage(null);
     try {
-      const res = await fetch("/api/cron/generate-ideas", {
+      const res = await fetch("/api/admin/cron-trigger", {
         method: "POST",
-        headers: {
-          Authorization: `Bearer ${process.env.NEXT_PUBLIC_CRON_SECRET ?? ""}`,
-        },
       });
       if (res.ok) {
-        setCrawlMessage("Crawl avviato con successo.");
+        setCrawlMessage("Crawl avviato con successo. Le nuove idee appariranno a breve.");
+        // Refresh ideas after a short delay
+        setTimeout(() => void fetchData(), 3000);
       } else {
-        setCrawlMessage("Errore nell'avvio del crawl.");
+        const body = (await res.json()) as { error?: string };
+        setCrawlMessage(body.error ?? "Errore nell'avvio del crawl.");
       }
     } catch {
       setCrawlMessage("Errore di rete.");
@@ -135,12 +177,28 @@ export default function DashboardPage() {
     }
   }
 
+  async function handleSelectIdea(ideaId: string) {
+    try {
+      const res = await fetch(`/api/ideas/${ideaId}/select`, { method: "POST" });
+      if (res.ok) {
+        setIdeas((prev) => prev.filter((i) => i.id !== ideaId));
+      }
+    } catch {
+      // silently ignore
+    }
+  }
+
   return (
     <>
       <header className="flex h-16 flex-shrink-0 items-center justify-between border-b border-border bg-card px-6">
         <h1 className="text-xl font-semibold">Dashboard</h1>
         <div className="flex items-center gap-4">
-          <Button variant="ghost" size="icon">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => void fetchData()}
+            title="Aggiorna dati"
+          >
             <RefreshCw className="h-4 w-4" />
           </Button>
         </div>
@@ -157,15 +215,23 @@ export default function DashboardPage() {
                 <Card>
                   <CardContent className="p-5">
                     <div className="flex items-center justify-between">
-                      <h3 className="text-sm font-medium text-muted-foreground">Articoli Totali</h3>
+                      <h3 className="text-sm font-medium text-muted-foreground">
+                        Articoli Totali
+                      </h3>
                       <FileText className="h-5 w-5 text-primary" />
                     </div>
                     <p className="mt-2 text-2xl font-bold">
-                      {articleTotal !== null ? articleTotal.toLocaleString("it-IT") : "—"}
+                      {articleTotal !== null
+                        ? articleTotal.toLocaleString("it-IT")
+                        : "—"}
                     </p>
-                    <div className="mt-2 flex items-center text-sm text-green-600 dark:text-green-400">
+                    <div className="mt-2 flex items-center text-sm text-muted-foreground">
                       <TrendingUp className="mr-1 h-4 w-4" />
-                      <span>+12 questa settimana</span>
+                      <span>
+                        {statusCounts.published !== undefined
+                          ? `${statusCounts.published} pubblicati`
+                          : "Caricamento..."}
+                      </span>
                     </div>
                   </CardContent>
                 </Card>
@@ -173,60 +239,122 @@ export default function DashboardPage() {
                 <Card>
                   <CardContent className="p-5">
                     <div className="flex items-center justify-between">
-                      <h3 className="text-sm font-medium text-muted-foreground">Visualizzazioni</h3>
+                      <h3 className="text-sm font-medium text-muted-foreground">
+                        Idee in Coda
+                      </h3>
                       <Eye className="h-5 w-5 text-primary" />
                     </div>
-                    <p className="mt-2 text-2xl font-bold">45.2K</p>
-                    <div className="mt-2 flex items-center text-sm text-green-600 dark:text-green-400">
-                      <TrendingUp className="mr-1 h-4 w-4" />
-                      <span>+5.4% vs mese scorso</span>
-                    </div>
+                    <p className="mt-2 text-2xl font-bold">
+                      {ideasLoading ? "—" : ideas.length}
+                    </p>
+                    <p className="mt-2 text-sm text-muted-foreground">
+                      Con stato &ldquo;new&rdquo;
+                    </p>
                   </CardContent>
                 </Card>
 
                 <Card>
                   <CardContent className="p-5">
                     <div className="flex items-center justify-between">
-                      <h3 className="text-sm font-medium text-muted-foreground">Freshness Score</h3>
+                      <h3 className="text-sm font-medium text-muted-foreground">
+                        Freshness Score
+                      </h3>
                       <Gauge className="h-5 w-5 text-primary" />
                     </div>
-                    <p className="mt-2 text-2xl font-bold">92/100</p>
-                    <p className="mt-2 text-sm text-muted-foreground">Eccellente</p>
+                    <p className="mt-2 text-2xl font-bold">
+                      {ideas.length > 0
+                        ? `${Math.round(
+                            ideas.reduce((acc, i) => acc + i.freshness_score, 0) /
+                              ideas.length
+                          )}/100`
+                        : "—"}
+                    </p>
+                    <p className="mt-2 text-sm text-muted-foreground">
+                      Media sulle idee recenti
+                    </p>
                   </CardContent>
                 </Card>
               </div>
             </section>
 
-            {/* Topic Proposals */}
+            {/* Topic Proposals (real ideas from API) */}
             <section>
               <div className="mb-4 flex items-center justify-between">
-                <h2 className="text-lg font-semibold">Proposte Topic (Perplexity AI)</h2>
-                <Button variant="link" className="text-sm text-primary">
-                  Vedi Tutti
+                <h2 className="text-lg font-semibold">
+                  Proposte Topic (Perplexity AI)
+                </h2>
+                <Button
+                  variant="link"
+                  className="text-sm text-primary"
+                  onClick={() => void fetchData()}
+                >
+                  Aggiorna
                 </Button>
               </div>
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                {PLACEHOLDER_PROPOSALS.map((proposal) => (
-                  <Card key={proposal.id} className="flex flex-col">
-                    <CardContent className="flex flex-1 flex-col p-4">
-                      <div className="mb-2 flex items-start justify-between">
-                        <Badge className={getTrendingColor(proposal.trendingScore)} variant="secondary">
-                          Trending: {proposal.trendingScore}
-                        </Badge>
-                        <span className="text-xs text-muted-foreground">
-                          Fonte: {proposal.source}
-                        </span>
-                      </div>
-                      <h3 className="mb-3 flex-1 text-sm font-medium leading-snug line-clamp-3">
-                        {proposal.title}
-                      </h3>
-                      <Button variant="outline" className="mt-auto w-full hover:bg-primary hover:text-primary-foreground">
-                        Seleziona per Sviluppo
-                      </Button>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
+
+              {ideasLoading ? (
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Caricamento idee...
+                </div>
+              ) : ideasError ? (
+                <div className="flex items-center gap-2 text-sm text-destructive">
+                  <AlertCircle className="h-4 w-4" />
+                  {ideasError}
+                </div>
+              ) : ideas.length === 0 ? (
+                <Card>
+                  <CardContent className="py-10 text-center">
+                    <p className="text-sm text-muted-foreground">
+                      Nessuna proposta disponibile. Avvia un crawl per generare
+                      nuove idee.
+                    </p>
+                  </CardContent>
+                </Card>
+              ) : (
+                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                  {ideas.map((idea) => {
+                    const category = CATEGORIES[idea.category];
+                    return (
+                      <Card key={idea.id} className="flex flex-col">
+                        <CardContent className="flex flex-1 flex-col p-4">
+                          <div className="mb-2 flex items-start justify-between gap-2">
+                            <Badge
+                              className={getTrendingColor(idea.freshness_score)}
+                              variant="secondary"
+                            >
+                              Score: {idea.freshness_score}
+                            </Badge>
+                            {category && (
+                              <span
+                                className="text-xs font-medium"
+                                style={{ color: category.accent }}
+                              >
+                                {category.label}
+                              </span>
+                            )}
+                          </div>
+                          <h3 className="mb-3 flex-1 text-sm font-medium leading-snug line-clamp-3">
+                            {idea.topic}
+                          </h3>
+                          {idea.source_url && (
+                            <p className="mb-2 truncate text-xs text-muted-foreground">
+                              {idea.source_url}
+                            </p>
+                          )}
+                          <Button
+                            variant="outline"
+                            className="mt-auto w-full hover:bg-primary hover:text-primary-foreground"
+                            onClick={() => void handleSelectIdea(idea.id)}
+                          >
+                            Seleziona per Sviluppo
+                          </Button>
+                        </CardContent>
+                      </Card>
+                    );
+                  })}
+                </div>
+              )}
             </section>
           </div>
 
@@ -259,11 +387,11 @@ export default function DashboardPage() {
 
                 <div className="mt-6 border-t border-border pt-4">
                   <h3 className="mb-2 text-sm font-medium text-muted-foreground">
-                    Prossimo Crawl Automatico
+                    Prossima Generazione Automatica
                   </h3>
-                  <div className="flex items-center text-lg font-bold">
-                    <Clock className="mr-2 h-5 w-5 text-primary" />
-                    {formatCountdown(countdown)}
+                  <div className="flex items-center text-sm text-foreground">
+                    <Clock className="mr-2 h-4 w-4 text-primary" />
+                    Ogni 3 giorni (automatico)
                   </div>
                 </div>
 
@@ -271,11 +399,15 @@ export default function DashboardPage() {
                   <Button
                     className="w-full"
                     variant="outline"
-                    onClick={handleCrawl}
+                    onClick={() => void handleCrawl()}
                     disabled={crawlLoading}
                   >
-                    <Play className="mr-2 h-4 w-4" />
-                    {crawlLoading ? "Avvio in corso..." : "Esegui Crawl"}
+                    {crawlLoading ? (
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    ) : (
+                      <Play className="mr-2 h-4 w-4" />
+                    )}
+                    {crawlLoading ? "Avvio in corso..." : "Esegui Crawl Ora"}
                   </Button>
                   {crawlMessage && (
                     <p className="mt-2 text-center text-xs text-muted-foreground">

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Globe,
   Cpu,
@@ -13,8 +13,6 @@ import {
   Twitter,
   Linkedin,
   Github,
-  Eye,
-  EyeOff,
 } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
@@ -42,14 +40,6 @@ interface EnvVarConfig {
 }
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
-
-function maskApiKey(value: string): string {
-  if (!value || value.trim() === "") return "—";
-  if (value.length <= 8) return "***";
-  const prefix = value.slice(0, 5);
-  const suffix = value.slice(-3);
-  return `${prefix}***...${suffix}`;
-}
 
 function getNextCronRun(): string {
   const now = new Date();
@@ -235,17 +225,17 @@ const ENV_VAR_CONFIGS: EnvVarConfig[] = [
   {
     key: "OPENROUTER_API_KEY",
     label: "OpenRouter",
-    service: "Kimi 2.5 — Umanizzazione",
+    service: "Kimi 2.5 — Strutturazione bozza",
   },
   {
     key: "ANTHROPIC_API_KEY",
     label: "Anthropic / Claude",
-    service: "Revisione & Miglioramento",
+    service: "Umanizzazione testo",
   },
   {
     key: "GEMINI_API_KEY",
     label: "Google Gemini",
-    service: "Generazione immagini",
+    service: "Generazione immagini (Imagen 3)",
   },
   {
     key: "RESEND_API_KEY",
@@ -254,29 +244,25 @@ const ENV_VAR_CONFIGS: EnvVarConfig[] = [
   },
 ];
 
-// Simulated configured state: in production a server action would return
-// actual presence booleans so keys are never exposed to the client.
-const SIMULATED_KEYS: Record<string, string> = {
-  PERPLEXITY_API_KEY: "pplx-abc123xyz",
-  OPENROUTER_API_KEY: "sk-or-v1-def456",
-  ANTHROPIC_API_KEY: "sk-ant-ghi789",
-  GEMINI_API_KEY: "",
-  RESEND_API_KEY: "re_jkl012mno",
-};
-
-function EnvVarRow({ config }: { config: EnvVarConfig }) {
+function EnvVarRow({
+  config,
+  configured,
+  loading,
+}: {
+  config: EnvVarConfig;
+  configured: boolean;
+  loading: boolean;
+}) {
   const { toast } = useToast();
-  const [reveal, setReveal] = useState(false);
 
-  const rawValue = SIMULATED_KEYS[config.key] ?? "";
-  const isConfigured = rawValue.trim().length > 0;
+  const isConfigured = configured;
 
   function handleTest() {
     toast({
       title: `Test ${config.label}`,
       description: isConfigured
-        ? `Connessione a ${config.label} verificata.`
-        : `Chiave ${config.key} non configurata.`,
+        ? `Chiave ${config.key} rilevata su Vercel.`
+        : `Chiave ${config.key} non trovata nelle env vars.`,
     });
   }
 
@@ -284,7 +270,9 @@ function EnvVarRow({ config }: { config: EnvVarConfig }) {
     <div className="flex flex-col sm:flex-row sm:items-center gap-3 py-4">
       {/* Status + labels */}
       <div className="flex items-center gap-3 flex-1 min-w-0">
-        {isConfigured ? (
+        {loading ? (
+          <div className="h-4 w-4 rounded-full border-2 border-muted-foreground/30 border-t-primary animate-spin shrink-0" />
+        ) : isConfigured ? (
           <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-500" />
         ) : (
           <XCircle className="h-4 w-4 shrink-0 text-red-500" />
@@ -303,29 +291,16 @@ function EnvVarRow({ config }: { config: EnvVarConfig }) {
         {config.key}
       </Badge>
 
-      {/* Masked value */}
+      {/* Status badge */}
       <div className="flex items-center gap-1.5 shrink-0">
-        <code className="text-xs font-mono text-muted-foreground bg-muted px-2 py-1 rounded select-none w-36 inline-block truncate">
-          {isConfigured
-            ? reveal
-              ? rawValue
-              : maskApiKey(rawValue)
-            : "non configurata"}
-        </code>
-        {isConfigured && (
-          <button
-            type="button"
-            onClick={() => setReveal((v) => !v)}
-            className="text-muted-foreground hover:text-foreground transition-colors"
-            aria-label={reveal ? "Nascondi chiave" : "Mostra chiave"}
-          >
-            {reveal ? (
-              <EyeOff className="h-3.5 w-3.5" />
-            ) : (
-              <Eye className="h-3.5 w-3.5" />
-            )}
-          </button>
-        )}
+        <span className={[
+          "text-xs px-2 py-1 rounded font-mono",
+          loading ? "text-muted-foreground bg-muted" :
+          isConfigured ? "text-emerald-600 bg-emerald-50 dark:bg-emerald-950/30 dark:text-emerald-400" :
+          "text-red-500 bg-red-50 dark:bg-red-950/30"
+        ].join(" ")}>
+          {loading ? "..." : isConfigured ? "configurata ✓" : "non configurata"}
+        </span>
       </div>
 
       {/* Test button */}
@@ -334,30 +309,49 @@ function EnvVarRow({ config }: { config: EnvVarConfig }) {
         size="sm"
         className="shrink-0 text-xs"
         onClick={handleTest}
-        disabled={!isConfigured}
+        disabled={loading || !isConfigured}
       >
-        Testa
+        Info
       </Button>
     </div>
   );
 }
 
 function TabAIPipeline() {
+  const [envStatus, setEnvStatus] = useState<Record<string, boolean>>({});
+  const [envLoading, setEnvLoading] = useState(true);
+
+  useEffect(() => {
+    fetch("/api/admin/env-status")
+      .then((r) => r.json())
+      .then((data: Record<string, boolean>) => {
+        setEnvStatus(data);
+      })
+      .catch(() => {
+        // Leave as empty = all unknown
+      })
+      .finally(() => setEnvLoading(false));
+  }, []);
+
   return (
     <div className="space-y-6">
       <Card>
         <CardHeader>
           <CardTitle className="text-base">Variabili d&apos;ambiente</CardTitle>
           <CardDescription>
-            Le chiavi API sono configurate come variabili d&apos;ambiente su Vercel e
-            sono in sola lettura da qui. Per modificarle, usa la dashboard
-            Vercel.
+            Stato reale delle chiavi API configurate su Vercel. I valori non
+            sono mai visibili lato client per sicurezza.
           </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="divide-y divide-border">
             {ENV_VAR_CONFIGS.map((cfg) => (
-              <EnvVarRow key={cfg.key} config={cfg} />
+              <EnvVarRow
+                key={cfg.key}
+                config={cfg}
+                configured={envStatus[cfg.key] === true}
+                loading={envLoading}
+              />
             ))}
           </div>
         </CardContent>
@@ -404,6 +398,16 @@ function TabNewsletter() {
     "Benvenuto su IlVantaggioAI!"
   );
   const [weeklyDigest, setWeeklyDigest] = useState(false);
+  const [subscriberCount, setSubscriberCount] = useState<number | null>(null);
+
+  useEffect(() => {
+    fetch("/api/admin/env-status")
+      .then((r) => r.json())
+      .then((d: Record<string, boolean | number>) => {
+        if (typeof d.subscriberCount === "number") setSubscriberCount(d.subscriberCount);
+      })
+      .catch(() => {});
+  }, []);
 
   function handleSave() {
     toast({
@@ -504,8 +508,10 @@ function TabNewsletter() {
               <Mail className="h-5 w-5 text-primary" />
             </div>
             <div>
-              <p className="text-2xl font-bold tabular-nums">0</p>
-              <p className="text-xs text-muted-foreground">iscritti totali</p>
+              <p className="text-2xl font-bold tabular-nums">
+                {subscriberCount === null ? "—" : subscriberCount}
+              </p>
+              <p className="text-xs text-muted-foreground">iscritti attivi</p>
             </div>
           </div>
         </CardContent>
@@ -528,9 +534,8 @@ function TabCron() {
   async function handleManualTrigger() {
     setIsRunning(true);
     try {
-      const res = await fetch("/api/cron/generate-ideas", {
+      const res = await fetch("/api/admin/cron-trigger", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
       });
       if (res.ok) {
         toast({
