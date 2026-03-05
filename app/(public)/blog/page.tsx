@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, Suspense } from "react";
+import { useState, useEffect, Suspense, type ComponentType } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { useSearchParams } from "next/navigation";
@@ -218,7 +218,7 @@ function ViewModeButton({
 }: {
   active: boolean;
   onClick: () => void;
-  icon: React.ElementType;
+  icon: ComponentType<{ className?: string }>;
 }) {
   return (
     <motion.button

@@ -1,20 +1,20 @@
-// Kimi via OpenRouter — moonshot-v1-8k with Claude fallback
+// Kimi direct API — moonshot.cn (OpenAI-compatible)
 
-interface OpenRouterMessage {
+interface KimiMessage {
   role: string;
   content: string;
 }
 
-interface OpenRouterChoice {
-  message: OpenRouterMessage;
+interface KimiChoice {
+  message: KimiMessage;
 }
 
-interface OpenRouterResponse {
-  choices: OpenRouterChoice[];
+interface KimiResponse {
+  choices: KimiChoice[];
 }
 
-const PRIMARY_MODEL = "moonshotai/moonshot-v1-8k";
-const FALLBACK_MODEL = "anthropic/claude-3-5-sonnet";
+// Models in order of preference
+const MODELS = ["kimi-k2.5", "moonshot-v1-8k"];
 
 function buildDraftPrompt(research: string, category: string): string {
   return `Sei un content writer esperto di tecnologia e AI.
@@ -36,31 +36,29 @@ Formatta in HTML (h2, p, ul, li, strong, em). Non usare h1 (è nel layout).
 Rispondi SOLO con l'HTML dell'articolo, senza markdown o testo aggiuntivo.`;
 }
 
-async function callOpenRouter(
+async function callKimi(
   apiKey: string,
   model: string,
   prompt: string,
   attempt: number = 1
-): Promise<OpenRouterResponse> {
+): Promise<KimiResponse> {
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 60000);
+  const timeout = setTimeout(() => controller.abort(), 90000);
 
   try {
     const response = await fetch(
-      "https://openrouter.ai/api/v1/chat/completions",
+      "https://api.moonshot.cn/v1/chat/completions",
       {
         method: "POST",
         headers: {
-          "Authorization": `Bearer ${apiKey}`,
+          Authorization: `Bearer ${apiKey}`,
           "Content-Type": "application/json",
-          "HTTP-Referer": "https://ilvantaggioai.it",
-          "X-Title": "IlVantaggioAI",
         },
         body: JSON.stringify({
           model,
           messages: [{ role: "user", content: prompt }],
           temperature: 0.75,
-          max_tokens: 3000,
+          max_tokens: 4000,
         }),
         signal: controller.signal,
       }
@@ -69,15 +67,15 @@ async function callOpenRouter(
     if (!response.ok) {
       const errorText = await response.text();
       if (response.status === 429 && attempt < 3) {
-        await new Promise((resolve) => setTimeout(resolve, attempt * 3000));
-        return callOpenRouter(apiKey, model, prompt, attempt + 1);
+        await new Promise((r) => setTimeout(r, attempt * 3000));
+        return callKimi(apiKey, model, prompt, attempt + 1);
       }
       throw new Error(
-        `OpenRouter API error ${response.status} (model: ${model}): ${errorText}`
+        `Kimi API HTTP ${response.status} (model: ${model}): ${errorText.slice(0, 400)}`
       );
     }
 
-    return response.json() as Promise<OpenRouterResponse>;
+    return response.json() as Promise<KimiResponse>;
   } finally {
     clearTimeout(timeout);
   }
@@ -87,40 +85,34 @@ export async function generateDraft(
   research: string,
   category: string
 ): Promise<string> {
-  const apiKey = process.env.OPENROUTER_API_KEY;
+  const apiKey = process.env.KIMI_API_KEY;
   if (!apiKey) {
     throw new Error(
-      "OPENROUTER_API_KEY non configurata. Aggiungila nelle variabili d'ambiente."
+      "KIMI_API_KEY non configurata. Aggiungila su Vercel → Settings → Environment Variables."
     );
   }
 
   const prompt = buildDraftPrompt(research, category);
+  let lastError: unknown;
 
-  let data: OpenRouterResponse;
-  try {
-    data = await callOpenRouter(apiKey, PRIMARY_MODEL, prompt);
-  } catch (primaryError) {
-    console.warn(
-      `Kimi (${PRIMARY_MODEL}) fallito, tentativo con fallback ${FALLBACK_MODEL}:`,
-      primaryError
-    );
+  for (const model of MODELS) {
     try {
-      data = await callOpenRouter(apiKey, FALLBACK_MODEL, prompt);
-    } catch (fallbackError) {
-      throw new Error(
-        `Entrambi i modelli hanno fallito. Primario: ${String(primaryError)}. Fallback: ${String(fallbackError)}`
-      );
+      console.log(`[kimi] Trying model: ${model}`);
+      const data = await callKimi(apiKey, model, prompt);
+      const content = data.choices[0]?.message?.content ?? "";
+      if (!content.trim()) {
+        throw new Error(`Risposta vuota dal modello ${model}`);
+      }
+      console.log(`[kimi] Success with model: ${model}`);
+      return content
+        .replace(/^```html?\s*/i, "")
+        .replace(/```\s*$/i, "")
+        .trim();
+    } catch (err) {
+      console.warn(`[kimi] Model ${model} failed:`, String(err));
+      lastError = err;
     }
   }
 
-  const content = data.choices[0]?.message?.content ?? "";
-  if (!content.trim()) {
-    throw new Error("OpenRouter ha restituito una risposta vuota.");
-  }
-
-  // Strip any markdown code fences the model might wrap HTML in
-  return content
-    .replace(/^```html?\s*/i, "")
-    .replace(/```\s*$/i, "")
-    .trim();
+  throw new Error(`Kimi: tutti i modelli hanno fallito. Ultimo errore: ${String(lastError)}`);
 }

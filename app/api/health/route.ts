@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 
 export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
 
 export async function GET() {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -21,7 +22,7 @@ export async function GET() {
     service_key_length: serviceKey?.length ?? 0,
     perplexity_key_set: Boolean(process.env.PERPLEXITY_API_KEY),
     cron_secret_set: Boolean(process.env.CRON_SECRET),
-    openrouter_key_set: Boolean(process.env.OPENROUTER_API_KEY),
+    kimi_key_set: Boolean(process.env.KIMI_API_KEY),
     anthropic_key_set: Boolean(process.env.ANTHROPIC_API_KEY),
   };
 
