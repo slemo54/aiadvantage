@@ -16,6 +16,7 @@ export async function POST(request: NextRequest) {
     const parsed = LoginSchema.safeParse(body);
 
     if (!parsed.success) {
+      console.error("[admin/auth] Validazione fallita:", parsed.error.flatten());
       return NextResponse.json(
         { error: "Dati non validi." },
         { status: 400 }
@@ -25,15 +26,18 @@ export async function POST(request: NextRequest) {
     const { password } = parsed.data;
     const adminPassword = process.env.ADMIN_PASSWORD;
 
+    console.log("[admin/auth] Login attempt, ADMIN_PASSWORD configured:", Boolean(adminPassword));
+
     if (!adminPassword) {
-      console.error("ADMIN_PASSWORD env var not set");
+      console.error("[admin/auth] ADMIN_PASSWORD env var not set");
       return NextResponse.json(
-        { error: "Configurazione server mancante." },
+        { error: "Configurazione server mancante: ADMIN_PASSWORD non impostata." },
         { status: 500 }
       );
     }
 
     if (password !== adminPassword) {
+      console.warn("[admin/auth] Password mismatch");
       return NextResponse.json(
         { error: "Password non corretta." },
         { status: 401 }
@@ -52,8 +56,10 @@ export async function POST(request: NextRequest) {
       path: "/",
     });
 
+    console.log("[admin/auth] Login successful, cookie set");
     return response;
-  } catch {
+  } catch (err) {
+    console.error("[admin/auth] Errore interno:", err);
     return NextResponse.json({ error: "Errore interno." }, { status: 500 });
   }
 }
