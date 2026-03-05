@@ -1,24 +1,26 @@
-import { createHash } from "crypto";
-
 /**
- * Hash a password using SHA-256.
- * This function is used consistently across login, middleware, and API routes.
+ * Hash a password using SHA-256 via Web Crypto API.
+ * Works in both Node.js and Edge Runtime.
  */
-export function hashPassword(password: string): string {
-  return createHash("sha256").update(password).digest("hex");
+export async function hashPassword(password: string): Promise<string> {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(password);
+  const hashBuffer = await crypto.subtle.digest("SHA-256", data);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  return hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
 }
 
 /**
  * Verify a session cookie against the admin password.
  * Returns true if the cookie value matches the hash of the admin password.
  */
-export function verifySessionCookie(
+export async function verifySessionCookie(
   cookieValue: string | undefined,
   adminPassword: string | undefined
-): boolean {
+): Promise<boolean> {
   if (!cookieValue || !adminPassword) {
     return false;
   }
-  const expectedHash = hashPassword(adminPassword);
+  const expectedHash = await hashPassword(adminPassword);
   return cookieValue === expectedHash;
 }

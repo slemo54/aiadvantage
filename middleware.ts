@@ -25,7 +25,7 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL("/admin-login", request.url));
   }
 
-  const expectedHash = hashPassword(adminPassword);
+  const expectedHash = await hashPassword(adminPassword);
 
   if (!sessionCookie || sessionCookie.value !== expectedHash) {
     return NextResponse.redirect(new URL("/admin-login", request.url));

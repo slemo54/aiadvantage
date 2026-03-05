@@ -40,7 +40,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const sessionValue = hashPassword(adminPassword);
+    const sessionValue = await hashPassword(adminPassword);
     const sevenDays = 7 * 24 * 60 * 60;
 
     const response = NextResponse.json({ success: true });

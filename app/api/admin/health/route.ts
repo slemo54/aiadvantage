@@ -26,7 +26,7 @@ export async function GET(request: NextRequest) {
   };
 
   // Verify session cookie using shared function
-  const sessionValid = verifySessionCookie(sessionCookie?.value, process.env.ADMIN_PASSWORD);
+  const sessionValid = await verifySessionCookie(sessionCookie?.value, process.env.ADMIN_PASSWORD);
 
   return NextResponse.json({
     ...status,

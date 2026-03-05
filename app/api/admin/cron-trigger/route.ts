@@ -23,7 +23,8 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Non autorizzato: nessun cookie di sessione" }, { status: 401 });
   }
 
-  if (!verifySessionCookie(sessionCookie.value, adminPassword)) {
+  const isValid = await verifySessionCookie(sessionCookie.value, adminPassword);
+  if (!isValid) {
     console.error("[admin/cron-trigger] Invalid session cookie");
     return NextResponse.json({ error: "Non autorizzato: cookie non valido" }, { status: 401 });
   }

@@ -8,7 +8,8 @@ export async function GET(request: NextRequest) {
   const sessionCookie = request.cookies.get("admin_session");
   const adminPassword = process.env.ADMIN_PASSWORD;
 
-  if (!verifySessionCookie(sessionCookie?.value, adminPassword)) {
+  const isValid = await verifySessionCookie(sessionCookie?.value, adminPassword);
+  if (!isValid) {
     return NextResponse.json({ error: "Non autorizzato" }, { status: 401 });
   }
 
