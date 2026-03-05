@@ -54,7 +54,7 @@ export function MarketingVision() {
             </motion.a>
           </motion.div>
 
-          {/* Right Content - Image placeholder */}
+          {/* Right Content - AI Marketing Illustration */}
           <motion.div
             initial={{ opacity: 0, x: 40 }}
             whileInView={{ opacity: 1, x: 0 }}
@@ -62,17 +62,59 @@ export function MarketingVision() {
             transition={{ duration: 0.6, delay: 0.2 }}
             className="relative"
           >
-            <div className="relative aspect-[4/3] rounded-3xl overflow-hidden bg-black/10">
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="text-center">
-                  <div className="text-8xl mb-4">📢</div>
-                  <p className="text-black/50 font-medium">Marketing Excellence</p>
-                </div>
-              </div>
-              
+            <div className="relative aspect-[4/3] rounded-3xl overflow-hidden bg-black/20">
+              <svg viewBox="0 0 480 360" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
+                {/* Background grid */}
+                <defs>
+                  <pattern id="grid-mv" width="40" height="40" patternUnits="userSpaceOnUse">
+                    <path d="M 40 0 L 0 0 0 40" fill="none" stroke="rgba(0,0,0,0.15)" strokeWidth="0.5"/>
+                  </pattern>
+                </defs>
+                <rect width="480" height="360" fill="url(#grid-mv)" />
+
+                {/* Central AI brain node */}
+                <circle cx="240" cy="180" r="52" fill="black" fillOpacity="0.6" stroke="black" strokeWidth="2"/>
+                <circle cx="240" cy="180" r="38" fill="black" fillOpacity="0.8"/>
+                {/* Brain circuit lines */}
+                <path d="M220 168 Q240 155 260 168 Q270 178 260 192 Q240 205 220 192 Q210 182 220 168Z" stroke="black" strokeWidth="1.5" fill="none" opacity="0.8"/>
+                <circle cx="240" cy="180" r="6" fill="black"/>
+                <circle cx="228" cy="173" r="3" fill="black" opacity="0.7"/>
+                <circle cx="252" cy="173" r="3" fill="black" opacity="0.7"/>
+                <circle cx="234" cy="190" r="2.5" fill="black" opacity="0.6"/>
+                <circle cx="248" cy="188" r="2.5" fill="black" opacity="0.6"/>
+
+                {/* Connecting nodes */}
+                {[
+                  [120, 90], [360, 90], [80, 220], [400, 220],
+                  [180, 300], [300, 300], [240, 60]
+                ].map(([cx, cy], i) => (
+                  <g key={i}>
+                    <line x1="240" y1="180" x2={cx} y2={cy} stroke="black" strokeWidth="1" strokeOpacity="0.3" strokeDasharray="4 4"/>
+                    <circle cx={cx} cy={cy} r="14" fill="black" fillOpacity="0.5" stroke="black" strokeWidth="1.5"/>
+                    <circle cx={cx} cy={cy} r="5" fill="black" fillOpacity="0.8"/>
+                  </g>
+                ))}
+
+                {/* Floating data cards */}
+                <g transform="translate(30, 40)">
+                  <rect width="100" height="52" rx="10" fill="black" fillOpacity="0.7" stroke="black" strokeWidth="1"/>
+                  <text x="12" y="22" fill="black" fontSize="9" opacity="0.7" fontFamily="monospace">REACH</text>
+                  <text x="12" y="38" fill="black" fontSize="16" fontWeight="bold" fontFamily="monospace">+340%</text>
+                </g>
+                <g transform="translate(350, 250)">
+                  <rect width="100" height="52" rx="10" fill="black" fillOpacity="0.7" stroke="black" strokeWidth="1"/>
+                  <text x="12" y="22" fill="black" fontSize="9" opacity="0.7" fontFamily="monospace">CONV.</text>
+                  <text x="12" y="38" fill="black" fontSize="16" fontWeight="bold" fontFamily="monospace">+218%</text>
+                </g>
+
+                {/* Pulse rings */}
+                <circle cx="240" cy="180" r="68" fill="none" stroke="black" strokeWidth="1" strokeOpacity="0.2"/>
+                <circle cx="240" cy="180" r="90" fill="none" stroke="black" strokeWidth="0.5" strokeOpacity="0.1"/>
+              </svg>
+
               {/* Floating badge */}
               <motion.div
-                animate={{ y: [0, -10, 0] }}
+                animate={{ y: [0, -8, 0] }}
                 transition={{ duration: 3, repeat: Infinity }}
                 className="absolute top-4 right-4 bg-white rounded-full px-4 py-2 shadow-lg"
               >
