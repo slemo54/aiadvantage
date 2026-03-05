@@ -1,16 +1,14 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { 
-  Search, 
-  Filter, 
-  Grid3X3, 
-  List, 
+import {
+  Search,
+  Filter,
+  Grid3X3,
+  List,
   ArrowRight,
-  Clock,
-  Calendar,
   TrendingUp
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -219,7 +217,7 @@ function CategoryBadge({
 
 // ─── Main Page ────────────────────────────────────────────────────────────────
 
-export default function BlogPage() {
+function BlogContent() {
   const searchParams = useSearchParams();
   const categoryParam = searchParams.get("category") as CategoryKey | null;
   
@@ -440,5 +438,13 @@ export default function BlogPage() {
         )}
       </section>
     </div>
+  );
+}
+
+export default function BlogPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-zinc-950" />}>
+      <BlogContent />
+    </Suspense>
   );
 }
