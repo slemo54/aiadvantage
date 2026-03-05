@@ -1,8 +1,8 @@
 "use client";
 
 import { useRef, useEffect, useMemo, useState } from "react";
-import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { Environment, Float, MeshTransmissionMaterial, Sparkles, Trail } from "@react-three/drei";
+import { Canvas, useFrame } from "@react-three/fiber";
+import { Environment, Float, MeshTransmissionMaterial, Sparkles } from "@react-three/drei";
 import * as THREE from "three";
 import gsap from "gsap";
 
@@ -40,12 +40,6 @@ function CrystalStar({ mousePosition }: { mousePosition: React.MutableRefObject<
     
     geometry.computeVertexNormals();
     return geometry;
-  }, []);
-
-  // Inner crystal core
-  const coreGeometry = useMemo(() => {
-    const geo = new THREE.OctahedronGeometry(0.7, 0);
-    return geo;
   }, []);
 
   // Rings with different geometries
