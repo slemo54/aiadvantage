@@ -294,6 +294,7 @@ export default function AgentPage() {
     try {
       const res = await fetch("/api/admin/cron-trigger", {
         method: "POST",
+        credentials: "include",
       });
       if (res.ok) {
         addLog("Ricerca avviata con successo", "success");

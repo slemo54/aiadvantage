@@ -322,7 +322,7 @@ function TabAIPipeline() {
   const [envLoading, setEnvLoading] = useState(true);
 
   useEffect(() => {
-    fetch("/api/admin/env-status")
+    fetch("/api/admin/env-status", { credentials: "include" })
       .then((r) => r.json())
       .then((data: Record<string, boolean>) => {
         setEnvStatus(data);
@@ -401,7 +401,7 @@ function TabNewsletter() {
   const [subscriberCount, setSubscriberCount] = useState<number | null>(null);
 
   useEffect(() => {
-    fetch("/api/admin/env-status")
+    fetch("/api/admin/env-status", { credentials: "include" })
       .then((r) => r.json())
       .then((d: Record<string, boolean | number>) => {
         if (typeof d.subscriberCount === "number") setSubscriberCount(d.subscriberCount);
@@ -536,6 +536,7 @@ function TabCron() {
     try {
       const res = await fetch("/api/admin/cron-trigger", {
         method: "POST",
+        credentials: "include",
       });
       if (res.ok) {
         toast({

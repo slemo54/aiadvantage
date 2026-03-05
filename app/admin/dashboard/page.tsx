@@ -161,6 +161,7 @@ export default function DashboardPage() {
     try {
       const res = await fetch("/api/admin/cron-trigger", {
         method: "POST",
+        credentials: "include",
       });
       if (res.ok) {
         setCrawlMessage("Crawl avviato con successo. Le nuove idee appariranno a breve.");
