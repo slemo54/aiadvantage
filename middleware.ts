@@ -1,20 +1,24 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createHash } from "crypto";
 
-function hashPassword(password: string): string {
-  return createHash("sha256").update(password).digest("hex");
+async function hashPassword(password: string): Promise<string> {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(password);
+  const hashBuffer = await crypto.subtle.digest("SHA-256", data);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  return hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
 }
 
-export function middleware(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // Only protect /admin/* routes; /admin-login is outside this scope
+  // Only protect /admin/* routes
   if (!pathname.startsWith("/admin")) {
     return NextResponse.next();
   }
 
-  // API auth routes do not require a session cookie
+  // Login/logout routes are always allowed
   if (
+    pathname === "/admin-login" ||
     pathname.startsWith("/api/admin/auth") ||
     pathname.startsWith("/api/admin/logout")
   ) {
@@ -25,11 +29,10 @@ export function middleware(request: NextRequest) {
   const adminPassword = process.env.ADMIN_PASSWORD;
 
   if (!adminPassword) {
-    // No password configured — block access entirely
     return NextResponse.redirect(new URL("/admin-login", request.url));
   }
 
-  const expectedHash = hashPassword(adminPassword);
+  const expectedHash = await hashPassword(adminPassword);
 
   if (!sessionCookie || sessionCookie.value !== expectedHash) {
     return NextResponse.redirect(new URL("/admin-login", request.url));
