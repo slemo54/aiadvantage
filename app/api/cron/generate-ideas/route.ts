@@ -38,6 +38,19 @@ export async function POST(request: NextRequest) {
     );
   }
 
+  if (
+    !process.env.NEXT_PUBLIC_SUPABASE_URL ||
+    !process.env.SUPABASE_SERVICE_ROLE_KEY
+  ) {
+    return NextResponse.json(
+      {
+        error:
+          "Supabase non configurato. Aggiungi NEXT_PUBLIC_SUPABASE_URL e SUPABASE_SERVICE_ROLE_KEY su Vercel → Settings → Environment Variables.",
+      },
+      { status: 503 }
+    );
+  }
+
   try {
     console.log("[cron] Avvio ricerca topic con Perplexity...");
     const research = await researchTopic("");

@@ -12,7 +12,21 @@ function buildImagePrompt(title: string, category: string): string {
   );
 }
 
+function isSupabaseConfigured(): boolean {
+  return (
+    Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL) &&
+    Boolean(process.env.SUPABASE_SERVICE_ROLE_KEY)
+  );
+}
+
 export async function POST(request: NextRequest) {
+  if (!isSupabaseConfigured()) {
+    return NextResponse.json(
+      { error: "Supabase non configurato. Aggiungi NEXT_PUBLIC_SUPABASE_URL e SUPABASE_SERVICE_ROLE_KEY su Vercel." },
+      { status: 503 }
+    );
+  }
+
   try {
     const body: unknown = await request.json();
     if (
