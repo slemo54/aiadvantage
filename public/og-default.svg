@@ -1,0 +1,82 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" fill="none">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#09090b"/>
+      <stop offset="60%" style="stop-color:#0f0f23"/>
+      <stop offset="100%" style="stop-color:#1e1b4b"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#818cf8"/>
+      <stop offset="100%" style="stop-color:#6366f1"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="70%" cy="40%" r="50%">
+      <stop offset="0%" style="stop-color:#4338ca;stop-opacity:0.4"/>
+      <stop offset="100%" style="stop-color:#09090b;stop-opacity:0"/>
+    </radialGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  <rect width="1200" height="630" fill="url(#glow)"/>
+
+  <!-- Grid pattern -->
+  <g opacity="0.06" stroke="#6366f1" stroke-width="1">
+    <line x1="0" y1="60" x2="1200" y2="60"/>
+    <line x1="0" y1="120" x2="1200" y2="120"/>
+    <line x1="0" y1="180" x2="1200" y2="180"/>
+    <line x1="0" y1="240" x2="1200" y2="240"/>
+    <line x1="0" y1="300" x2="1200" y2="300"/>
+    <line x1="0" y1="360" x2="1200" y2="360"/>
+    <line x1="0" y1="420" x2="1200" y2="420"/>
+    <line x1="0" y1="480" x2="1200" y2="480"/>
+    <line x1="0" y1="540" x2="1200" y2="540"/>
+    <line x1="0" y1="600" x2="1200" y2="600"/>
+    <line x1="60" y1="0" x2="60" y2="630"/>
+    <line x1="120" y1="0" x2="120" y2="630"/>
+    <line x1="180" y1="0" x2="180" y2="630"/>
+    <line x1="240" y1="0" x2="240" y2="630"/>
+    <line x1="300" y1="0" x2="300" y2="630"/>
+    <line x1="360" y1="0" x2="360" y2="630"/>
+    <line x1="420" y1="0" x2="420" y2="630"/>
+    <line x1="480" y1="0" x2="480" y2="630"/>
+    <line x1="540" y1="0" x2="540" y2="630"/>
+    <line x1="600" y1="0" x2="600" y2="630"/>
+    <line x1="660" y1="0" x2="660" y2="630"/>
+    <line x1="720" y1="0" x2="720" y2="630"/>
+    <line x1="780" y1="0" x2="780" y2="630"/>
+    <line x1="840" y1="0" x2="840" y2="630"/>
+    <line x1="900" y1="0" x2="900" y2="630"/>
+    <line x1="960" y1="0" x2="960" y2="630"/>
+    <line x1="1020" y1="0" x2="1020" y2="630"/>
+    <line x1="1080" y1="0" x2="1080" y2="630"/>
+    <line x1="1140" y1="0" x2="1140" y2="630"/>
+  </g>
+
+  <!-- Neural network nodes -->
+  <circle cx="850" cy="200" r="6" fill="url(#accent)" opacity="0.9"/>
+  <circle cx="950" cy="150" r="4" fill="url(#accent)" opacity="0.7"/>
+  <circle cx="1000" cy="280" r="8" fill="url(#accent)" opacity="0.8"/>
+  <circle cx="1100" cy="200" r="5" fill="url(#accent)" opacity="0.6"/>
+  <circle cx="920" cy="320" r="4" fill="url(#accent)" opacity="0.5"/>
+  <circle cx="1050" cy="380" r="6" fill="url(#accent)" opacity="0.7"/>
+  <circle cx="1150" cy="350" r="3" fill="url(#accent)" opacity="0.4"/>
+  <line x1="850" y1="200" x2="950" y2="150" stroke="#6366f1" stroke-width="1.5" opacity="0.4"/>
+  <line x1="850" y1="200" x2="1000" y2="280" stroke="#6366f1" stroke-width="1.5" opacity="0.4"/>
+  <line x1="950" y1="150" x2="1100" y2="200" stroke="#6366f1" stroke-width="1.5" opacity="0.3"/>
+  <line x1="1000" y1="280" x2="1100" y2="200" stroke="#6366f1" stroke-width="1.5" opacity="0.3"/>
+  <line x1="1000" y1="280" x2="920" y2="320" stroke="#6366f1" stroke-width="1.5" opacity="0.3"/>
+  <line x1="920" y1="320" x2="1050" y2="380" stroke="#6366f1" stroke-width="1.5" opacity="0.3"/>
+  <line x1="1100" y1="200" x2="1150" y2="350" stroke="#6366f1" stroke-width="1.5" opacity="0.2"/>
+  <line x1="1050" y1="380" x2="1150" y2="350" stroke="#6366f1" stroke-width="1.5" opacity="0.2"/>
+
+  <!-- Accent bar -->
+  <rect x="80" y="260" width="6" height="80" rx="3" fill="url(#accent)"/>
+
+  <!-- Main text -->
+  <text x="110" y="310" font-family="system-ui, -apple-system, sans-serif" font-size="64" font-weight="800" fill="#f4f4f5">IlVantaggio<tspan fill="url(#accent)">AI</tspan></text>
+  <text x="110" y="365" font-family="system-ui, -apple-system, sans-serif" font-size="26" fill="#71717a" font-weight="400">Il blog italiano sull'Intelligenza Artificiale</text>
+
+  <!-- Bottom badge -->
+  <rect x="110" y="420" width="220" height="36" rx="18" fill="#1e1b4b" stroke="#4338ca" stroke-width="1.5"/>
+  <text x="220" y="443" font-family="system-ui, -apple-system, sans-serif" font-size="14" fill="#818cf8" font-weight="600" text-anchor="middle">ilvantaggioai.it</text>
+</svg>

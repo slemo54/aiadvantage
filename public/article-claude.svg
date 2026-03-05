@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 720" fill="none">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1e1b4b"/>
+      <stop offset="50%" style="stop-color:#312e81"/>
+      <stop offset="100%" style="stop-color:#4c1d95"/>
+    </linearGradient>
+    <linearGradient id="acc" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#a5b4fc"/>
+      <stop offset="100%" style="stop-color:#818cf8"/>
+    </linearGradient>
+  </defs>
+  <rect width="1280" height="720" fill="url(#bg)"/>
+  <!-- Grid -->
+  <g opacity="0.07" stroke="#818cf8" stroke-width="1">
+    <line x1="0" y1="60" x2="1280" y2="60"/><line x1="0" y1="120" x2="1280" y2="120"/>
+    <line x1="0" y1="180" x2="1280" y2="180"/><line x1="0" y1="240" x2="1280" y2="240"/>
+    <line x1="0" y1="300" x2="1280" y2="300"/><line x1="0" y1="360" x2="1280" y2="360"/>
+    <line x1="0" y1="420" x2="1280" y2="420"/><line x1="0" y1="480" x2="1280" y2="480"/>
+    <line x1="0" y1="540" x2="1280" y2="540"/><line x1="0" y1="600" x2="1280" y2="600"/>
+    <line x1="0" y1="660" x2="1280" y2="660"/>
+    <line x1="80" y1="0" x2="80" y2="720"/><line x1="160" y1="0" x2="160" y2="720"/>
+    <line x1="240" y1="0" x2="240" y2="720"/><line x1="320" y1="0" x2="320" y2="720"/>
+    <line x1="400" y1="0" x2="400" y2="720"/><line x1="480" y1="0" x2="480" y2="720"/>
+    <line x1="560" y1="0" x2="560" y2="720"/><line x1="640" y1="0" x2="640" y2="720"/>
+    <line x1="720" y1="0" x2="720" y2="720"/><line x1="800" y1="0" x2="800" y2="720"/>
+    <line x1="880" y1="0" x2="880" y2="720"/><line x1="960" y1="0" x2="960" y2="720"/>
+    <line x1="1040" y1="0" x2="1040" y2="720"/><line x1="1120" y1="0" x2="1120" y2="720"/>
+    <line x1="1200" y1="0" x2="1200" y2="720"/>
+  </g>
+  <!-- Code block visual -->
+  <rect x="680" y="80" width="520" height="560" rx="16" fill="#09090b" opacity="0.8"/>
+  <rect x="680" y="80" width="520" height="36" rx="16" fill="#18181b" opacity="0.9"/>
+  <circle cx="704" cy="98" r="6" fill="#ef4444" opacity="0.8"/>
+  <circle cx="724" cy="98" r="6" fill="#f59e0b" opacity="0.8"/>
+  <circle cx="744" cy="98" r="6" fill="#22c55e" opacity="0.8"/>
+  <!-- Code lines -->
+  <rect x="700" y="136" width="120" height="10" rx="4" fill="#6366f1" opacity="0.7"/>
+  <rect x="700" y="158" width="80" height="8" rx="4" fill="#a5b4fc" opacity="0.5"/>
+  <rect x="720" y="178" width="200" height="8" rx="4" fill="#4ade80" opacity="0.4"/>
+  <rect x="720" y="198" width="160" height="8" rx="4" fill="#a5b4fc" opacity="0.4"/>
+  <rect x="740" y="218" width="140" height="8" rx="4" fill="#67e8f9" opacity="0.4"/>
+  <rect x="740" y="238" width="180" height="8" rx="4" fill="#a5b4fc" opacity="0.3"/>
+  <rect x="720" y="258" width="100" height="8" rx="4" fill="#f9a8d4" opacity="0.3"/>
+  <rect x="700" y="278" width="60" height="8" rx="4" fill="#a5b4fc" opacity="0.5"/>
+  <rect x="700" y="310" width="200" height="8" rx="4" fill="#6366f1" opacity="0.6"/>
+  <rect x="720" y="330" width="160" height="8" rx="4" fill="#a5b4fc" opacity="0.4"/>
+  <rect x="740" y="350" width="180" height="8" rx="4" fill="#4ade80" opacity="0.4"/>
+  <rect x="740" y="370" width="140" height="8" rx="4" fill="#67e8f9" opacity="0.3"/>
+  <rect x="720" y="390" width="100" height="8" rx="4" fill="#f9a8d4" opacity="0.3"/>
+  <rect x="700" y="410" width="80" height="8" rx="4" fill="#a5b4fc" opacity="0.5"/>
+  <!-- AI cursor blink -->
+  <rect x="700" y="440" width="3" height="16" rx="1" fill="#818cf8" opacity="0.9"/>
+  <!-- Left content -->
+  <rect x="80" y="180" width="8" height="120" rx="4" fill="url(#acc)"/>
+  <text x="110" y="230" font-family="system-ui, sans-serif" font-size="36" font-weight="800" fill="white">Claude</text>
+  <text x="110" y="275" font-family="system-ui, sans-serif" font-size="36" font-weight="800" fill="url(#acc)">Sonnet 4.6</text>
+  <text x="110" y="340" font-family="system-ui, sans-serif" font-size="18" fill="#a1a1aa">AI Coding · Anthropic · 2026</text>
+</svg>
