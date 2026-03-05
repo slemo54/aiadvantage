@@ -30,7 +30,7 @@ const testimonials = [
 
 export function Testimonials() {
   return (
-    <section className="py-20 bg-white">
+    <section className="py-20 bg-black">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <motion.div
@@ -39,40 +39,40 @@ export function Testimonials() {
           viewport={{ once: true }}
           className="text-center mb-16"
         >
-          <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
-            Cosa dicono i nostri lettori
+          <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">
+            Happy Client
           </h2>
-          <p className="text-gray-600 text-lg max-w-2xl mx-auto">
+          <p className="text-gray-400 text-lg max-w-2xl mx-auto">
             Scopri i feedback della nostra community
           </p>
         </motion.div>
 
         {/* Testimonials Grid */}
-        <StaggerContainer className="grid md:grid-cols-3 gap-8">
+        <StaggerContainer className="grid md:grid-cols-3 gap-6">
           {testimonials.map((testimonial, index) => (
             <StaggerItem key={index}>
               <motion.div
                 whileHover={{ y: -8 }}
-                className="bg-gray-50 rounded-2xl p-6 relative group hover:bg-white hover:shadow-xl transition-all duration-300 border border-transparent hover:border-gray-100"
+                className="bg-[#0a0a0a] border border-gray-800 rounded-2xl p-6 group hover:border-[#22c55e]/30 transition-all duration-300"
               >
                 {/* Quote icon */}
-                <div className="absolute -top-4 -left-2 w-10 h-10 bg-[#3B5BFF] rounded-full flex items-center justify-center shadow-lg">
-                  <Quote className="w-5 h-5 text-white" />
+                <div className="w-10 h-10 bg-[#22c55e]/10 rounded-full flex items-center justify-center mb-4">
+                  <Quote className="w-5 h-5 text-[#22c55e]" />
                 </div>
 
                 {/* Content */}
-                <p className="text-gray-700 mb-6 pt-2 italic">
+                <p className="text-gray-300 mb-6 text-sm leading-relaxed">
                   &ldquo;{testimonial.quote}&rdquo;
                 </p>
 
                 {/* Author */}
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#3B5BFF] to-[#A855F7] flex items-center justify-center text-white font-bold">
+                    <div className="w-10 h-10 rounded-full bg-[#22c55e] flex items-center justify-center text-black font-bold">
                       {testimonial.author[0]}
                     </div>
                     <div>
-                      <div className="font-semibold text-gray-900">
+                      <div className="font-semibold text-white text-sm">
                         {testimonial.author}
                       </div>
                       <div className="text-xs text-gray-500">
@@ -83,7 +83,7 @@ export function Testimonials() {
 
                   {/* Stats */}
                   <div className="text-right">
-                    <div className="text-2xl font-bold text-[#3B5BFF]">
+                    <div className="text-xl font-bold text-[#22c55e]">
                       {testimonial.stats.value}
                     </div>
                     <div className="text-xs text-gray-500">

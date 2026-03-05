@@ -4,7 +4,7 @@ import { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { useSearchParams } from "next/navigation";
-import { Search, Filter, Grid3X3, List, ArrowRight, Sparkles } from "lucide-react";
+import { Search, Filter, Grid3X3, List, ArrowRight } from "lucide-react";
 import { ArticleCard, ArticleCardSkeleton } from "@/components/blog/article-card";
 import { CATEGORIES } from "@/lib/constants";
 import type { Article } from "@/lib/types";
@@ -193,8 +193,8 @@ function CategoryBadge({
       className={[
         "flex shrink-0 items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium transition-all",
         isActive
-          ? "border-transparent text-white shadow-lg"
-          : "border-gray-200 text-gray-600 hover:border-[#3B5BFF] hover:text-[#3B5BFF] bg-white",
+          ? "border-transparent text-black"
+          : "border-gray-700 text-gray-400 hover:border-[#22c55e] hover:text-[#22c55e] bg-black",
       ].join(" ")}
       style={isActive ? { backgroundColor: category.accent } : {}}
     >
@@ -202,7 +202,7 @@ function CategoryBadge({
       <span
         className={[
           "rounded-full px-2 py-0.5 text-xs",
-          isActive ? "bg-white/20" : "bg-gray-100 text-gray-500",
+          isActive ? "bg-black/20" : "bg-gray-800 text-gray-500",
         ].join(" ")}
       >
         {count}
@@ -228,8 +228,8 @@ function ViewModeButton({
       className={[
         "flex h-9 w-9 items-center justify-center rounded-lg transition-all",
         active
-          ? "bg-[#3B5BFF] text-white shadow-md shadow-blue-500/25"
-          : "bg-white border border-gray-200 text-gray-500 hover:border-[#3B5BFF] hover:text-[#3B5BFF]",
+          ? "bg-[#22c55e] text-black"
+          : "bg-black border border-gray-700 text-gray-400 hover:border-[#22c55e] hover:text-[#22c55e]",
       ].join(" ")}
     >
       <Icon className="h-4 w-4" />
@@ -306,25 +306,24 @@ function BlogContent() {
   ).map(([key, cat]) => ({ key, label: cat.label, accent: cat.accent }));
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-black">
       {/* Header Section */}
-      <section className="relative overflow-hidden bg-white border-b border-gray-100">
+      <section className="relative overflow-hidden bg-black border-b border-gray-800">
         {/* Background decorations */}
         <div className="absolute inset-0 -z-10">
-          <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-blue-50 rounded-full blur-3xl" />
-          <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-purple-50 rounded-full blur-3xl" />
+          <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-[#22c55e]/5 rounded-full blur-3xl" />
         </div>
 
         <div className="relative mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
           <FadeIn className="mb-8">
-            <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-blue-100 bg-blue-50 px-4 py-1.5 text-xs font-medium text-[#3B5BFF]">
-              <Sparkles className="h-3.5 w-3.5" />
+            <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-[#22c55e]/20 bg-[#22c55e]/10 px-4 py-1.5 text-xs font-medium text-[#22c55e]">
+              <span className="w-2 h-2 rounded-full bg-[#22c55e] animate-pulse" />
               Esplora la Knowledge Base AI
             </div>
-            <h1 className="mb-4 text-4xl font-bold text-gray-900 sm:text-5xl">
+            <h1 className="mb-4 text-4xl font-bold text-white sm:text-5xl">
               Blog
             </h1>
-            <p className="max-w-2xl text-lg text-gray-600">
+            <p className="max-w-2xl text-lg text-gray-400">
               Esplora articoli su Intelligenza Artificiale, casi d&apos;uso reali,
               tutorial pratici e analisi del settore.
             </p>
@@ -334,13 +333,13 @@ function BlogContent() {
           <FadeIn delay={0.1} className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             {/* Search */}
             <div className="relative max-w-md flex-1">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500" />
               <input
                 type="search"
                 placeholder="Cerca articoli..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full h-11 rounded-xl border border-gray-200 bg-white pl-10 pr-4 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-[#3B5BFF] focus:ring-2 focus:ring-blue-100 transition-all"
+                className="w-full h-11 rounded-xl border border-gray-800 bg-black pl-10 pr-4 text-sm text-white placeholder:text-gray-500 focus:outline-none focus:border-[#22c55e] transition-colors"
               />
             </div>
 
@@ -363,10 +362,10 @@ function BlogContent() {
       </section>
 
       {/* Category Filters */}
-      <section className="sticky top-16 lg:top-20 z-30 border-b border-gray-200 bg-white/95 backdrop-blur-md">
+      <section className="sticky top-16 lg:top-20 z-30 border-b border-gray-800 bg-black/95 backdrop-blur-md">
         <div className="mx-auto max-w-7xl px-4 py-3 sm:px-6 lg:px-8">
           <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-hide">
-            <Filter className="h-4 w-4 shrink-0 text-gray-400" />
+            <Filter className="h-4 w-4 shrink-0 text-gray-500" />
             <motion.button
               onClick={() => setActiveCategory("all")}
               whileHover={{ scale: 1.05 }}
@@ -374,12 +373,12 @@ function BlogContent() {
               className={[
                 "shrink-0 rounded-full border px-4 py-2 text-sm font-medium transition-all",
                 activeCategory === "all"
-                  ? "bg-[#3B5BFF] text-white border-transparent shadow-md shadow-blue-500/25"
-                  : "border-gray-200 text-gray-600 hover:border-[#3B5BFF] hover:text-[#3B5BFF] bg-white",
+                  ? "bg-[#22c55e] text-black border-transparent"
+                  : "border-gray-700 text-gray-400 hover:border-[#22c55e] hover:text-[#22c55e] bg-black",
               ].join(" ")}
             >
               Tutti
-              <span className="ml-2 rounded-full bg-white/20 px-2 py-0.5 text-xs">
+              <span className="ml-2 rounded-full bg-black/20 px-2 py-0.5 text-xs">
                 {articles.length}
               </span>
             </motion.button>
@@ -405,7 +404,7 @@ function BlogContent() {
           className="mb-6 flex items-center justify-between"
         >
           <p className="text-sm text-gray-500">
-            <span className="font-medium text-gray-900">
+            <span className="font-medium text-white">
               {filteredArticles.length}
             </span>{" "}
             articoli trovati
@@ -424,7 +423,7 @@ function BlogContent() {
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
-              className="rounded-2xl border border-gray-200 bg-white py-16 text-center"
+              className="rounded-2xl border border-gray-800 bg-[#0a0a0a] py-16 text-center"
             >
               <p className="text-gray-500">Nessun articolo trovato.</p>
               <button
@@ -432,7 +431,7 @@ function BlogContent() {
                   setActiveCategory("all");
                   setSearchQuery("");
                 }}
-                className="mt-4 text-[#3B5BFF] font-medium hover:underline"
+                className="mt-4 text-[#22c55e] font-medium hover:underline"
               >
                 Cancella filtri
               </button>
@@ -462,38 +461,37 @@ function BlogContent() {
               >
                 <Link
                   href={`/blog/${article.slug}`}
-                  className="group flex flex-col gap-4 rounded-2xl border border-gray-200 bg-white p-4 transition-all hover:border-[#3B5BFF]/30 hover:shadow-lg sm:flex-row sm:items-center"
+                  className="group flex flex-col gap-4 rounded-2xl border border-gray-800 bg-[#0a0a0a] p-4 transition-all hover:border-[#22c55e]/30 sm:flex-row sm:items-center"
                 >
                   <div
-                    className="h-24 w-full shrink-0 rounded-xl sm:w-32 flex items-center justify-center text-3xl"
-                    style={{ backgroundColor: CATEGORIES[article.category].accent + "20" }}
+                    className="h-24 w-full shrink-0 rounded-xl sm:w-32 flex items-center justify-center text-3xl bg-[#171717]"
                   >
                     {CATEGORIES[article.category].icon}
                   </div>
                   <div className="flex-1">
                     <div className="mb-2 flex items-center gap-2">
                       <span
-                        className="rounded-full px-2 py-0.5 text-xs font-semibold text-white"
+                        className="rounded-full px-2 py-0.5 text-xs font-semibold text-black"
                         style={{
                           backgroundColor: CATEGORIES[article.category].accent,
                         }}
                       >
                         {CATEGORIES[article.category].label}
                       </span>
-                      <span className="text-xs text-gray-400">
+                      <span className="text-xs text-gray-500">
                         {new Date(article.published_at || "").toLocaleDateString(
                           "it-IT"
                         )}
                       </span>
                     </div>
-                    <h3 className="mb-1 text-lg font-semibold text-gray-900 transition-colors group-hover:text-[#3B5BFF]">
+                    <h3 className="mb-1 text-lg font-semibold text-white transition-colors group-hover:text-[#22c55e]">
                       {article.title}
                     </h3>
                     <p className="line-clamp-2 text-sm text-gray-500">
                       {article.meta_description}
                     </p>
                   </div>
-                  <ArrowRight className="hidden h-5 w-5 text-gray-300 transition-colors group-hover:text-[#3B5BFF] sm:block" />
+                  <ArrowRight className="hidden h-5 w-5 text-gray-600 transition-colors group-hover:text-[#22c55e] sm:block" />
                 </Link>
               </motion.div>
             ))}
@@ -508,7 +506,7 @@ export default function BlogPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen bg-gray-50">
+        <div className="min-h-screen bg-black">
           <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {[1, 2, 3, 4, 5, 6].map((i) => (

@@ -1,9 +1,8 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Button } from "@/components/ui-new/button";
 import { useState } from "react";
-import { Sparkles, Loader2, CheckCircle } from "lucide-react";
+import { Loader2, CheckCircle, Send } from "lucide-react";
 
 export function Newsletter() {
   const [email, setEmail] = useState("");
@@ -21,71 +20,22 @@ export function Newsletter() {
   };
 
   return (
-    <section className="py-20 bg-[#1a1a4e] relative overflow-hidden">
-      {/* Background decorations */}
-      <div className="absolute inset-0">
-        {/* Animated sun */}
-        <motion.div
-          animate={{ rotate: 360 }}
-          transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-          className="absolute top-8 left-1/2 -translate-x-1/2"
-        >
-          <svg width="80" height="80" viewBox="0 0 80 80" fill="none">
-            <circle cx="40" cy="40" r="15" fill="#FFD93D" />
-            {[...Array(8)].map((_, i) => (
-              <motion.line
-                key={i}
-                x1="40"
-                y1="10"
-                x2="40"
-                y2="20"
-                stroke="#FFD93D"
-                strokeWidth="4"
-                strokeLinecap="round"
-                transform={`rotate(${i * 45} 40 40)`}
-                animate={{ opacity: [0.5, 1, 0.5] }}
-                transition={{ duration: 2, repeat: Infinity, delay: i * 0.1 }}
-              />
-            ))}
-          </svg>
-        </motion.div>
-
-        {/* Decorative text circle */}
-        <motion.div
-          animate={{ rotate: -360 }}
-          transition={{ duration: 30, repeat: Infinity, ease: "linear" }}
-          className="absolute bottom-8 left-8 w-32 h-32 opacity-20"
-        >
-          <svg viewBox="0 0 100 100" className="w-full h-full">
-            <defs>
-              <path
-                id="circlePath"
-                d="M 50,50 m -37,0 a 37,37 0 1,1 74,0 a 37,37 0 1,1 -74,0"
-              />
-            </defs>
-            <text fill="white" fontSize="10" fontWeight="bold">
-              <textPath href="#circlePath">
-                • ISCRIVITI ORA • AI ADVANTAGE • NEWSLETTER •
-              </textPath>
-            </text>
-          </svg>
-          <div className="absolute inset-0 flex items-center justify-center">
-            <span className="text-3xl">🔥</span>
-          </div>
-        </motion.div>
-      </div>
-
-      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative">
+    <section id="contact" className="py-20 bg-[#0a0a0a] border-t border-gray-800">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
+          className="text-center"
         >
-          <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4 pt-16">
-            Iscriviti alla nostra newsletter
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-6">
+            Do You have Project{" "}
+            <span className="text-[#22c55e]">Let&apos;s discusses</span>{" "}
+            With us.
           </h2>
-          <p className="text-white/70 text-lg mb-8">
-            Ricevi ogni settimana i migliori contenuti sull&apos;AI direttamente nella tua inbox
+          <p className="text-gray-400 text-lg mb-8 max-w-xl mx-auto">
+            Iscriviti alla nostra newsletter per ricevere aggiornamenti settimanali 
+            sul mondo dell&apos;AI.
           </p>
 
           <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-4 max-w-lg mx-auto">
@@ -94,45 +44,43 @@ export function Newsletter() {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="Inserisci la tua email"
-                className="w-full px-6 py-4 rounded-xl bg-white text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#3B5BFF] transition-all"
+                placeholder="Enter your email"
+                className="w-full px-6 py-4 rounded-full bg-black border border-gray-800 text-white placeholder-gray-500 focus:outline-none focus:border-[#22c55e] transition-colors"
                 disabled={status === "loading" || status === "success"}
               />
             </div>
-            <Button
+            <motion.button
               type="submit"
               disabled={status === "loading" || status === "success"}
-              className="whitespace-nowrap"
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              className="px-8 py-4 bg-[#22c55e] text-black font-semibold rounded-full hover:bg-[#4ade80] transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
             >
               {status === "loading" ? (
                 <Loader2 className="w-5 h-5 animate-spin" />
               ) : status === "success" ? (
                 <>
                   <CheckCircle className="w-5 h-5" />
-                  Iscritto!
+                  Subscribed!
                 </>
               ) : (
                 <>
-                  <Sparkles className="w-5 h-5" />
-                  Iscriviti
+                  <Send className="w-4 h-4" />
+                  Subscribe
                 </>
               )}
-            </Button>
+            </motion.button>
           </form>
 
           {status === "success" && (
             <motion.p
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              className="text-green-400 mt-4"
+              className="text-[#22c55e] mt-4"
             >
               Grazie per l&apos;iscrizione! Controlla la tua email.
             </motion.p>
           )}
-
-          <p className="text-white/40 text-sm mt-6">
-            Unsubscribe anytime. No spam, ever.
-          </p>
         </motion.div>
       </div>
     </section>

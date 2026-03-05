@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { Hero } from "@/components/sections/hero";
+import { MarketingVision } from "@/components/sections/marketing-vision";
+import { Services } from "@/components/sections/services";
 import { Features } from "@/components/sections/features";
 import { RecentArticles } from "@/components/sections/recent-articles";
 import { Testimonials } from "@/components/sections/testimonials";
@@ -117,21 +119,21 @@ export default function HomePage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
-        <div className="w-8 h-8 border-4 border-[#3B5BFF] border-t-transparent rounded-full animate-spin" />
+      <div className="min-h-screen bg-black flex items-center justify-center">
+        <div className="w-8 h-8 border-4 border-[#22c55e] border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
 
   return (
-    <main className="min-h-screen bg-white">
+    <main className="min-h-screen bg-black">
       <Hero />
+      <MarketingVision />
+      <Services />
       <Features />
       <RecentArticles articles={articles} />
       <Testimonials />
-      <div id="newsletter">
-        <Newsletter />
-      </div>
+      <Newsletter />
     </main>
   );
 }
