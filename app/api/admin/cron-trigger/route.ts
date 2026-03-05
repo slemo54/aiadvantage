@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { verifySessionCookie } from "@/lib/auth";
 
 // Server-side proxy: lets authenticated admin trigger cron without exposing CRON_SECRET client-side
 export async function POST(request: NextRequest) {
@@ -22,13 +23,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Non autorizzato: nessun cookie di sessione" }, { status: 401 });
   }
 
-  const encoder = new TextEncoder();
-  const data = encoder.encode(adminPassword);
-  const hashBuffer = await crypto.subtle.digest("SHA-256", data);
-  const hashArray = Array.from(new Uint8Array(hashBuffer));
-  const expectedHash = hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
-
-  if (sessionCookie.value !== expectedHash) {
+  if (!verifySessionCookie(sessionCookie.value, adminPassword)) {
     console.error("[admin/cron-trigger] Invalid session cookie");
     return NextResponse.json({ error: "Non autorizzato: cookie non valido" }, { status: 401 });
   }

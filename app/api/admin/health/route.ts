@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { verifySessionCookie } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
 
@@ -24,16 +25,8 @@ export async function GET(request: NextRequest) {
     timestamp: new Date().toISOString(),
   };
 
-  // If cookie exists, verify it
-  let sessionValid = false;
-  if (sessionCookie && process.env.ADMIN_PASSWORD) {
-    const encoder = new TextEncoder();
-    const data = encoder.encode(process.env.ADMIN_PASSWORD);
-    const hashBuffer = await crypto.subtle.digest("SHA-256", data);
-    const hashArray = Array.from(new Uint8Array(hashBuffer));
-    const expectedHash = hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
-    sessionValid = sessionCookie.value === expectedHash;
-  }
+  // Verify session cookie using shared function
+  const sessionValid = verifySessionCookie(sessionCookie?.value, process.env.ADMIN_PASSWORD);
 
   return NextResponse.json({
     ...status,

@@ -1,14 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createHash } from "crypto";
 import { z } from "zod";
+import { hashPassword } from "@/lib/auth";
 
 const LoginSchema = z.object({
   password: z.string().min(1, "Password obbligatoria"),
 });
-
-function hashPassword(password: string): string {
-  return createHash("sha256").update(password).digest("hex");
-}
 
 export async function POST(request: NextRequest) {
   try {

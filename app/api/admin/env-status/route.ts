@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { verifySessionCookie } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
 
@@ -7,17 +8,7 @@ export async function GET(request: NextRequest) {
   const sessionCookie = request.cookies.get("admin_session");
   const adminPassword = process.env.ADMIN_PASSWORD;
 
-  if (!adminPassword || !sessionCookie) {
-    return NextResponse.json({ error: "Non autorizzato" }, { status: 401 });
-  }
-
-  const encoder = new TextEncoder();
-  const data = encoder.encode(adminPassword);
-  const hashBuffer = await crypto.subtle.digest("SHA-256", data);
-  const hashArray = Array.from(new Uint8Array(hashBuffer));
-  const expectedHash = hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
-
-  if (sessionCookie.value !== expectedHash) {
+  if (!verifySessionCookie(sessionCookie?.value, adminPassword)) {
     return NextResponse.json({ error: "Non autorizzato" }, { status: 401 });
   }
 

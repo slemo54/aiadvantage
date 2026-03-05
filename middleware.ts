@@ -1,12 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-
-async function hashPassword(password: string): Promise<string> {
-  const encoder = new TextEncoder();
-  const data = encoder.encode(password);
-  const hashBuffer = await crypto.subtle.digest("SHA-256", data);
-  const hashArray = Array.from(new Uint8Array(hashBuffer));
-  return hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
-}
+import { hashPassword } from "@/lib/auth";
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -32,7 +25,7 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL("/admin-login", request.url));
   }
 
-  const expectedHash = await hashPassword(adminPassword);
+  const expectedHash = hashPassword(adminPassword);
 
   if (!sessionCookie || sessionCookie.value !== expectedHash) {
     return NextResponse.redirect(new URL("/admin-login", request.url));
