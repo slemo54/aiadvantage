@@ -2,6 +2,7 @@
 
 import { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
+import { motion } from "framer-motion";
 import { useSearchParams } from "next/navigation";
 import {
   Search,
@@ -9,14 +10,16 @@ import {
   Grid3X3,
   List,
   ArrowRight,
-  TrendingUp
+  TrendingUp,
+  Sparkles,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { ArticleCard } from "@/components/blog/article-card";
+import { ArticleCard, ArticleCardSkeleton } from "@/components/blog/article-card";
 import { CATEGORIES } from "@/lib/constants";
 import type { Article } from "@/lib/types";
 import type { CategoryKey } from "@/lib/constants";
+import { AnimatedHeroBackground } from "@/components/animations/animated-hero";
 
 // ─── Extended placeholder data ────────────────────────────────────────────────
 
@@ -178,31 +181,29 @@ const PLACEHOLDER_ARTICLES: Article[] = [
 
 // ─── Components ───────────────────────────────────────────────────────────────
 
-function CategoryBadge({ 
-  category, 
-  isActive, 
-  onClick, 
-  count 
-}: { 
+function CategoryBadge({
+  category,
+  isActive,
+  onClick,
+  count,
+}: {
   category: { key: CategoryKey; label: string; accent: string };
   isActive: boolean;
   onClick: () => void;
   count: number;
 }) {
   return (
-    <button
+    <motion.button
       onClick={onClick}
+      whileHover={{ scale: 1.05 }}
+      whileTap={{ scale: 0.95 }}
       className={[
-        "flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium transition-all",
+        "flex shrink-0 items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium transition-all",
         isActive
           ? "border-transparent text-white"
           : "border-zinc-700 text-zinc-400 hover:border-zinc-500 hover:text-zinc-200",
       ].join(" ")}
-      style={
-        isActive
-          ? { backgroundColor: category.accent }
-          : {}
-      }
+      style={isActive ? { backgroundColor: category.accent } : {}}
     >
       {category.label}
       <span className={[
@@ -211,7 +212,33 @@ function CategoryBadge({
       ].join(" ")}>
         {count}
       </span>
-    </button>
+    </motion.button>
+  );
+}
+
+function ViewModeButton({
+  active,
+  onClick,
+  icon: Icon,
+}: {
+  active: boolean;
+  onClick: () => void;
+  icon: React.ElementType;
+}) {
+  return (
+    <motion.button
+      whileHover={{ scale: 1.1 }}
+      whileTap={{ scale: 0.9 }}
+      onClick={onClick}
+      className={[
+        "flex h-9 w-9 items-center justify-center rounded-lg transition-all",
+        active
+          ? "bg-indigo-600 text-white"
+          : "bg-zinc-800 text-zinc-400 hover:bg-zinc-700 hover:text-white",
+      ].join(" ")}
+    >
+      <Icon className="h-4 w-4" />
+    </motion.button>
   );
 }
 
@@ -220,7 +247,7 @@ function CategoryBadge({
 function BlogContent() {
   const searchParams = useSearchParams();
   const categoryParam = searchParams.get("category") as CategoryKey | null;
-  
+
   const [articles, setArticles] = useState<Article[]>(PLACEHOLDER_ARTICLES);
   const [activeCategory, setActiveCategory] = useState<CategoryKey | "all">(categoryParam || "all");
   const [searchQuery, setSearchQuery] = useState("");
@@ -254,14 +281,14 @@ function BlogContent() {
 
   // Filter articles
   let filteredArticles = articles;
-  
+
   if (activeCategory !== "all") {
     filteredArticles = filteredArticles.filter(a => a.category === activeCategory);
   }
-  
+
   if (searchQuery.trim()) {
     const query = searchQuery.toLowerCase();
-    filteredArticles = filteredArticles.filter(a => 
+    filteredArticles = filteredArticles.filter(a =>
       a.title.toLowerCase().includes(query) ||
       a.meta_description?.toLowerCase().includes(query) ||
       a.keywords.some(k => k.toLowerCase().includes(query))
@@ -275,18 +302,34 @@ function BlogContent() {
   return (
     <div className="min-h-screen bg-zinc-950">
       {/* Header Section */}
-      <section className="border-b border-zinc-800 bg-zinc-950">
-        <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
-          <div className="mb-8">
-            <h1 className="mb-4 text-4xl font-bold text-white">Blog</h1>
+      <section className="relative overflow-hidden border-b border-zinc-800">
+        <AnimatedHeroBackground gradient="from-indigo-900/30 via-zinc-950 to-zinc-950" />
+        
+        <div className="relative mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className="mb-8"
+          >
+            <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-indigo-500/30 bg-indigo-900/20 px-4 py-1.5 text-xs font-medium text-indigo-300">
+              <Sparkles className="h-3.5 w-3.5" />
+              Esplora la Knowledge Base AI
+            </div>
+            <h1 className="mb-4 text-4xl font-bold text-white sm:text-5xl">Blog</h1>
             <p className="max-w-2xl text-lg text-zinc-400">
-              Esplora articoli su Intelligenza Artificiale, casi d&apos;uso reali, 
+              Esplora articoli su Intelligenza Artificiale, casi d&apos;uso reali,
               tutorial pratici e analisi del settore.
             </p>
-          </div>
+          </motion.div>
 
           {/* Search and Filters */}
-          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.1 }}
+            className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between"
+          >
             {/* Search */}
             <div className="relative max-w-md flex-1">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-500" />
@@ -295,44 +338,41 @@ function BlogContent() {
                 placeholder="Cerca articoli..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="h-10 border-zinc-700 bg-zinc-900 pl-10 text-sm text-zinc-300 placeholder:text-zinc-500 focus:border-indigo-500"
+                className="h-11 border-zinc-700 bg-zinc-900/80 pl-10 text-sm text-zinc-300 placeholder:text-zinc-500 focus:border-indigo-500 focus:ring-indigo-500/20"
               />
             </div>
 
             {/* View Mode Toggle */}
             <div className="flex items-center gap-2">
-              <Button
-                variant="ghost"
-                size="sm"
+              <span className="mr-2 text-xs text-zinc-500">Vista:</span>
+              <ViewModeButton
+                active={viewMode === "grid"}
                 onClick={() => setViewMode("grid")}
-                className={viewMode === "grid" ? "bg-zinc-800 text-white" : "text-zinc-500"}
-              >
-                <Grid3X3 className="h-4 w-4" />
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
+                icon={Grid3X3}
+              />
+              <ViewModeButton
+                active={viewMode === "list"}
                 onClick={() => setViewMode("list")}
-                className={viewMode === "list" ? "bg-zinc-800 text-white" : "text-zinc-500"}
-              >
-                <List className="h-4 w-4" />
-              </Button>
+                icon={List}
+              />
             </div>
-          </div>
+          </motion.div>
         </div>
       </section>
 
       {/* Category Filters */}
-      <section className="border-b border-zinc-800 bg-zinc-900/30">
-        <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
-          <div className="flex items-center gap-2 overflow-x-auto pb-2">
+      <section className="sticky top-16 z-30 border-b border-zinc-800 bg-zinc-950/95 backdrop-blur-md">
+        <div className="mx-auto max-w-7xl px-4 py-3 sm:px-6 lg:px-8">
+          <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-hide">
             <Filter className="h-4 w-4 shrink-0 text-zinc-500" />
-            <button
+            <motion.button
               onClick={() => setActiveCategory("all")}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
               className={[
                 "shrink-0 rounded-full border px-4 py-2 text-sm font-medium transition-all",
                 activeCategory === "all"
-                  ? "border-indigo-500 bg-indigo-500 text-white"
+                  ? "border-indigo-500 bg-indigo-600 text-white"
                   : "border-zinc-700 text-zinc-400 hover:border-zinc-500 hover:text-zinc-200",
               ].join(" ")}
             >
@@ -340,7 +380,7 @@ function BlogContent() {
               <span className="ml-2 rounded-full bg-white/20 px-2 py-0.5 text-xs">
                 {articles.length}
               </span>
-            </button>
+            </motion.button>
             {categoryList.map((cat) => (
               <CategoryBadge
                 key={cat.key}
@@ -357,29 +397,34 @@ function BlogContent() {
       {/* Articles Grid/List */}
       <section className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
         {/* Results info */}
-        <div className="mb-6 flex items-center justify-between">
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="mb-6 flex items-center justify-between"
+        >
           <p className="text-sm text-zinc-500">
-            {filteredArticles.length} articoli trovati
+            <span className="font-medium text-white">{filteredArticles.length}</span> articoli trovati
           </p>
           <div className="flex items-center gap-2 text-sm text-zinc-500">
             <TrendingUp className="h-4 w-4" />
             <span>Ordinati per: Più recenti</span>
           </div>
-        </div>
+        </motion.div>
 
         {/* Grid View */}
         {viewMode === "grid" ? (
           isLoading ? (
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {[1, 2, 3, 4, 5, 6].map((i) => (
-                <div
-                  key={i}
-                  className="h-80 animate-pulse rounded-xl border border-zinc-800 bg-zinc-900"
-                />
+                <ArticleCardSkeleton key={i} index={i} />
               ))}
             </div>
           ) : filteredArticles.length === 0 ? (
-            <div className="rounded-xl border border-zinc-800 py-16 text-center">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="rounded-xl border border-zinc-800 py-16 text-center"
+            >
               <p className="text-zinc-500">Nessun articolo trovato.</p>
               <Button
                 variant="link"
@@ -388,53 +433,62 @@ function BlogContent() {
               >
                 Cancella filtri
               </Button>
-            </div>
+            </motion.div>
           ) : (
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {filteredArticles.map((article) => (
+            <motion.div
+              layout
+              className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3"
+            >
+              {filteredArticles.map((article, index) => (
                 <ArticleCard
                   key={article.id}
                   article={article}
-                  gradient={ARTICLE_META[article.id]?.gradient}
                   author={ARTICLE_META[article.id]?.author}
                   readTime={ARTICLE_META[article.id]?.readTime}
+                  index={index}
                 />
               ))}
-            </div>
+            </motion.div>
           )
         ) : (
           /* List View */
-          <div className="space-y-4">
-            {filteredArticles.map((article) => (
-              <Link
+          <motion.div layout className="space-y-4">
+            {filteredArticles.map((article, index) => (
+              <motion.div
                 key={article.id}
-                href={`/blog/${article.slug}`}
-                className="group flex flex-col gap-4 rounded-xl border border-zinc-800 bg-zinc-900/50 p-4 transition-all hover:border-zinc-700 sm:flex-row sm:items-center"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3, delay: index * 0.05 }}
               >
-                <div className={`h-24 w-full shrink-0 rounded-lg bg-gradient-to-br ${ARTICLE_META[article.id]?.gradient || "from-indigo-900 to-violet-900"} sm:w-32`} />
-                <div className="flex-1">
-                  <div className="mb-2 flex items-center gap-2">
-                    <span
-                      className="rounded-full px-2 py-0.5 text-xs font-semibold text-white"
-                      style={{ backgroundColor: CATEGORIES[article.category].accent }}
-                    >
-                      {CATEGORIES[article.category].label}
-                    </span>
-                    <span className="text-xs text-zinc-500">
-                      {new Date(article.published_at || "").toLocaleDateString("it-IT")}
-                    </span>
+                <Link
+                  href={`/blog/${article.slug}`}
+                  className="group flex flex-col gap-4 rounded-xl border border-zinc-800 bg-zinc-900/50 p-4 transition-all hover:border-indigo-500/30 hover:bg-zinc-900 sm:flex-row sm:items-center"
+                >
+                  <div className={`h-24 w-full shrink-0 rounded-lg bg-gradient-to-br ${ARTICLE_META[article.id]?.gradient || "from-indigo-900 to-violet-900"} sm:w-32`} />
+                  <div className="flex-1">
+                    <div className="mb-2 flex items-center gap-2">
+                      <span
+                        className="rounded-full px-2 py-0.5 text-xs font-semibold text-white"
+                        style={{ backgroundColor: CATEGORIES[article.category].accent }}
+                      >
+                        {CATEGORIES[article.category].label}
+                      </span>
+                      <span className="text-xs text-zinc-500">
+                        {new Date(article.published_at || "").toLocaleDateString("it-IT")}
+                      </span>
+                    </div>
+                    <h3 className="mb-1 text-lg font-semibold text-white transition-colors group-hover:text-indigo-300">
+                      {article.title}
+                    </h3>
+                    <p className="line-clamp-2 text-sm text-zinc-400">
+                      {article.meta_description}
+                    </p>
                   </div>
-                  <h3 className="mb-1 text-lg font-semibold text-white group-hover:text-indigo-400">
-                    {article.title}
-                  </h3>
-                  <p className="line-clamp-2 text-sm text-zinc-400">
-                    {article.meta_description}
-                  </p>
-                </div>
-                <ArrowRight className="hidden h-5 w-5 text-zinc-600 transition-colors group-hover:text-indigo-400 sm:block" />
-              </Link>
+                  <ArrowRight className="hidden h-5 w-5 text-zinc-600 transition-colors group-hover:text-indigo-400 sm:block" />
+                </Link>
+              </motion.div>
             ))}
-          </div>
+          </motion.div>
         )}
       </section>
     </div>
@@ -443,7 +497,17 @@ function BlogContent() {
 
 export default function BlogPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-zinc-950" />}>
+    <Suspense fallback={
+      <div className="min-h-screen bg-zinc-950">
+        <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {[1, 2, 3, 4, 5, 6].map((i) => (
+              <ArticleCardSkeleton key={i} />
+            ))}
+          </div>
+        </div>
+      </div>
+    }>
       <BlogContent />
     </Suspense>
   );

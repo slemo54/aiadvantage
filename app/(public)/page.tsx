@@ -2,14 +2,16 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { ArrowRight, Mail, LayoutGrid, Flame, BookOpen } from "lucide-react";
-import { ArticleCard } from "@/components/blog/article-card";
+import { motion } from "framer-motion";
+import { ArrowRight, Mail, LayoutGrid, Flame, BookOpen, ChevronRight } from "lucide-react";
+import { ArticleCard, ArticleCardSkeleton } from "@/components/blog/article-card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { CATEGORIES } from "@/lib/constants";
 import type { Article } from "@/lib/types";
 import type { CategoryKey } from "@/lib/constants";
 import { SEED_ARTICLES } from "@/lib/seed-articles";
+import { AnimatedHeroBackground, FloatingParticles } from "@/components/animations/animated-hero";
 
 // ─── Extended placeholder data ────────────────────────────────────────────────
 
@@ -121,27 +123,72 @@ function NewsletterSection() {
 
   return (
     <section className="relative overflow-hidden bg-gradient-to-br from-indigo-900/40 via-zinc-900 to-zinc-950 py-20">
-      {/* Glow effect */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute left-1/2 top-1/2 h-96 w-96 -translate-x-1/2 -translate-y-1/2 rounded-full bg-indigo-600/10 blur-3xl"
+      {/* Animated background elements */}
+      <motion.div
+        className="pointer-events-none absolute left-1/4 top-1/4 h-64 w-64 rounded-full bg-indigo-600/10 blur-3xl"
+        animate={{
+          scale: [1, 1.2, 1],
+          opacity: [0.3, 0.5, 0.3],
+        }}
+        transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
       />
+      <motion.div
+        className="pointer-events-none absolute bottom-1/4 right-1/4 h-64 w-64 rounded-full bg-purple-600/10 blur-3xl"
+        animate={{
+          scale: [1, 1.3, 1],
+          opacity: [0.3, 0.6, 0.3],
+        }}
+        transition={{ duration: 7, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+      />
+
       <div className="relative mx-auto max-w-2xl px-4 text-center sm:px-6">
-        <div className="mx-auto mb-6 flex h-12 w-12 items-center justify-center rounded-full bg-indigo-600/20">
+        <motion.div
+          initial={{ scale: 0, opacity: 0 }}
+          whileInView={{ scale: 1, opacity: 1 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5, type: "spring" }}
+          className="mx-auto mb-6 flex h-12 w-12 items-center justify-center rounded-full bg-indigo-600/20"
+        >
           <Mail className="h-5 w-5 text-indigo-400" />
-        </div>
-        <h2 className="mb-3 text-3xl font-bold text-white sm:text-4xl">
+        </motion.div>
+
+        <motion.h2
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5, delay: 0.1 }}
+          className="mb-3 text-3xl font-bold text-white sm:text-4xl"
+        >
           Stay Ahead of the Curve
-        </h2>
-        <p className="mb-8 text-zinc-400">
+        </motion.h2>
+
+        <motion.p
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+          className="mb-8 text-zinc-400"
+        >
           Get the weekly digest of AI breakthroughs and practical implementation guides delivered to your inbox.
-        </p>
+        </motion.p>
+
         {submitted ? (
-          <div className="rounded-xl border border-green-500/30 bg-green-900/20 px-6 py-4 text-green-400">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="rounded-xl border border-green-500/30 bg-green-900/20 px-6 py-4 text-green-400"
+          >
             Grazie per l&apos;iscrizione! Ti terremo aggiornato.
-          </div>
+          </motion.div>
         ) : (
-          <form onSubmit={handleSubmit} className="flex flex-col gap-3 sm:flex-row sm:justify-center">
+          <motion.form
+            onSubmit={handleSubmit}
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5, delay: 0.3 }}
+            className="flex flex-col gap-3 sm:flex-row sm:justify-center"
+          >
             <Input
               type="email"
               value={email}
@@ -150,17 +197,26 @@ function NewsletterSection() {
               required
               className="h-12 border-zinc-700 bg-zinc-900/80 px-4 text-sm text-zinc-100 placeholder:text-zinc-500 focus:border-indigo-500 focus:ring-indigo-500/20 sm:w-72"
             />
-            <Button
-              type="submit"
-              className="h-12 bg-indigo-600 px-6 text-sm font-semibold text-white hover:bg-indigo-500"
-            >
-              Join 5,000+ Readers
-            </Button>
-          </form>
+            <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+              <Button
+                type="submit"
+                className="h-12 w-full bg-indigo-600 px-6 text-sm font-semibold text-white hover:bg-indigo-500 sm:w-auto"
+              >
+                Join 5,000+ Readers
+              </Button>
+            </motion.div>
+          </motion.form>
         )}
-        <p className="mt-4 text-xs text-zinc-600">
+
+        <motion.p
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5, delay: 0.4 }}
+          className="mt-4 text-xs text-zinc-600"
+        >
           ZERO SPAM. PURE INSIGHT. UNSUBSCRIBE ANYTIME.
-        </p>
+        </motion.p>
       </div>
     </section>
   );
@@ -177,8 +233,10 @@ interface TabButtonProps {
 
 function TabButton({ active, onClick, icon, label }: TabButtonProps) {
   return (
-    <button
+    <motion.button
       onClick={onClick}
+      whileHover={{ y: -2 }}
+      whileTap={{ scale: 0.98 }}
       className={[
         "flex items-center gap-2 border-b-2 px-4 py-3 text-sm font-medium transition-colors",
         active
@@ -188,7 +246,38 @@ function TabButton({ active, onClick, icon, label }: TabButtonProps) {
     >
       {icon}
       {label}
-    </button>
+    </motion.button>
+  );
+}
+
+// ─── Category Filter Button ───────────────────────────────────────────────────
+
+function CategoryFilterButton({
+  active,
+  onClick,
+  label,
+  accent,
+}: {
+  active: boolean;
+  onClick: () => void;
+  label: string;
+  accent?: string;
+}) {
+  return (
+    <motion.button
+      onClick={onClick}
+      whileHover={{ scale: 1.05 }}
+      whileTap={{ scale: 0.95 }}
+      className={[
+        "rounded-full border px-4 py-1.5 text-xs font-medium transition-all duration-200",
+        active
+          ? "border-transparent text-white"
+          : "border-zinc-700 text-zinc-400 hover:border-zinc-500 hover:text-zinc-200",
+      ].join(" ")}
+      style={active && accent ? { backgroundColor: accent } : {}}
+    >
+      {label}
+    </motion.button>
   );
 }
 
@@ -230,51 +319,27 @@ export default function HomePage() {
     <div className="flex flex-col bg-zinc-950">
       {/* ── FEATURED ARTICLE HERO ────────────────────────────────────────────── */}
       {!isLoading && featured && (
-        <section className="relative overflow-hidden">
-          {/* Background gradient */}
-          <div 
-            className="absolute inset-0 bg-gradient-to-br from-emerald-900/80 via-zinc-900 to-zinc-950"
-            style={{
-              backgroundImage: `linear-gradient(135deg, rgba(16, 185, 129, 0.3) 0%, rgba(6, 78, 59, 0.5) 50%, rgba(9, 9, 11, 1) 100%)`
-            }}
-          />
-          {/* Pattern overlay */}
-          <div 
-            aria-hidden 
-            className="pointer-events-none absolute inset-0 opacity-10"
-            style={{
-              backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.4'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
-            }}
-          />
+        <section className="relative min-h-[70vh] overflow-hidden">
+          <AnimatedHeroBackground gradient="from-emerald-900/60 via-zinc-900 to-zinc-950" />
+          <FloatingParticles count={15} />
           
-          <div className="relative mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
-            <div className="grid gap-8 lg:grid-cols-2 lg:gap-12 items-center">
-              {/* Left - Image/Visual */}
-              <div className="relative order-2 lg:order-1">
-                <div className="relative aspect-[4/3] overflow-hidden rounded-2xl bg-gradient-to-br from-emerald-800/50 to-teal-900/50">
-                  {/* Abstract visual */}
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="text-center">
-                      <span className="text-6xl font-black text-white/20 tracking-tighter">FEATURE</span>
-                      <span className="block text-4xl font-black text-white/10 tracking-tighter">ARTICLE</span>
-                    </div>
-                  </div>
-                  {/* Grid lines */}
-                  <div 
-                    className="pointer-events-none absolute inset-0 opacity-20"
-                    style={{
-                      backgroundImage: "linear-gradient(rgba(255,255,255,.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.1) 1px, transparent 1px)",
-                      backgroundSize: "40px 40px",
-                    }}
-                  />
-                </div>
-              </div>
-
-              {/* Right - Content */}
-              <div className="order-1 lg:order-2">
+          <div className="relative mx-auto flex h-full max-w-7xl items-center px-4 py-20 sm:px-6 lg:px-8">
+            <div className="grid w-full gap-12 lg:grid-cols-2 lg:gap-12 items-center">
+              {/* Left - Content */}
+              <motion.div
+                initial={{ opacity: 0, x: -30 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.6, ease: "easeOut" }}
+                className="order-1"
+              >
                 {/* Meta */}
-                <div className="mb-4 flex items-center gap-3 text-xs">
-                  <span 
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: 0.2 }}
+                  className="mb-4 flex flex-wrap items-center gap-3 text-xs"
+                >
+                  <span
                     className="rounded-full px-3 py-1 font-semibold text-white"
                     style={{ backgroundColor: CATEGORIES[featured.category].accent }}
                   >
@@ -283,32 +348,103 @@ export default function HomePage() {
                   <span className="text-zinc-400">12 Min Read</span>
                   <span className="text-zinc-500">•</span>
                   <span className="text-zinc-400">March 18, 2024</span>
-                </div>
+                </motion.div>
 
                 {/* Title */}
-                <h1 className="mb-6 text-3xl font-bold leading-tight text-white sm:text-4xl lg:text-5xl">
-                  The Edge of Innovation: How AI is Reshaping the Digital Frontier
-                </h1>
+                <motion.h1
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: 0.3 }}
+                  className="mb-6 text-4xl font-bold leading-tight text-white sm:text-5xl lg:text-6xl"
+                >
+                  The Edge of Innovation: How{" "}
+                  <span className="bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">
+                    AI is Reshaping
+                  </span>{" "}
+                  the Digital Frontier
+                </motion.h1>
+
+                {/* Description */}
+                <motion.p
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: 0.4 }}
+                  className="mb-8 max-w-xl text-lg text-zinc-400"
+                >
+                  Scopri come l&apos;intelligenza artificiale sta trasformando i mercati digitali
+                  e creando nuove opportunità per startup e enterprise.
+                </motion.p>
 
                 {/* CTA */}
-                <div className="flex flex-wrap items-center gap-4">
-                  <Link
-                    href={`/blog/${featured.slug}`}
-                    className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-6 py-3 text-sm font-semibold text-white transition-all hover:bg-indigo-500"
-                  >
-                    Read Full Story
-                    <ArrowRight className="h-4 w-4" />
-                  </Link>
-                  
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: 0.5 }}
+                  className="flex flex-wrap items-center gap-4"
+                >
+                  <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                    <Link
+                      href={`/blog/${featured.slug}`}
+                      className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-6 py-3 text-sm font-semibold text-white transition-all hover:bg-indigo-500 hover:shadow-lg hover:shadow-indigo-600/25"
+                    >
+                      Read Full Story
+                      <ChevronRight className="h-4 w-4" />
+                    </Link>
+                  </motion.div>
+
                   {/* Author */}
-                  <div className="flex items-center gap-2">
-                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-indigo-900 text-xs font-bold text-indigo-300">
+                  <motion.div
+                    className="flex items-center gap-3"
+                    whileHover={{ x: 5 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-indigo-600 to-purple-600 text-sm font-bold text-white">
                       A
                     </div>
-                    <span className="text-sm text-zinc-400">By Anselmo</span>
+                    <div>
+                      <p className="text-sm font-medium text-white">Anselmo</p>
+                      <p className="text-xs text-zinc-500">AI Policy Expert</p>
+                    </div>
+                  </motion.div>
+                </motion.div>
+              </motion.div>
+
+              {/* Right - Visual */}
+              <motion.div
+                initial={{ opacity: 0, x: 30 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.6, delay: 0.3 }}
+                className="relative order-2 hidden lg:block"
+              >
+                <motion.div
+                  className="relative aspect-square overflow-hidden rounded-2xl"
+                  whileHover={{ scale: 1.02 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <div className="absolute inset-0 bg-gradient-to-br from-emerald-800/50 via-indigo-900/50 to-purple-900/50" />
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <motion.div
+                      className="text-center"
+                      animate={{ y: [0, -10, 0] }}
+                      transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+                    >
+                      <span className="text-7xl font-black text-white/10 tracking-tighter">AI</span>
+                      <span className="block text-5xl font-black text-white/5 tracking-tighter">ADVANTAGE</span>
+                    </motion.div>
                   </div>
-                </div>
-              </div>
+                  {/* Decorative elements */}
+                  <motion.div
+                    className="absolute right-4 top-4 h-20 w-20 rounded-full border border-white/10"
+                    animate={{ rotate: 360 }}
+                    transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+                  />
+                  <motion.div
+                    className="absolute bottom-8 left-8 h-12 w-12 rounded-lg border border-white/10"
+                    animate={{ rotate: -360 }}
+                    transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
+                  />
+                </motion.div>
+              </motion.div>
             </div>
           </div>
         </section>
@@ -317,10 +453,16 @@ export default function HomePage() {
       {/* ── ARTICLES GRID ─────────────────────────────────────────────────────── */}
       <section
         id="articoli"
-        className="mx-auto w-full max-w-7xl px-4 py-12 sm:px-6 lg:px-8"
+        className="mx-auto w-full max-w-7xl px-4 py-16 sm:px-6 lg:px-8"
       >
         {/* Tabs */}
-        <div className="mb-8 flex items-center justify-between border-b border-zinc-800">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5 }}
+          className="mb-8 flex items-center justify-between border-b border-zinc-800"
+        >
           <div className="flex">
             <TabButton
               active={activeTab === "latest"}
@@ -348,74 +490,85 @@ export default function HomePage() {
             View All
             <ArrowRight className="h-3.5 w-3.5" />
           </Link>
-        </div>
+        </motion.div>
 
         {/* Category filters */}
-        <div className="mb-8 flex flex-wrap gap-2">
-          <button
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5, delay: 0.1 }}
+          className="mb-8 flex flex-wrap gap-2"
+        >
+          <CategoryFilterButton
+            active={activeCategory === "all"}
             onClick={() => setActiveCategory("all")}
-            className={[
-              "rounded-full border px-4 py-1.5 text-xs font-medium transition-colors",
-              activeCategory === "all"
-                ? "border-indigo-500 bg-indigo-500 text-white"
-                : "border-zinc-700 text-zinc-400 hover:border-zinc-500 hover:text-zinc-200",
-            ].join(" ")}
-          >
-            Tutti
-          </button>
+            label="Tutti"
+            accent="#6366f1"
+          />
           {(
             Object.entries(CATEGORIES) as [
               CategoryKey,
               (typeof CATEGORIES)[CategoryKey],
             ][]
           ).map(([key, cat]) => (
-            <button
+            <CategoryFilterButton
               key={key}
+              active={activeCategory === key}
               onClick={() => setActiveCategory(key)}
-              className={[
-                "rounded-full border px-3 py-1 text-xs font-medium transition-colors",
-                activeCategory === key
-                  ? "text-white"
-                  : "border-zinc-700 text-zinc-400 hover:border-zinc-500 hover:text-zinc-200",
-              ].join(" ")}
-              style={
-                activeCategory === key
-                  ? { backgroundColor: cat.accent, borderColor: cat.accent }
-                  : {}
-              }
-            >
-              {cat.label}
-            </button>
+              label={cat.label}
+              accent={cat.accent}
+            />
           ))}
-        </div>
+        </motion.div>
 
         {/* Grid */}
         {isLoading ? (
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {[1, 2, 3, 4, 5, 6].map((i) => (
-              <div
-                key={i}
-                className="h-80 animate-pulse rounded-xl border border-zinc-800 bg-zinc-900"
-              />
+              <ArticleCardSkeleton key={i} index={i} />
             ))}
           </div>
         ) : filtered.length === 0 ? (
-          <p className="py-16 text-center text-zinc-500">
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="py-16 text-center text-zinc-500"
+          >
             Nessun articolo in questa categoria.
-          </p>
+          </motion.p>
         ) : (
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {filtered.map((article) => (
+            {filtered.map((article, index) => (
               <ArticleCard
                 key={article.id}
                 article={article}
-                gradient={ARTICLE_META[article.id]?.gradient}
                 author={ARTICLE_META[article.id]?.author}
                 readTime={ARTICLE_META[article.id]?.readTime}
+                index={index}
               />
             ))}
           </div>
         )}
+
+        {/* View All Button */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5 }}
+          className="mt-12 text-center"
+        >
+          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+            <Link
+              href="/blog"
+              className="inline-flex items-center gap-2 rounded-lg border border-zinc-700 bg-zinc-900 px-6 py-3 text-sm font-medium text-zinc-300 transition-all hover:border-indigo-500/50 hover:text-white"
+            >
+              View All Articles
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+          </motion.div>
+        </motion.div>
       </section>
 
       {/* ── NEWSLETTER CTA ────────────────────────────────────────────────────── */}
