@@ -64,6 +64,7 @@ export async function POST(request: NextRequest) {
 
     const humanizedHtml = await humanizeText(article.content_html as string);
 
+    // Save humanized content
     const { error: updateError } = await supabase
       .from("articles")
       .update({
@@ -76,6 +77,16 @@ export async function POST(request: NextRequest) {
     if (updateError) {
       throw new Error(`Supabase update error: ${updateError.message}`);
     }
+
+    // Trigger next step (images) asynchronously - fire and forget
+    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+    fetch(`${baseUrl}/api/workflow/images`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ articleId }),
+    }).catch((err) => {
+      console.error("[workflow/humanize] Failed to trigger images:", err);
+    });
 
     return NextResponse.json({
       success: true,

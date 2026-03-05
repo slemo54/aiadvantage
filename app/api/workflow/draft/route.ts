@@ -36,7 +36,7 @@ export async function POST(request: NextRequest) {
 
     const supabase = createAdminClient();
 
-    // Fetch the idea linked to this articleId
+    // Fetch the article
     const { data: article, error: articleError } = await supabase
       .from("articles")
       .select("id, title, category, status")
@@ -50,7 +50,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Find most recent idea matching this article's title or any "selected" idea
+    // Find the idea that matches this article's title or any "selected" idea
     const { data: idea, error: ideaError } = await supabase
       .from("ideas")
       .select("*")
@@ -85,7 +85,7 @@ export async function POST(request: NextRequest) {
 
     const htmlDraft = await generateDraft(researchText, typedIdea.category);
 
-    // Save content and advance status
+    // Save content
     const { error: updateError } = await supabase
       .from("articles")
       .update({
@@ -104,6 +104,16 @@ export async function POST(request: NextRequest) {
       .from("ideas")
       .update({ status: "used" })
       .eq("id", typedIdea.id);
+
+    // Trigger next step (humanize) asynchronously - fire and forget
+    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+    fetch(`${baseUrl}/api/workflow/humanize`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ articleId }),
+    }).catch((err) => {
+      console.error("[workflow/draft] Failed to trigger humanize:", err);
+    });
 
     return NextResponse.json({
       success: true,
