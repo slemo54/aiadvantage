@@ -1,222 +1,539 @@
 "use client";
 
-import { useRef, useEffect, useMemo } from "react";
+import { useRef, useEffect, useMemo, useState } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { Float } from "@react-three/drei";
+import { Environment, Float, MeshTransmissionMaterial, Sparkles, Trail } from "@react-three/drei";
 import * as THREE from "three";
 import gsap from "gsap";
 
-const C_EMERALD   = new THREE.Color("#22c55e");
-const C_LIGHT     = new THREE.Color("#4ade80");
-const C_DARK      = new THREE.Color("#052e16");
-const C_MID       = new THREE.Color("#166534");
+// Enhanced Crystal Star with more organic shape
+function CrystalStar({ mousePosition }: { mousePosition: React.MutableRefObject<{ x: number; y: number; targetX: number; targetY: number }> }) {
+  const groupRef = useRef<THREE.Group>(null);
+  const starRef = useRef<THREE.Mesh>(null);
+  const innerRef = useRef<THREE.Mesh>(null);
+  const coreRef = useRef<THREE.Mesh>(null);
+  const ring1Ref = useRef<THREE.Mesh>(null);
+  const ring2Ref = useRef<THREE.Mesh>(null);
+  const ring3Ref = useRef<THREE.Mesh>(null);
+  const glowRef = useRef<THREE.Mesh>(null);
 
-function CrystalStar({ mouseRef }: { mouseRef: React.MutableRefObject<{ x: number; y: number }> }) {
-  const groupRef  = useRef<THREE.Group>(null);
-  const innerRef  = useRef<THREE.Mesh>(null);
-  const ring1Ref  = useRef<THREE.Mesh>(null);
-  const ring2Ref  = useRef<THREE.Mesh>(null);
-  const ring3Ref  = useRef<THREE.Mesh>(null);
-
-  /* ── Geometries ── */
-  const starGeo = useMemo(() => {
-    const g = new THREE.OctahedronGeometry(1.2, 1);
-    const pos = g.attributes.position.array as Float32Array;
-    for (let i = 0; i < pos.length; i += 3) {
-      const len = Math.sqrt(pos[i]**2 + pos[i+1]**2 + pos[i+2]**2);
-      if (len > 1.3) {
-        pos[i]   *= 1.45;
-        pos[i+1] *= 1.45;
-        pos[i+2] *= 1.45;
-      }
+  // Create enhanced star geometry - more organic crystal shape
+  const starGeometry = useMemo(() => {
+    // Use a more complex geometry - combine octahedron with torus for organic feel
+    const geometry = new THREE.OctahedronGeometry(1.4, 1);
+    const positions = geometry.attributes.position.array as Float32Array;
+    
+    // Modify vertices to create more organic star shape
+    for (let i = 0; i < positions.length; i += 3) {
+      const x = positions[i];
+      const y = positions[i + 1];
+      const z = positions[i + 2];
+      
+      // Create organic distortion based on position
+      const noise = Math.sin(x * 2) * Math.cos(y * 2) * 0.1;
+      const elongation = 1 + Math.abs(y) * 0.3;
+      
+      positions[i] = x * elongation + noise;
+      positions[i + 1] = y * (1.2 + noise);
+      positions[i + 2] = z * elongation + noise;
     }
-    g.computeVertexNormals();
-    return g;
+    
+    geometry.computeVertexNormals();
+    return geometry;
   }, []);
 
-  const ringGeo1 = useMemo(() => new THREE.TorusGeometry(2.2, 0.025, 16, 120), []);
-  const ringGeo2 = useMemo(() => new THREE.TorusGeometry(2.9, 0.018, 16, 120), []);
-  const ringGeo3 = useMemo(() => new THREE.TorusGeometry(3.5, 0.012, 16, 120), []);
+  // Inner crystal core
+  const coreGeometry = useMemo(() => {
+    const geo = new THREE.OctahedronGeometry(0.7, 0);
+    return geo;
+  }, []);
 
-  useFrame(({ clock }) => {
-    if (!groupRef.current || !innerRef.current) return;
-    const t  = clock.getElapsedTime();
-    const mx = mouseRef.current.x;
-    const my = mouseRef.current.y;
+  // Rings with different geometries
+  const ring1Geometry = useMemo(() => new THREE.TorusGeometry(2.4, 0.03, 32, 200), []);
+  const ring2Geometry = useMemo(() => new THREE.TorusGeometry(3.0, 0.02, 32, 200), []);
+  const ring3Geometry = useMemo(() => new THREE.TorusGeometry(3.6, 0.015, 32, 200), []);
 
-    groupRef.current.rotation.x += (my * 0.4 - groupRef.current.rotation.x) * 0.04;
-    groupRef.current.rotation.y += (mx * 0.4 - groupRef.current.rotation.y + t * 0.12) * 0.04;
+  useFrame((state) => {
+    if (!groupRef.current || !starRef.current) return;
 
-    innerRef.current.rotation.y = -t * 0.6;
-    innerRef.current.rotation.z =  t * 0.25;
+    const time = state.clock.getElapsedTime();
+    const { x, y, targetX, targetY } = mousePosition.current;
 
-    if (ring1Ref.current) { ring1Ref.current.rotation.x = Math.PI/2 + Math.sin(t*0.5)*0.25; ring1Ref.current.rotation.y = t*0.35; }
-    if (ring2Ref.current) { ring2Ref.current.rotation.x = Math.PI/3 + Math.cos(t*0.4)*0.25; ring2Ref.current.rotation.z = t*0.22; }
-    if (ring3Ref.current) { ring3Ref.current.rotation.x = Math.PI/6 + Math.sin(t*0.3)*0.2;  ring3Ref.current.rotation.y =-t*0.18; }
+    // Smooth interpolation for mouse movement
+    mousePosition.current.x += (targetX - x) * 0.05;
+    mousePosition.current.y += (targetY - y) * 0.05;
+
+    // Apply rotation based on mouse with smooth easing
+    const targetRotationX = mousePosition.current.y * 0.4;
+    const targetRotationY = mousePosition.current.x * 0.4;
+    
+    groupRef.current.rotation.x += (targetRotationX - groupRef.current.rotation.x) * 0.03;
+    groupRef.current.rotation.y += (targetRotationY - groupRef.current.rotation.y) * 0.03;
+
+    // Add subtle floating animation
+    groupRef.current.position.y = Math.sin(time * 0.5) * 0.1;
+
+    // Star gentle rotation
+    if (starRef.current) {
+      starRef.current.rotation.y = time * 0.1;
+      starRef.current.rotation.z = Math.sin(time * 0.2) * 0.05;
+    }
+
+    // Inner core counter-rotation
+    if (innerRef.current) {
+      innerRef.current.rotation.y = -time * 0.3;
+      innerRef.current.rotation.x = time * 0.15;
+    }
+
+    // Core pulse
+    if (coreRef.current) {
+      const pulse = 1 + Math.sin(time * 2) * 0.05;
+      coreRef.current.scale.setScalar(pulse);
+    }
+
+    // Rings with varied rotation speeds and tilts
+    if (ring1Ref.current) {
+      ring1Ref.current.rotation.x = Math.PI / 2 + Math.sin(time * 0.3) * 0.3;
+      ring1Ref.current.rotation.y = time * 0.4;
+      ring1Ref.current.rotation.z = Math.cos(time * 0.2) * 0.1;
+    }
+    
+    if (ring2Ref.current) {
+      ring2Ref.current.rotation.x = Math.PI / 3 + Math.cos(time * 0.25) * 0.2;
+      ring2Ref.current.rotation.y = Math.sin(time * 0.15) * 0.5;
+      ring2Ref.current.rotation.z = time * 0.25;
+    }
+    
+    if (ring3Ref.current) {
+      ring3Ref.current.rotation.x = Math.PI / 6 + Math.sin(time * 0.2) * 0.15;
+      ring3Ref.current.rotation.y = -time * 0.2;
+      ring3Ref.current.rotation.z = Math.cos(time * 0.3) * 0.2;
+    }
+
+    // Glow pulse
+    if (glowRef.current) {
+      const glowPulse = 1 + Math.sin(time * 1.5) * 0.1;
+      glowRef.current.scale.setScalar(glowPulse);
+    }
   });
 
   return (
     <group ref={groupRef}>
-      {/* ── Main crystal — solid emissive emerald ── */}
-      <Float speed={1.4} rotationIntensity={0.15} floatIntensity={0.35}>
-        <mesh geometry={starGeo}>
-          <meshPhysicalMaterial
-            color={C_MID}
-            emissive={C_EMERALD}
-            emissiveIntensity={1.8}
-            metalness={0.6}
-            roughness={0.08}
-            transparent
-            opacity={0.92}
-          />
-        </mesh>
-        {/* Wireframe overlay for crystal edges */}
-        <mesh geometry={starGeo}>
-          <meshBasicMaterial color={C_LIGHT} wireframe transparent opacity={0.35} />
-        </mesh>
-      </Float>
-
-      {/* ── Inner core ── */}
-      <mesh ref={innerRef} scale={0.55}>
-        <octahedronGeometry args={[1, 0]} />
-        <meshPhysicalMaterial
-          color={C_DARK}
-          emissive={C_LIGHT}
-          emissiveIntensity={3.0}
-          metalness={0.9}
-          roughness={0.02}
+      {/* Outer Glow Sphere */}
+      <mesh ref={glowRef} scale={[4, 4, 4]}>
+        <sphereGeometry args={[1, 32, 32]} />
+        <meshBasicMaterial
+          color="#1e40af"
           transparent
-          opacity={0.95}
+          opacity={0.15}
+          side={THREE.BackSide}
         />
       </mesh>
 
-      {/* ── Rings ── */}
-      <mesh ref={ring1Ref} geometry={ringGeo1}>
-        <meshPhysicalMaterial color={C_EMERALD} emissive={C_EMERALD} emissiveIntensity={1.2} metalness={0.9} roughness={0.05} transparent opacity={0.75} />
-      </mesh>
-      <mesh ref={ring2Ref} geometry={ringGeo2}>
-        <meshPhysicalMaterial color={C_LIGHT}   emissive={C_EMERALD} emissiveIntensity={0.8} metalness={0.85} roughness={0.1} transparent opacity={0.55} />
-      </mesh>
-      <mesh ref={ring3Ref} geometry={ringGeo3}>
-        <meshBasicMaterial color={C_LIGHT} transparent opacity={0.35} />
+      {/* Main Crystal Star - Outer Shell */}
+      <Float speed={2} rotationIntensity={0.3} floatIntensity={0.2}>
+        <mesh ref={starRef} geometry={starGeometry}>
+          <MeshTransmissionMaterial
+            backside
+            backsideThickness={3}
+            thickness={2}
+            chromaticAberration={0.25}
+            anisotropy={0.8}
+            distortion={0.15}
+            distortionScale={0.8}
+            temporalDistortion={0.15}
+            iridescence={1}
+            iridescenceIOR={1.8}
+            color="#60a5fa"
+            attenuationColor="#1e3a5f"
+            attenuationDistance={8}
+            ior={2.4}
+            roughness={0.02}
+            metalness={0.15}
+            transmission={0.95}
+            transparent
+            opacity={1}
+          />
+        </mesh>
+      </Float>
+
+      {/* Middle Layer */}
+      <mesh ref={innerRef} scale={0.75}>
+        <octahedronGeometry args={[1.2, 1]} />
+        <meshPhysicalMaterial
+          color="#3b82f6"
+          emissive="#1e40af"
+          emissiveIntensity={0.4}
+          metalness={0.6}
+          roughness={0.1}
+          transmission={0.7}
+          thickness={1.5}
+          ior={1.9}
+          transparent
+          opacity={0.9}
+          clearcoat={1}
+          clearcoatRoughness={0.1}
+        />
       </mesh>
 
-      {/* ── Particles ── */}
-      {Array.from({ length: 8 }).map((_, i) => <Particle key={i} index={i} />)}
+      {/* Inner Core - Bright Center */}
+      <mesh ref={coreRef} scale={0.4}>
+        <octahedronGeometry args={[1, 0]} />
+        <meshPhysicalMaterial
+          color="#dbeafe"
+          emissive="#60a5fa"
+          emissiveIntensity={0.8}
+          metalness={0.9}
+          roughness={0.05}
+          transmission={0.5}
+          thickness={0.8}
+          ior={2.2}
+          toneMapped={false}
+        />
+      </mesh>
+
+      {/* Primary Orbit Ring - Thick and prominent */}
+      <mesh ref={ring1Ref} geometry={ring1Geometry}>
+        <meshPhysicalMaterial
+          color="#60a5fa"
+          metalness={0.95}
+          roughness={0.02}
+          transparent
+          opacity={0.8}
+          emissive="#3b82f6"
+          emissiveIntensity={0.3}
+          clearcoat={1}
+        />
+      </mesh>
+
+      {/* Secondary Ring - Medium */}
+      <mesh ref={ring2Ref} geometry={ring2Geometry}>
+        <meshPhysicalMaterial
+          color="#93c5fd"
+          metalness={0.9}
+          roughness={0.05}
+          transparent
+          opacity={0.5}
+          emissive="#60a5fa"
+          emissiveIntensity={0.2}
+        />
+      </mesh>
+
+      {/* Tertiary Ring - Thin and subtle */}
+      <mesh ref={ring3Ref} geometry={ring3Geometry}>
+        <meshPhysicalMaterial
+          color="#bfdbfe"
+          metalness={0.85}
+          roughness={0.08}
+          transparent
+          opacity={0.35}
+          emissive="#93c5fd"
+          emissiveIntensity={0.15}
+        />
+      </mesh>
+
+      {/* Sparkles effect */}
+      <Sparkles
+        count={30}
+        scale={6}
+        size={3}
+        speed={0.4}
+        color="#60a5fa"
+        opacity={0.6}
+      />
+
+      {/* Floating particles */}
+      {Array.from({ length: 8 }).map((_, i) => (
+        <FloatingParticle key={i} index={i} />
+      ))}
+
+      {/* Light trails */}
+      <ParticleTrail />
     </group>
   );
 }
 
-function Particle({ index }: { index: number }) {
-  const ref    = useRef<THREE.Mesh>(null);
-  const angle  = (index / 8) * Math.PI * 2;
-  const radius = 3.8 + (index % 3) * 0.6;
-  const speed  = 0.25 + (index % 4) * 0.12;
-  const yo     = (index - 4) * 0.5;
+// Enhanced floating particles with trails
+function FloatingParticle({ index }: { index: number }) {
+  const ref = useRef<THREE.Mesh>(null);
+  const angle = (index / 8) * Math.PI * 2;
+  const radius = 4.5 + Math.random() * 1.5;
+  const speed = 0.2 + Math.random() * 0.3;
+  const yOffset = (Math.random() - 0.5) * 4;
 
-  useFrame(({ clock }) => {
+  useFrame((state) => {
     if (!ref.current) return;
-    const t = clock.getElapsedTime();
-    ref.current.position.set(
-      Math.cos(angle + t * speed) * radius,
-      yo + Math.sin(t * 0.5 + index) * 0.6,
-      Math.sin(angle + t * speed) * radius,
-    );
-    ref.current.rotation.x = t * 0.6;
-    ref.current.rotation.y = t * 0.4;
+    const time = state.clock.getElapsedTime();
+    const x = Math.cos(angle + time * speed) * radius;
+    const z = Math.sin(angle + time * speed) * radius;
+    const y = yOffset + Math.sin(time * 0.4 + index) * 0.8;
+
+    ref.current.position.set(x, y, z);
+    ref.current.rotation.x = time * 0.8;
+    ref.current.rotation.y = time * 0.5;
+    
+    // Pulsing scale
+    const scale = 0.08 + Math.sin(time * 2 + index) * 0.03;
+    ref.current.scale.setScalar(scale);
   });
 
   return (
-    <mesh ref={ref} scale={0.07 + (index % 3) * 0.025}>
+    <mesh ref={ref}>
       <octahedronGeometry args={[1, 0]} />
       <meshPhysicalMaterial
-        color={C_EMERALD}
-        emissive={C_EMERALD}
-        emissiveIntensity={2.0}
-        metalness={0.8}
+        color="#60a5fa"
+        emissive="#3b82f6"
+        emissiveIntensity={0.6}
+        metalness={0.9}
         roughness={0.1}
+        transmission={0.6}
+        thickness={0.3}
         transparent
         opacity={0.9}
+        toneMapped={false}
       />
     </mesh>
   );
 }
 
-function Scene() {
-  const mouseRef = useRef({ x: 0, y: 0 });
-  useThree();
-
-  useEffect(() => {
-    const onMove = (e: MouseEvent) => {
-      mouseRef.current = {
-        x:  (e.clientX / window.innerWidth)  * 2 - 1,
-        y: -(e.clientY / window.innerHeight) * 2 + 1,
-      };
-    };
-    let dragging = false, sx = 0, sy = 0;
-    const onDown = (e: MouseEvent) => { dragging = true; sx = e.clientX; sy = e.clientY; document.body.style.cursor = "grabbing"; };
-    const onUp   = () => { dragging = false; document.body.style.cursor = "default"; };
-    const onDrag = (e: MouseEvent) => {
-      if (!dragging) return;
-      const dx = (e.clientX - sx) / window.innerWidth;
-      const dy = (e.clientY - sy) / window.innerHeight;
-      gsap.to(mouseRef.current, { x: Math.max(-1, Math.min(1, mouseRef.current.x + dx*2)), y: Math.max(-1, Math.min(1, mouseRef.current.y - dy*2)), duration: 0.3, ease: "power2.out" });
-      sx = e.clientX; sy = e.clientY;
-    };
-    window.addEventListener("mousemove", onMove);
-    window.addEventListener("mousedown", onDown);
-    window.addEventListener("mouseup",   onUp);
-    window.addEventListener("mousemove", onDrag);
-    return () => { window.removeEventListener("mousemove", onMove); window.removeEventListener("mousedown", onDown); window.removeEventListener("mouseup", onUp); window.removeEventListener("mousemove", onDrag); };
+// Particle trail effect
+function ParticleTrail() {
+  const trailRef = useRef<THREE.Points>(null);
+  const particleCount = 50;
+  
+  const positions = useMemo(() => {
+    const pos = new Float32Array(particleCount * 3);
+    for (let i = 0; i < particleCount; i++) {
+      pos[i * 3] = (Math.random() - 0.5) * 8;
+      pos[i * 3 + 1] = (Math.random() - 0.5) * 8;
+      pos[i * 3 + 2] = (Math.random() - 0.5) * 8;
+    }
+    return pos;
   }, []);
+
+  useFrame((state) => {
+    if (!trailRef.current) return;
+    const time = state.clock.getElapsedTime();
+    trailRef.current.rotation.y = time * 0.05;
+    trailRef.current.rotation.x = Math.sin(time * 0.1) * 0.1;
+  });
+
+  return (
+    <points ref={trailRef}>
+      <bufferGeometry>
+        <bufferAttribute
+          attach="attributes-position"
+          count={particleCount}
+          array={positions}
+          itemSize={3}
+        />
+      </bufferGeometry>
+      <pointsMaterial
+        size={0.05}
+        color="#60a5fa"
+        transparent
+        opacity={0.6}
+        sizeAttenuation
+      />
+    </points>
+  );
+}
+
+// Ambient floating lights
+function AmbientLights() {
+  const light1Ref = useRef<THREE.PointLight>(null);
+  const light2Ref = useRef<THREE.PointLight>(null);
+
+  useFrame((state) => {
+    const time = state.clock.getElapsedTime();
+    if (light1Ref.current) {
+      light1Ref.current.position.x = Math.sin(time * 0.5) * 4;
+      light1Ref.current.position.z = Math.cos(time * 0.5) * 4;
+    }
+    if (light2Ref.current) {
+      light2Ref.current.position.x = Math.sin(time * 0.7 + Math.PI) * 4;
+      light2Ref.current.position.y = Math.cos(time * 0.3) * 2;
+    }
+  });
 
   return (
     <>
-      <ambientLight intensity={0.05} />
-      <pointLight position={[0, 0, 4]}   intensity={6}  color="#22c55e" distance={12} decay={2} />
-      <pointLight position={[3, 3, 2]}   intensity={4}  color="#4ade80" distance={10} decay={2} />
-      <pointLight position={[-3,-3, 2]}  intensity={3}  color="#16a34a" distance={10} decay={2} />
-      <pointLight position={[0, 0,-3]}   intensity={2}  color="#22c55e" distance={8}  decay={2} />
-      <CrystalStar mouseRef={mouseRef} />
+      <pointLight ref={light1Ref} position={[4, 2, 4]} intensity={2} color="#60a5fa" distance={10} decay={2} />
+      <pointLight ref={light2Ref} position={[-4, -2, -4]} intensity={1.5} color="#3b82f6" distance={10} decay={2} />
     </>
   );
 }
 
-export function CrystalShape3D() {
-  const containerRef = useRef<HTMLDivElement>(null);
+// Scene setup
+function Scene() {
+  const mousePosition = useRef({ 
+    x: 0, 
+    y: 0, 
+    targetX: 0, 
+    targetY: 0 
+  });
 
   useEffect(() => {
-    const el = containerRef.current;
-    if (!el) return;
-    const fn = (e: MouseEvent) => {
-      const r = el.getBoundingClientRect();
-      el.style.setProperty("--cx", `${e.clientX - r.left}px`);
-      el.style.setProperty("--cy", `${e.clientY - r.top}px`);
+    let isDragging = false;
+    let lastX = 0;
+    let lastY = 0;
+
+    const handleMouseMove = (e: MouseEvent) => {
+      // Normalize mouse position -1 to 1
+      const x = (e.clientX / window.innerWidth) * 2 - 1;
+      const y = -(e.clientY / window.innerHeight) * 2 + 1;
+      
+      mousePosition.current.targetX = x;
+      mousePosition.current.targetY = y;
+
+      if (isDragging) {
+        const deltaX = (e.clientX - lastX) / window.innerWidth * 4;
+        const deltaY = (e.clientY - lastY) / window.innerHeight * 4;
+        
+        gsap.to(mousePosition.current, {
+          targetX: Math.max(-1.5, Math.min(1.5, mousePosition.current.targetX + deltaX)),
+          targetY: Math.max(-1.5, Math.min(1.5, mousePosition.current.targetY - deltaY)),
+          duration: 0.5,
+          ease: "power2.out",
+          overwrite: true,
+        });
+      }
+      
+      lastX = e.clientX;
+      lastY = e.clientY;
     };
-    el.addEventListener("mousemove", fn);
-    return () => el.removeEventListener("mousemove", fn);
+
+    const handleMouseDown = () => {
+      isDragging = true;
+      document.body.style.cursor = "grabbing";
+    };
+
+    const handleMouseUp = () => {
+      isDragging = false;
+      document.body.style.cursor = "default";
+    };
+
+    window.addEventListener("mousemove", handleMouseMove);
+    window.addEventListener("mousedown", handleMouseDown);
+    window.addEventListener("mouseup", handleMouseUp);
+
+    return () => {
+      window.removeEventListener("mousemove", handleMouseMove);
+      window.removeEventListener("mousedown", handleMouseDown);
+      window.removeEventListener("mouseup", handleMouseUp);
+    };
   }, []);
 
   return (
-    <div
+    <>
+      <ambientLight intensity={0.3} />
+      <directionalLight position={[5, 5, 5]} intensity={1.2} color="#60a5fa" />
+      <directionalLight position={[-5, -5, -5]} intensity={0.6} color="#3b82f6" />
+      <pointLight position={[0, 0, 4]} intensity={3} color="#87ceeb" distance={15} decay={2} />
+      <AmbientLights />
+      <Environment preset="city" />
+      <CrystalStar mousePosition={mousePosition} />
+    </>
+  );
+}
+
+// Main export component
+export function CrystalShape3D() {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [isHovering, setIsHovering] = useState(false);
+
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    const handleMouseMove = (e: MouseEvent) => {
+      const rect = container.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      
+      container.style.setProperty("--cursor-x", `${x}px`);
+      container.style.setProperty("--cursor-y", `${y}px`);
+    };
+
+    container.addEventListener("mousemove", handleMouseMove);
+    return () => container.removeEventListener("mousemove", handleMouseMove);
+  }, []);
+
+  return (
+    <div 
       ref={containerRef}
       className="relative w-full h-[500px] lg:h-[600px] cursor-move group"
-      style={{ background: "radial-gradient(700px circle at var(--cx,50%) var(--cy,50%), rgba(34,197,94,0.07), transparent 45%), #000" }}
+      onMouseEnter={() => setIsHovering(true)}
+      onMouseLeave={() => setIsHovering(false)}
+      style={{
+        background: `
+          radial-gradient(800px circle at var(--cursor-x, 50%) var(--cursor-y, 50%), 
+          rgba(59, 130, 246, 0.12), 
+          transparent 40%)
+        `,
+      }}
     >
-      {/* Grid */}
-      <div className="absolute inset-0 pointer-events-none opacity-[0.07]"
-        style={{ backgroundImage: "linear-gradient(rgba(34,197,94,.4) 1px,transparent 1px),linear-gradient(90deg,rgba(34,197,94,.4) 1px,transparent 1px)", backgroundSize: "48px 48px" }} />
+      {/* Enhanced grid background pattern */}
+      <div 
+        className="absolute inset-0 opacity-30 pointer-events-none"
+        style={{
+          backgroundImage: `
+            linear-gradient(rgba(59, 130, 246, 0.15) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(59, 130, 246, 0.15) 1px, transparent 1px)
+          `,
+          backgroundSize: "48px 48px",
+        }}
+      />
 
-      <Canvas camera={{ position: [0,0,7], fov: 45 }} dpr={[1,2]}
-        gl={{ antialias: true, alpha: false, powerPreference: "high-performance" }}
-        style={{ background: "#000000" }}>
-        <color attach="background" args={["#000000"]} />
+      {/* Radial gradient overlay */}
+      <div 
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          background: `radial-gradient(circle at center, transparent 0%, rgba(0,0,0,0.4) 100%)`,
+        }}
+      />
+
+      <Canvas
+        camera={{ position: [0, 0, 8], fov: 40 }}
+        dpr={[1, 2]}
+        gl={{ 
+          antialias: true, 
+          alpha: true,
+          powerPreference: "high-performance",
+          stencil: false,
+          depth: true,
+        }}
+      >
         <Scene />
       </Canvas>
 
-      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-2 text-xs text-gray-600 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
-        <span>Drag to rotate</span>
+      {/* Floating UI hint */}
+      <div 
+        className={`absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-3 px-4 py-2 rounded-full bg-black/50 backdrop-blur-sm border border-gray-800 transition-all duration-300 ${
+          isHovering ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'
+        }`}
+      >
+        <div className="flex items-center gap-2 text-sm text-gray-400">
+          <svg className="w-4 h-4 animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122" />
+          </svg>
+          <span>Trascina per ruotare</span>
+        </div>
+        <div className="w-px h-4 bg-gray-700" />
+        <div className="flex items-center gap-2 text-sm text-gray-400">
+          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+          </svg>
+          <span>Muovi per esplorare</span>
+        </div>
       </div>
+
+      {/* Corner accents */}
+      <div className="absolute top-4 left-4 w-8 h-8 border-l-2 border-t-2 border-[#22c55e]/30 rounded-tl-lg" />
+      <div className="absolute top-4 right-4 w-8 h-8 border-r-2 border-t-2 border-[#22c55e]/30 rounded-tr-lg" />
+      <div className="absolute bottom-4 left-4 w-8 h-8 border-l-2 border-b-2 border-[#22c55e]/30 rounded-bl-lg" />
+      <div className="absolute bottom-4 right-4 w-8 h-8 border-r-2 border-b-2 border-[#22c55e]/30 rounded-br-lg" />
     </div>
   );
 }
