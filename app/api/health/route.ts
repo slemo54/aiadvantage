@@ -40,7 +40,7 @@ export async function GET() {
 
   const allGood =
     config.supabase_url_set &&
-    config.supabase_url_valid &&
+    config.supabase_url_parseable &&
     config.service_key_set &&
     config.service_key_looks_valid &&
     supabase_connection === "ok";
