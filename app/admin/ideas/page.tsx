@@ -6,6 +6,7 @@ import { IdeaCard } from "@/components/admin/idea-card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import type { Idea } from "@/lib/types";
+import { generateIdeasAction } from "@/app/actions/generate-ideas";
 
 // ─── Placeholder data ────────────────────────────────────────────────────────
 
@@ -154,14 +155,13 @@ export default function IdeasPage() {
   async function handleGenerateIdeas() {
     setIsGenerating(true);
     try {
-      await fetch("/api/admin/cron-trigger", {
-        method: "POST",
-        credentials: "include",
-      });
-      // Refetch ideas after generation to pick up any new entries from DB
+      const result = await generateIdeasAction();
+      if (!result.success) {
+        console.error("[ideas] generateIdeasAction failed:", result.error);
+      }
       await fetchIdeas();
-    } catch {
-      // silently fail in demo mode
+    } catch (err) {
+      console.error("[ideas] handleGenerateIdeas error:", err);
     } finally {
       setIsGenerating(false);
     }
