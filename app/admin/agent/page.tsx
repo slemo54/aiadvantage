@@ -60,7 +60,7 @@ type IdeaStatus = Idea["status"] | "all";
 
 const PIPELINE_STEPS = [
   { id: "researching", label: "Perplexity", sublabel: "Discovery", Icon: Search },
-  { id: "drafting", label: "Kimi", sublabel: "Structuring", Icon: FileText },
+  { id: "drafting", label: "Venice AI", sublabel: "Structuring", Icon: FileText },
   { id: "humanizing", label: "Claude", sublabel: "Drafting", Icon: PenTool },
   { id: "reviewing", label: "Gemini", sublabel: "Review", Icon: Sparkles },
   { id: "ready", label: "Pubblica", sublabel: "Publish", Icon: Send },
@@ -319,7 +319,7 @@ export default function AgentPage() {
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Pipeline</h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            Perplexity &rarr; Kimi &rarr; Claude &rarr; Gemini
+            Perplexity &rarr; Venice AI &rarr; Claude &rarr; Gemini
           </p>
         </div>
         <Badge variant="outline" className="gap-1.5 px-3 py-1.5 text-sm">

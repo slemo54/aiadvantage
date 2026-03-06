@@ -186,7 +186,7 @@ export function EditorAISidebar({
                 Ottimizzazione SEO
               </CardTitle>
               <Badge variant="secondary" className="text-xs">
-                Kimi
+                Venice AI
               </Badge>
             </div>
           </CardHeader>
