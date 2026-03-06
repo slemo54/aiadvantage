@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import NextLink from "next/link";
 import {
   ChevronLeft,
   ChevronRight,
@@ -21,6 +22,7 @@ import type { CategoryKey, WorkflowState } from "@/lib/constants";
 interface CalendarArticle {
   id: string;
   title: string;
+  slug: string;
   scheduledDate: Date;
   status: WorkflowState;
   category: CategoryKey;
@@ -29,6 +31,7 @@ interface CalendarArticle {
 interface ArticleFromApi {
   id: string;
   title: string;
+  slug: string;
   status: WorkflowState;
   category: CategoryKey;
   scheduled_date: string | null;
@@ -64,6 +67,7 @@ function mapApiArticle(a: ArticleFromApi): CalendarArticle | null {
   return {
     id: a.id,
     title: a.title,
+    slug: a.slug,
     scheduledDate: parsed,
     status: a.status,
     category: a.category,
@@ -125,9 +129,10 @@ function CalendarDay({
       </div>
       <div className="space-y-1">
         {articles.slice(0, 3).map((article) => (
-          <div
+          <NextLink
             key={article.id}
-            className="group cursor-pointer rounded-md border border-border bg-card p-1.5 text-xs transition-all hover:border-primary/50 hover:shadow-sm"
+            href={`/admin/editor?slug=${article.slug}`}
+            className="group block cursor-pointer rounded-md border border-border bg-card p-1.5 text-xs transition-all hover:border-primary/50 hover:shadow-sm"
           >
             <div className="mb-1 flex items-center gap-1">
               {getStatusIcon(article.status)}
@@ -139,7 +144,7 @@ function CalendarDay({
             <p className="line-clamp-2 font-medium leading-tight text-foreground">
               {article.title}
             </p>
-          </div>
+          </NextLink>
         ))}
         {articles.length > 3 && (
           <div className="flex items-center justify-center py-1">

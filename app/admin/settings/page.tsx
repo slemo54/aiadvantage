@@ -224,8 +224,8 @@ const ENV_VAR_CONFIGS: EnvVarConfig[] = [
     service: "Ricerca & Trend",
   },
   {
-    key: "OPENROUTER_API_KEY",
-    label: "OpenRouter",
+    key: "KIMI_API_KEY",
+    label: "Kimi (Moonshot)",
     service: "Kimi 2.5 — Strutturazione bozza",
   },
   {

@@ -1,5 +1,6 @@
 "use client";
 
+import { useRef } from "react";
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Image from "@tiptap/extension-image";
@@ -26,6 +27,7 @@ interface TiptapEditorProps {
 }
 
 export function TiptapEditor({ content, onChange }: TiptapEditorProps) {
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const editor = useEditor({
     extensions: [
       StarterKit.configure({
@@ -37,6 +39,7 @@ export function TiptapEditor({ content, onChange }: TiptapEditorProps) {
         placeholder: "Inizia a scrivere il tuo articolo...",
       }),
     ],
+    immediatelyRender: false,
     content: content || DEFAULT_CONTENT,
     editorProps: {
       attributes: {
@@ -151,14 +154,29 @@ export function TiptapEditor({ content, onChange }: TiptapEditorProps) {
             <Redo className="h-4 w-4" />
           </ToolbarButton>
           <ToolbarButton
-            onClick={() => {
-              const url = window.prompt("URL immagine:");
-              if (url) editor.chain().focus().setImage({ src: url }).run();
-            }}
+            onClick={() => fileInputRef.current?.click()}
             title="Aggiungi immagine"
           >
             <ImagePlus className="h-4 w-4" />
           </ToolbarButton>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={(e) => {
+              const file = e.target.files?.[0];
+              if (!file) return;
+              const reader = new FileReader();
+              reader.onload = () => {
+                if (typeof reader.result === "string") {
+                  editor.chain().focus().setImage({ src: reader.result }).run();
+                }
+              };
+              reader.readAsDataURL(file);
+              e.target.value = "";
+            }}
+          />
         </div>
       </div>
 

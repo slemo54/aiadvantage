@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Brain,
   Search,
@@ -9,23 +9,75 @@ import {
   Wand2,
   Sparkles,
   Paintbrush,
+  Loader2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import type { Article } from "@/lib/types";
 
-export function EditorAISidebar() {
+interface EditorAISidebarProps {
+  article: Article | null;
+  onUpdate?: (fields: Partial<Article>) => void;
+  onHumanize?: () => Promise<void>;
+  onGenerateImage?: () => Promise<void>;
+}
+
+export function EditorAISidebar({
+  article,
+  onUpdate,
+  onHumanize,
+  onGenerateImage,
+}: EditorAISidebarProps) {
   const [tone, setTone] = useState<"conversational" | "professional" | "storytelling">("conversational");
-  const [focusKeyword, setFocusKeyword] = useState("AI nello Sviluppo Web");
-  const [metaDescription, setMetaDescription] = useState(
-    "Scopri come l'Intelligenza Artificiale sta trasformando lo sviluppo web. Scopri nuovi strumenti, workflow e cosa significa per il futuro del web."
-  );
-  const [slug, setSlug] = useState("futuro-ai-sviluppo-web-guida");
+  const [focusKeyword, setFocusKeyword] = useState("");
+  const [metaDescription, setMetaDescription] = useState("");
+  const [slug, setSlug] = useState("");
   const [imagePrompt, setImagePrompt] = useState("");
   const [imageRatio, setImageRatio] = useState("16:9");
   const [imageStyle, setImageStyle] = useState("photorealistic");
+  const [humanizing, setHumanizing] = useState(false);
+  const [generatingImage, setGeneratingImage] = useState(false);
+
+  // Sync fields from article prop
+  useEffect(() => {
+    if (article) {
+      setMetaDescription(article.meta_description ?? "");
+      setFocusKeyword(article.keywords?.join(", ") ?? "");
+      setSlug(article.slug ?? "");
+    }
+  }, [article]);
+
+  async function handleHumanize() {
+    if (!onHumanize) return;
+    setHumanizing(true);
+    try {
+      await onHumanize();
+    } finally {
+      setHumanizing(false);
+    }
+  }
+
+  async function handleGenerateImage() {
+    if (!onGenerateImage) return;
+    setGeneratingImage(true);
+    try {
+      await onGenerateImage();
+    } finally {
+      setGeneratingImage(false);
+    }
+  }
+
+  function handleSaveSEO() {
+    if (!onUpdate) return;
+    const keywords = focusKeyword
+      .split(",")
+      .map((k) => k.trim())
+      .filter(Boolean);
+    onUpdate({ meta_description: metaDescription, keywords, slug });
+  }
 
   return (
     <aside className="flex w-80 flex-shrink-0 flex-col overflow-y-auto border-l border-border bg-muted/30 lg:w-96">
@@ -35,6 +87,19 @@ export function EditorAISidebar() {
       </div>
 
       <div className="space-y-4 p-4">
+        {/* Hero Image Preview */}
+        {article?.hero_image_url && (
+          <Card>
+            <CardContent className="p-3">
+              <img
+                src={article.hero_image_url}
+                alt="Hero"
+                className="w-full rounded-md object-cover"
+              />
+            </CardContent>
+          </Card>
+        )}
+
         {/* Umanizzazione */}
         <Card>
           <CardHeader className="pb-3">
@@ -82,8 +147,18 @@ export function EditorAISidebar() {
               />
               Storytelling
             </label>
-            <Button variant="outline" className="mt-3 w-full" size="sm">
-              <RefreshCw className="mr-1.5 h-3.5 w-3.5" />
+            <Button
+              variant="outline"
+              className="mt-3 w-full"
+              size="sm"
+              disabled={!article || humanizing}
+              onClick={() => void handleHumanize()}
+            >
+              {humanizing ? (
+                <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
+              ) : (
+                <RefreshCw className="mr-1.5 h-3.5 w-3.5" />
+              )}
               Applica Umanizzazione
             </Button>
           </CardContent>
@@ -100,7 +175,7 @@ export function EditorAISidebar() {
           <CardContent className="space-y-3 pt-0">
             <div>
               <label className="mb-1 block text-xs font-medium text-muted-foreground">
-                Focus Keyword
+                Keywords (separate da virgola)
               </label>
               <Input
                 value={focusKeyword}
@@ -123,10 +198,6 @@ export function EditorAISidebar() {
                 rows={3}
                 className="text-sm"
               />
-              <button className="mt-1 flex items-center text-xs text-primary hover:underline">
-                <Wand2 className="mr-1 h-3 w-3" />
-                Genera descrizione migliore
-              </button>
             </div>
             <div>
               <label className="mb-1 block text-xs font-medium text-muted-foreground">
@@ -138,6 +209,16 @@ export function EditorAISidebar() {
                 className="h-8 font-mono text-xs"
               />
             </div>
+            <Button
+              variant="outline"
+              className="w-full"
+              size="sm"
+              disabled={!article}
+              onClick={handleSaveSEO}
+            >
+              <Wand2 className="mr-1.5 h-3.5 w-3.5" />
+              Salva SEO
+            </Button>
           </CardContent>
         </Card>
 
@@ -188,8 +269,17 @@ export function EditorAISidebar() {
                 <option value="vector">Vector Art</option>
               </select>
             </div>
-            <Button className="w-full" size="sm">
-              <Paintbrush className="mr-1.5 h-3.5 w-3.5" />
+            <Button
+              className="w-full"
+              size="sm"
+              disabled={!article || generatingImage}
+              onClick={() => void handleGenerateImage()}
+            >
+              {generatingImage ? (
+                <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
+              ) : (
+                <Paintbrush className="mr-1.5 h-3.5 w-3.5" />
+              )}
               Genera Immagine
             </Button>
           </CardContent>
