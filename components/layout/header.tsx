@@ -29,7 +29,7 @@ export function Header() {
             <div className="w-8 h-8 bg-[#22c55e] rounded-lg flex items-center justify-center">
               <span className="text-black font-bold text-sm">AI</span>
             </div>
-            <span className="text-xl font-bold text-white">Advantage</span>
+            <span className="text-xl font-bold text-white">IlVantaggioAI</span>
           </Link>
 
           {/* Desktop Navigation */}

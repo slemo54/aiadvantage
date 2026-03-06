@@ -388,7 +388,7 @@ function EditorPageInner() {
                   </div>
                 )}
                 <TiptapEditor
-                  key={selectedSlug || "empty"}
+                  key={currentArticle?.id ?? "empty"}
                   content={content}
                   onChange={setContent}
                 />

@@ -36,7 +36,7 @@ export function Footer() {
               <div className="w-8 h-8 bg-[#22c55e] rounded-lg flex items-center justify-center">
                 <span className="text-black font-bold text-sm">AI</span>
               </div>
-              <span className="text-xl font-bold text-white">Advantage</span>
+              <span className="text-xl font-bold text-white">IlVantaggioAI</span>
             </Link>
             <p className="text-gray-500 text-sm mb-6">
               Il tuo punto di riferimento per l&apos;intelligenza artificiale in italiano.
@@ -108,7 +108,7 @@ export function Footer() {
         {/* Bottom */}
         <div className="mt-12 pt-8 border-t border-gray-800 flex flex-col sm:flex-row items-center justify-between gap-4">
           <p className="text-gray-600 text-sm">
-            © {new Date().getFullYear()} AI Advantage. Tutti i diritti riservati.
+            © {new Date().getFullYear()} IlVantaggioAI • By Anselmo
           </p>
           <div className="flex gap-6 text-sm">
             <Link href="#" className="text-gray-600 hover:text-gray-400">
