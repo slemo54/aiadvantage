@@ -65,6 +65,11 @@ async function callKimi(
     );
 
     if (!response.ok) {
+      if (response.status === 401) {
+        throw new Error(
+          `KIMI_API_KEY non valida o scaduta (HTTP 401). Aggiornala su Vercel → Settings → Environment Variables.`
+        );
+      }
       const errorText = await response.text();
       if (response.status === 429 && attempt < 3) {
         await new Promise((r) => setTimeout(r, attempt * 3000));

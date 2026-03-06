@@ -354,11 +354,18 @@ function EditorPageInner() {
                 Caricamento articolo...
               </div>
             ) : (
-              <TiptapEditor
-                key={selectedSlug || "empty"}
-                content={content}
-                onChange={setContent}
-              />
+              <>
+                {!articleLoading && currentArticle && !content && (
+                  <div className="mb-4 rounded-md border border-yellow-500/30 bg-yellow-500/10 px-4 py-3 text-sm text-yellow-700 dark:text-yellow-400">
+                    Nessuna bozza disponibile per questo articolo. Scrivi manualmente oppure rigenera il draft dalla Pipeline.
+                  </div>
+                )}
+                <TiptapEditor
+                  key={selectedSlug || "empty"}
+                  content={content}
+                  onChange={setContent}
+                />
+              </>
             )}
           </div>
         </section>
