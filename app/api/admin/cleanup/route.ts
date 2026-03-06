@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 
-export async function POST() {
+export async function GET() {
   const supabase = createAdminClient();
 
   // Delete all non-published articles
