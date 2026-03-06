@@ -26,6 +26,32 @@ interface TiptapEditorProps {
   onChange?: (html: string) => void;
 }
 
+function ToolbarButton({
+  onClick,
+  active,
+  children,
+  title,
+}: {
+  onClick: () => void;
+  active?: boolean;
+  children: React.ReactNode;
+  title: string;
+}) {
+  return (
+    <Button
+      type="button"
+      variant="ghost"
+      size="sm"
+      onMouseDown={(e) => e.preventDefault()}
+      onClick={onClick}
+      title={title}
+      className={cn("h-8 w-8 p-0", active && "bg-accent text-accent-foreground")}
+    >
+      {children}
+    </Button>
+  );
+}
+
 export function TiptapEditor({ content, onChange }: TiptapEditorProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const editor = useEditor({
@@ -40,7 +66,7 @@ export function TiptapEditor({ content, onChange }: TiptapEditorProps) {
       }),
     ],
     immediatelyRender: false,
-    content: content || DEFAULT_CONTENT,
+    content: content,
     editorProps: {
       attributes: {
         class:
@@ -53,29 +79,6 @@ export function TiptapEditor({ content, onChange }: TiptapEditorProps) {
   });
 
   if (!editor) return null;
-
-  const ToolbarButton = ({
-    onClick,
-    active,
-    children,
-    title,
-  }: {
-    onClick: () => void;
-    active?: boolean;
-    children: React.ReactNode;
-    title: string;
-  }) => (
-    <Button
-      type="button"
-      variant="ghost"
-      size="sm"
-      onClick={onClick}
-      title={title}
-      className={cn("h-8 w-8 p-0", active && "bg-accent text-accent-foreground")}
-    >
-      {children}
-    </Button>
-  );
 
   return (
     <div className="rounded-lg border border-border bg-card">
@@ -186,19 +189,3 @@ export function TiptapEditor({ content, onChange }: TiptapEditorProps) {
   );
 }
 
-const DEFAULT_CONTENT = `
-<h1>Il Futuro dell'AI nello Sviluppo Web: Una Guida Completa</h1>
-<p>L'Intelligenza Artificiale sta rapidamente trasformando il modo in cui costruiamo e interagiamo con il web. In questo articolo, esploriamo gli strumenti piu' recenti, le tecniche e le implicazioni per sviluppatori e aziende.</p>
-<h2>Comprendere il Cambiamento</h2>
-<p>L'integrazione dell'AI nello sviluppo web non e' semplicemente una tendenza; e' un cambio di paradigma. Strumenti come GitHub Copilot e modelli linguistici avanzati stanno cambiando il flusso di lavoro quotidiano degli sviluppatori, automatizzando le attivita' ripetitive e suggerendo strutture di codice complesse.</p>
-<h3>Aree Chiave di Impatto</h3>
-<ul>
-<li><strong>Generazione Automatica del Codice:</strong> Gli assistenti AI possono scrivere codice boilerplate, configurare ambienti di test e persino tradurre codice tra linguaggi.</li>
-<li><strong>Esperienza Utente Migliorata (UX):</strong> I motori di personalizzazione basati sull'AI analizzano il comportamento degli utenti per adattare contenuti e interfacce in modo dinamico.</li>
-<li><strong>Testing e QA Intelligenti:</strong> Strumenti di test automatizzati che utilizzano l'AI possono identificare casi limite e potenziali bug in modo piu' efficace rispetto ai test tradizionali.</li>
-</ul>
-<h2>Implementare Workflow AI</h2>
-<p>Per i team che desiderano adottare queste tecnologie, la transizione richiede una pianificazione attenta. E' fondamentale comprendere i limiti dei modelli AI attuali, in particolare per quanto riguarda la sicurezza e la qualita' del codice.</p>
-<blockquote><p>"L'AI non sostituira' gli sviluppatori, ma gli sviluppatori che usano l'AI sostituiranno quelli che non lo fanno." - Proverbio del settore</p></blockquote>
-<p>Man mano che procediamo, l'attenzione si spostera' dalla scrittura manuale di ogni riga di codice all'orchestrazione degli strumenti AI e alla curatela dell'output.</p>
-`;

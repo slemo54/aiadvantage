@@ -169,7 +169,6 @@ function EditorPageInner() {
       body: JSON.stringify({ articleId: currentArticle.id }),
     });
     if (res.ok) {
-      // Reload article to get updated content
       const updated = await fetch(`/api/articles/${selectedSlug}`).then(
         (r) => r.json() as Promise<ArticleApiResponse>
       );
@@ -177,7 +176,8 @@ function EditorPageInner() {
       setContent(updated.article.content_html ?? "");
       setStatusMessage("Umanizzazione completata.");
     } else {
-      setStatusMessage("Errore nell'umanizzazione.");
+      const data = await res.json().catch(() => ({})) as { error?: string };
+      setStatusMessage(`Errore umanizzazione: ${data.error ?? res.statusText}`);
     }
   }
 
@@ -188,15 +188,38 @@ function EditorPageInner() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ articleId: currentArticle.id }),
     });
-    if (res.ok) {
-      const updated = await fetch(`/api/articles/${selectedSlug}`).then(
-        (r) => r.json() as Promise<ArticleApiResponse>
-      );
-      setCurrentArticle(updated.article);
-      setStatusMessage("Immagine generata.");
-    } else {
-      setStatusMessage("Errore nella generazione immagine.");
+    const data = await res.json().catch(() => ({})) as { success?: boolean; hero_image_url?: string | null; warning?: string; error?: string };
+    if (!res.ok) {
+      setStatusMessage(`Errore generazione immagine: ${data.error ?? res.statusText}`);
+      return;
     }
+    if (!data.hero_image_url) {
+      setStatusMessage(data.warning ?? "Immagine non generata (controlla GEMINI_API_KEY).");
+      return;
+    }
+    const updated = await fetch(`/api/articles/${selectedSlug}`).then(
+      (r) => r.json() as Promise<ArticleApiResponse>
+    );
+    setCurrentArticle(updated.article);
+    setStatusMessage("Immagine generata.");
+  }
+
+  async function handleGenerateSEO() {
+    if (!currentArticle) return;
+    const res = await fetch("/api/workflow/seo", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ articleId: currentArticle.id }),
+    });
+    const data = await res.json().catch(() => ({})) as { meta_description?: string; keywords?: string[]; slug?: string; error?: string };
+    if (!res.ok) {
+      setStatusMessage(`Errore SEO: ${data.error ?? res.statusText}`);
+      return;
+    }
+    setCurrentArticle((prev) =>
+      prev ? { ...prev, meta_description: data.meta_description ?? prev.meta_description, keywords: data.keywords ?? prev.keywords, slug: data.slug ?? prev.slug } : prev
+    );
+    setStatusMessage("SEO generato con AI.");
   }
 
   async function handleSidebarUpdate(fields: Partial<Article>) {
@@ -280,7 +303,12 @@ function EditorPageInner() {
               <>
                 <select
                   value={selectedSlug}
-                  onChange={(e) => setSelectedSlug(e.target.value)}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    setContent("");
+                    setArticleLoading(true);
+                    setSelectedSlug(value);
+                  }}
                   className="w-full appearance-none rounded-md border border-input bg-background py-2 pl-3 pr-8 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                 >
                   <option value="">
@@ -343,6 +371,7 @@ function EditorPageInner() {
           onUpdate={handleSidebarUpdate}
           onHumanize={handleHumanize}
           onGenerateImage={handleGenerateImage}
+          onGenerateSEO={handleGenerateSEO}
         />
       </div>
     </div>

@@ -116,3 +116,57 @@ export async function generateDraft(
 
   throw new Error(`Kimi: tutti i modelli hanno fallito. Ultimo errore: ${String(lastError)}`);
 }
+
+export async function generateSEO(
+  title: string,
+  content: string
+): Promise<{ meta_description: string; keywords: string[]; slug: string }> {
+  const apiKey = process.env.KIMI_API_KEY;
+  if (!apiKey) {
+    throw new Error(
+      "KIMI_API_KEY non configurata. Aggiungila su Vercel → Settings → Environment Variables."
+    );
+  }
+
+  const plainText = content
+    .replace(/<[^>]*>/g, " ")
+    .replace(/\s+/g, " ")
+    .trim()
+    .slice(0, 3000);
+
+  const prompt = `Sei un esperto SEO italiano. Analizza questo articolo e restituisci SOLO un JSON valido senza markdown:
+{
+  "meta_description": "massimo 155 caratteri, include keyword principale, chiara e invitante",
+  "keywords": ["keyword1", "keyword2", "keyword3", "keyword4", "keyword5"],
+  "slug": "url-slug-ottimizzato-senza-accenti"
+}
+Titolo: ${title}
+Contenuto:
+${plainText}`;
+
+  let lastError: unknown;
+
+  for (const model of MODELS) {
+    try {
+      console.log(`[kimi-seo] Trying model: ${model}`);
+      const data = await callKimi(apiKey, model, prompt);
+      const raw = data.choices[0]?.message?.content ?? "";
+      const cleaned = raw
+        .replace(/^```json?\s*/i, "")
+        .replace(/```\s*$/i, "")
+        .trim();
+      const parsed = JSON.parse(cleaned) as {
+        meta_description: string;
+        keywords: string[];
+        slug: string;
+      };
+      console.log(`[kimi-seo] Success with model: ${model}`);
+      return parsed;
+    } catch (err) {
+      console.warn(`[kimi-seo] Model ${model} failed:`, String(err));
+      lastError = err;
+    }
+  }
+
+  throw new Error(`Kimi SEO: tutti i modelli hanno fallito. Ultimo errore: ${String(lastError)}`);
+}

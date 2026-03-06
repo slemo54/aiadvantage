@@ -23,6 +23,7 @@ interface EditorAISidebarProps {
   onUpdate?: (fields: Partial<Article>) => void;
   onHumanize?: () => Promise<void>;
   onGenerateImage?: () => Promise<void>;
+  onGenerateSEO?: () => Promise<void>;
 }
 
 export function EditorAISidebar({
@@ -30,6 +31,7 @@ export function EditorAISidebar({
   onUpdate,
   onHumanize,
   onGenerateImage,
+  onGenerateSEO,
 }: EditorAISidebarProps) {
   const [tone, setTone] = useState<"conversational" | "professional" | "storytelling">("conversational");
   const [focusKeyword, setFocusKeyword] = useState("");
@@ -40,6 +42,7 @@ export function EditorAISidebar({
   const [imageStyle, setImageStyle] = useState("photorealistic");
   const [humanizing, setHumanizing] = useState(false);
   const [generatingImage, setGeneratingImage] = useState(false);
+  const [generatingSEO, setGeneratingSEO] = useState(false);
 
   // Sync fields from article prop
   useEffect(() => {
@@ -67,6 +70,16 @@ export function EditorAISidebar({
       await onGenerateImage();
     } finally {
       setGeneratingImage(false);
+    }
+  }
+
+  async function handleGenerateSEO() {
+    if (!onGenerateSEO) return;
+    setGeneratingSEO(true);
+    try {
+      await onGenerateSEO();
+    } finally {
+      setGeneratingSEO(false);
     }
   }
 
@@ -167,10 +180,15 @@ export function EditorAISidebar({
         {/* SEO */}
         <Card>
           <CardHeader className="pb-3">
-            <CardTitle className="flex items-center text-sm">
-              <Search className="mr-1.5 h-4 w-4 text-green-500" />
-              Ottimizzazione SEO
-            </CardTitle>
+            <div className="flex items-center justify-between">
+              <CardTitle className="flex items-center text-sm">
+                <Search className="mr-1.5 h-4 w-4 text-green-500" />
+                Ottimizzazione SEO
+              </CardTitle>
+              <Badge variant="secondary" className="text-xs">
+                Kimi
+              </Badge>
+            </div>
           </CardHeader>
           <CardContent className="space-y-3 pt-0">
             <div>
@@ -213,10 +231,23 @@ export function EditorAISidebar({
               variant="outline"
               className="w-full"
               size="sm"
+              disabled={!article || generatingSEO}
+              onClick={() => void handleGenerateSEO()}
+            >
+              {generatingSEO ? (
+                <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
+              ) : (
+                <Wand2 className="mr-1.5 h-3.5 w-3.5" />
+              )}
+              Genera con AI
+            </Button>
+            <Button
+              variant="outline"
+              className="w-full"
+              size="sm"
               disabled={!article}
               onClick={handleSaveSEO}
             >
-              <Wand2 className="mr-1.5 h-3.5 w-3.5" />
               Salva SEO
             </Button>
           </CardContent>
