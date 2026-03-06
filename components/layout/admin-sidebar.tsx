@@ -8,12 +8,14 @@ import {
   CalendarDays,
   Settings,
   LogOut,
+  BookOpen,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const NAV_ITEMS = [
   { href: "/admin/agent", label: "Pipeline", icon: Bot },
   { href: "/admin/editor", label: "Editor", icon: PenTool },
+  { href: "/admin/blog", label: "Blog", icon: BookOpen },
   { href: "/admin/calendar", label: "Calendario", icon: CalendarDays },
   { href: "/admin/settings", label: "Impostazioni", icon: Settings },
 ];

@@ -55,17 +55,19 @@ function EditorPageInner() {
     setArticlesLoading(true);
     setArticlesError(null);
     try {
-      const [drafting, humanizing, reviewing, ready] = await Promise.all([
+      const [drafting, humanizing, reviewing, ready, published] = await Promise.all([
         fetch("/api/articles?status=drafting&limit=20").then((r) => r.json() as Promise<ArticlesApiResponse>),
         fetch("/api/articles?status=humanizing&limit=20").then((r) => r.json() as Promise<ArticlesApiResponse>),
         fetch("/api/articles?status=reviewing&limit=20").then((r) => r.json() as Promise<ArticlesApiResponse>),
         fetch("/api/articles?status=ready&limit=20").then((r) => r.json() as Promise<ArticlesApiResponse>),
+        fetch("/api/articles?status=published&limit=50").then((r) => r.json() as Promise<ArticlesApiResponse>),
       ]);
       const all = [
         ...(drafting.articles ?? []),
         ...(humanizing.articles ?? []),
         ...(reviewing.articles ?? []),
         ...(ready.articles ?? []),
+        ...(published.articles ?? []),
       ];
       setArticles(all);
 

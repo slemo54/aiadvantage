@@ -201,11 +201,11 @@ export default function BlogArticlePage() {
     if (seedMatch) { setIsLoading(false); return; }
     async function loadArticle() {
       try {
-        const res = await fetch(`/api/articles?slug=${slug}`);
+        const res = await fetch(`/api/articles/${slug}`);
         if (res.ok) {
-          const data = await res.json() as { articles?: Article[] };
-          if (data.articles?.[0]) {
-            setArticle(data.articles[0]);
+          const data = await res.json() as { article?: Article };
+          if (data.article) {
+            setArticle(data.article);
             setSeedMeta(undefined);
           }
         }
