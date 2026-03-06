@@ -145,6 +145,7 @@ function EditorPageInner() {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          content_html: content,
           status: "published",
           published_at: new Date().toISOString(),
         }),
