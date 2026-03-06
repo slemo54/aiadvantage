@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { generateIdeasAction } from "@/app/actions/generate-ideas";
 import {
   Search,
   FileText,
@@ -292,11 +293,8 @@ export default function AgentPage() {
     setIsGeneratingIdeas(true);
     addLog(`Avvio crawl topic tramite Perplexity: "${newTopic}"`);
     try {
-      const res = await fetch("/api/admin/cron-trigger", {
-        method: "POST",
-        credentials: "include",
-      });
-      if (res.ok) {
+      const result = await generateIdeasAction();
+      if (result.success) {
         addLog("Ricerca avviata con successo", "success");
         setNewTopic("");
         setTimeout(() => void fetchIdeas(), 3000);

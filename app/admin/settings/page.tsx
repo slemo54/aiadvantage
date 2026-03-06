@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { generateIdeasAction } from "@/app/actions/generate-ideas";
 import {
   Globe,
   Cpu,
@@ -534,11 +535,8 @@ function TabCron() {
   async function handleManualTrigger() {
     setIsRunning(true);
     try {
-      const res = await fetch("/api/admin/cron-trigger", {
-        method: "POST",
-        credentials: "include",
-      });
-      if (res.ok) {
+      const result = await generateIdeasAction();
+      if (result.success) {
         toast({
           title: "Cron eseguito",
           description: "La generazione idee è stata avviata con successo.",
@@ -546,7 +544,7 @@ function TabCron() {
       } else {
         toast({
           title: "Errore",
-          description: `La richiesta ha restituito lo stato ${res.status}.`,
+          description: result.error ?? "Errore nell'avvio del cron.",
         });
       }
     } catch {

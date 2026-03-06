@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { generateIdeasAction } from "@/app/actions/generate-ideas";
 import {
   FileText,
   Eye,
@@ -159,17 +160,12 @@ export default function DashboardPage() {
     setCrawlLoading(true);
     setCrawlMessage(null);
     try {
-      const res = await fetch("/api/admin/cron-trigger", {
-        method: "POST",
-        credentials: "include",
-      });
-      if (res.ok) {
+      const result = await generateIdeasAction();
+      if (result.success) {
         setCrawlMessage("Crawl avviato con successo. Le nuove idee appariranno a breve.");
-        // Refresh ideas after a short delay
         setTimeout(() => void fetchData(), 3000);
       } else {
-        const body = (await res.json()) as { error?: string };
-        setCrawlMessage(body.error ?? "Errore nell'avvio del crawl.");
+        setCrawlMessage(result.error ?? "Errore nell'avvio del crawl.");
       }
     } catch {
       setCrawlMessage("Errore di rete.");
