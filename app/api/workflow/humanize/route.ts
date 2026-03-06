@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { humanizeText } from "@/lib/ai/claude";
+import { humanizeText } from "@/lib/ai/kimi";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 function isSupabaseConfigured(): boolean {

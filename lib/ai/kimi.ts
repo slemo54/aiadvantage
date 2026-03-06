@@ -109,6 +109,77 @@ export async function generateDraft(
     .trim();
 }
 
+export async function humanizeText(draft: string, tone = "conversational"): Promise<string> {
+  const apiKey = process.env.VENICE_API_KEY;
+  if (!apiKey) throw new Error("VENICE_API_KEY non configurata.");
+  if (!draft.trim()) throw new Error("Testo vuoto da umanizzare.");
+
+  const toneMap = {
+    conversational: "conversazionale e amichevole",
+    professional: "professionale e autorevole",
+    storytelling: "narrativo e coinvolgente come uno storyteller",
+  } as const;
+  const toneLabel = toneMap[tone as keyof typeof toneMap] ?? toneMap.conversational;
+
+  const prompt = `Sei un editor esperto. Riscrivi questo articolo in italiano con tono ${toneLabel}.
+Mantieni il formato HTML, i fatti e le fonti. Rimuovi frasi generiche/robotiche.
+Rispondi SOLO con l'HTML riscritto.
+
+${draft}`;
+
+  console.log(`[venice-humanize] Calling model: ${MODEL}`);
+  const data = await callVenice(apiKey, prompt);
+  const content = data.choices[0]?.message?.content ?? "";
+  if (!content.trim()) throw new Error("Venice: risposta humanize vuota.");
+  console.log(`[venice-humanize] Humanize completed`);
+  return content.replace(/^```html?\s*/i, "").replace(/```\s*$/i, "").trim();
+}
+
+interface VeniceImageResponse {
+  data: { b64_json?: string; url?: string }[];
+}
+
+export async function generateImageVenice(prompt: string): Promise<string | null> {
+  const apiKey = process.env.VENICE_API_KEY;
+  if (!apiKey) throw new Error("VENICE_API_KEY non configurata.");
+
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 90000);
+
+  try {
+    const response = await fetch("https://api.venice.ai/api/v1/images/generations", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: "fluently-xl",
+        prompt,
+        n: 1,
+        size: "1024x1024",
+        response_format: "b64_json",
+      }),
+      signal: controller.signal,
+    });
+
+    if (!response.ok) {
+      const err = await response.text();
+      console.error(`[venice-image] HTTP ${response.status}:`, err.slice(0, 200));
+      return null;
+    }
+
+    const data = (await response.json()) as VeniceImageResponse;
+    const b64 = data.data?.[0]?.b64_json;
+    return b64 ? `data:image/png;base64,${b64}` : null;
+  } catch (err) {
+    console.error("[venice-image] Error:", err);
+    return null;
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
 export async function generateSEO(
   title: string,
   content: string

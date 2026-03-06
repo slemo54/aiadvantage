@@ -10,6 +10,7 @@ import {
   Sparkles,
   Paintbrush,
   Loader2,
+  Upload,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -24,6 +25,7 @@ interface EditorAISidebarProps {
   onHumanize?: () => Promise<void>;
   onGenerateImage?: () => Promise<void>;
   onGenerateSEO?: () => Promise<void>;
+  onUploadImage?: (file: File) => Promise<void>;
 }
 
 export function EditorAISidebar({
@@ -32,6 +34,7 @@ export function EditorAISidebar({
   onHumanize,
   onGenerateImage,
   onGenerateSEO,
+  onUploadImage,
 }: EditorAISidebarProps) {
   const [tone, setTone] = useState<"conversational" | "professional" | "storytelling">("conversational");
   const [focusKeyword, setFocusKeyword] = useState("");
@@ -43,6 +46,7 @@ export function EditorAISidebar({
   const [humanizing, setHumanizing] = useState(false);
   const [generatingImage, setGeneratingImage] = useState(false);
   const [generatingSEO, setGeneratingSEO] = useState(false);
+  const [uploadingImage, setUploadingImage] = useState(false);
 
   // Sync fields from article prop
   useEffect(() => {
@@ -80,6 +84,16 @@ export function EditorAISidebar({
       await onGenerateSEO();
     } finally {
       setGeneratingSEO(false);
+    }
+  }
+
+  async function handleUploadImage(file: File) {
+    if (!onUploadImage) return;
+    setUploadingImage(true);
+    try {
+      await onUploadImage(file);
+    } finally {
+      setUploadingImage(false);
     }
   }
 
@@ -122,7 +136,7 @@ export function EditorAISidebar({
                 Umanizzazione
               </CardTitle>
               <Badge variant="secondary" className="text-xs">
-                Claude 4.6
+                Venice AI
               </Badge>
             </div>
             <p className="text-xs text-muted-foreground">
@@ -262,7 +276,7 @@ export function EditorAISidebar({
                 Generazione Immagini
               </CardTitle>
               <Badge variant="secondary" className="text-xs">
-                Gemini
+                Venice AI
               </Badge>
             </div>
           </CardHeader>
@@ -300,6 +314,37 @@ export function EditorAISidebar({
                 <option value="vector">Vector Art</option>
               </select>
             </div>
+            <div>
+              <label className="mb-1 block text-xs font-medium text-muted-foreground">
+                Carica immagine manuale (quadrata)
+              </label>
+              <div className="flex gap-2">
+                <input
+                  type="file"
+                  accept="image/*"
+                  id="hero-upload"
+                  className="hidden"
+                  onChange={(e) => {
+                    const f = e.target.files?.[0];
+                    if (f) void handleUploadImage(f);
+                  }}
+                />
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="w-full"
+                  disabled={!article || uploadingImage}
+                  onClick={() => document.getElementById("hero-upload")?.click()}
+                >
+                  {uploadingImage ? (
+                    <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
+                  ) : (
+                    <Upload className="mr-1.5 h-3.5 w-3.5" />
+                  )}
+                  {uploadingImage ? "Caricamento..." : "Carica immagine"}
+                </Button>
+              </div>
+            </div>
             <Button
               className="w-full"
               size="sm"
@@ -311,7 +356,7 @@ export function EditorAISidebar({
               ) : (
                 <Paintbrush className="mr-1.5 h-3.5 w-3.5" />
               )}
-              Genera Immagine
+              Genera Immagine AI
             </Button>
           </CardContent>
         </Card>

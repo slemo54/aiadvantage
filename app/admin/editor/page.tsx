@@ -39,6 +39,7 @@ function EditorPageInner() {
 
   const [articles, setArticles] = useState<Article[]>([]);
   const [articlesLoading, setArticlesLoading] = useState(true);
+  const [articlesError, setArticlesError] = useState<string | null>(null);
 
   const [selectedSlug, setSelectedSlug] = useState<string>("");
   const [currentArticle, setCurrentArticle] = useState<Article | null>(null);
@@ -52,6 +53,7 @@ function EditorPageInner() {
   // Load articles eligible for editing
   const fetchArticles = useCallback(async () => {
     setArticlesLoading(true);
+    setArticlesError(null);
     try {
       const [drafting, humanizing, reviewing, ready] = await Promise.all([
         fetch("/api/articles?status=drafting&limit=20").then((r) => r.json() as Promise<ArticlesApiResponse>),
@@ -71,8 +73,8 @@ function EditorPageInner() {
       if (slugFromUrl && all.some((a) => a.slug === slugFromUrl)) {
         setSelectedSlug(slugFromUrl);
       }
-    } catch {
-      // silently ignore
+    } catch (err) {
+      setArticlesError(`Errore caricamento articoli: ${String(err)}. Verifica Supabase.`);
     } finally {
       setArticlesLoading(false);
     }
@@ -161,6 +163,27 @@ function EditorPageInner() {
     }
   }
 
+  async function handleUploadImage(file: File) {
+    if (!selectedSlug) return;
+    const reader = new FileReader();
+    reader.onload = async (e) => {
+      const dataUri = e.target?.result as string;
+      if (!dataUri) return;
+      const res = await fetch(`/api/articles/${selectedSlug}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ hero_image_url: dataUri }),
+      });
+      if (res.ok) {
+        setCurrentArticle((prev) => prev ? { ...prev, hero_image_url: dataUri } : prev);
+        setStatusMessage("Immagine caricata.");
+      } else {
+        setStatusMessage("Errore upload immagine.");
+      }
+    };
+    reader.readAsDataURL(file);
+  }
+
   async function handleHumanize() {
     if (!currentArticle) return;
     const res = await fetch("/api/workflow/humanize", {
@@ -194,7 +217,7 @@ function EditorPageInner() {
       return;
     }
     if (!data.hero_image_url) {
-      setStatusMessage(data.warning ?? "Immagine non generata (controlla GEMINI_API_KEY).");
+      setStatusMessage(data.warning ?? "Immagine non generata (controlla VENICE_API_KEY).");
       return;
     }
     const updated = await fetch(`/api/articles/${selectedSlug}`).then(
@@ -299,6 +322,8 @@ function EditorPageInner() {
                 <Loader2 className="h-4 w-4 animate-spin" />
                 Caricamento articoli...
               </div>
+            ) : articlesError ? (
+              <p className="text-xs text-red-500">{articlesError}</p>
             ) : (
               <>
                 <select
@@ -379,6 +404,7 @@ function EditorPageInner() {
           onHumanize={handleHumanize}
           onGenerateImage={handleGenerateImage}
           onGenerateSEO={handleGenerateSEO}
+          onUploadImage={handleUploadImage}
         />
       </div>
     </div>
