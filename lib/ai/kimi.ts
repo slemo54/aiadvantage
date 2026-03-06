@@ -1,20 +1,19 @@
-// Kimi direct API — moonshot.cn (OpenAI-compatible)
+// Venice AI API — api.venice.ai (OpenAI-compatible)
 
-interface KimiMessage {
+interface VeniceMessage {
   role: string;
   content: string;
 }
 
-interface KimiChoice {
-  message: KimiMessage;
+interface VeniceChoice {
+  message: VeniceMessage;
 }
 
-interface KimiResponse {
-  choices: KimiChoice[];
+interface VeniceResponse {
+  choices: VeniceChoice[];
 }
 
-// Models in order of preference
-const MODELS = ["kimi-k2.5", "moonshot-v1-8k"];
+const MODEL = "venice-uncensored";
 
 function buildDraftPrompt(research: string, category: string): string {
   return `Sei un content writer esperto di tecnologia e AI.
@@ -36,18 +35,17 @@ Formatta in HTML (h2, p, ul, li, strong, em). Non usare h1 (è nel layout).
 Rispondi SOLO con l'HTML dell'articolo, senza markdown o testo aggiuntivo.`;
 }
 
-async function callKimi(
+async function callVenice(
   apiKey: string,
-  model: string,
   prompt: string,
   attempt: number = 1
-): Promise<KimiResponse> {
+): Promise<VeniceResponse> {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 90000);
 
   try {
     const response = await fetch(
-      "https://api.moonshot.cn/v1/chat/completions",
+      "https://api.venice.ai/api/v1/chat/completions",
       {
         method: "POST",
         headers: {
@@ -55,7 +53,7 @@ async function callKimi(
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          model,
+          model: MODEL,
           messages: [{ role: "user", content: prompt }],
           temperature: 0.75,
           max_tokens: 4000,
@@ -67,20 +65,20 @@ async function callKimi(
     if (!response.ok) {
       if (response.status === 401) {
         throw new Error(
-          `KIMI_API_KEY non valida o scaduta (HTTP 401). Aggiornala su Vercel → Settings → Environment Variables.`
+          `VENICE_API_KEY non valida o scaduta (HTTP 401). Aggiornala su Vercel → Settings → Environment Variables.`
         );
       }
       const errorText = await response.text();
       if (response.status === 429 && attempt < 3) {
         await new Promise((r) => setTimeout(r, attempt * 3000));
-        return callKimi(apiKey, model, prompt, attempt + 1);
+        return callVenice(apiKey, prompt, attempt + 1);
       }
       throw new Error(
-        `Kimi API HTTP ${response.status} (model: ${model}): ${errorText.slice(0, 400)}`
+        `Venice API HTTP ${response.status} (model: ${MODEL}): ${errorText.slice(0, 400)}`
       );
     }
 
-    return response.json() as Promise<KimiResponse>;
+    return response.json() as Promise<VeniceResponse>;
   } finally {
     clearTimeout(timeout);
   }
@@ -90,46 +88,35 @@ export async function generateDraft(
   research: string,
   category: string
 ): Promise<string> {
-  const apiKey = process.env.KIMI_API_KEY;
+  const apiKey = process.env.VENICE_API_KEY;
   if (!apiKey) {
     throw new Error(
-      "KIMI_API_KEY non configurata. Aggiungila su Vercel → Settings → Environment Variables."
+      "VENICE_API_KEY non configurata. Aggiungila su Vercel → Settings → Environment Variables."
     );
   }
 
   const prompt = buildDraftPrompt(research, category);
-  let lastError: unknown;
-
-  for (const model of MODELS) {
-    try {
-      console.log(`[kimi] Trying model: ${model}`);
-      const data = await callKimi(apiKey, model, prompt);
-      const content = data.choices[0]?.message?.content ?? "";
-      if (!content.trim()) {
-        throw new Error(`Risposta vuota dal modello ${model}`);
-      }
-      console.log(`[kimi] Success with model: ${model}`);
-      return content
-        .replace(/^```html?\s*/i, "")
-        .replace(/```\s*$/i, "")
-        .trim();
-    } catch (err) {
-      console.warn(`[kimi] Model ${model} failed:`, String(err));
-      lastError = err;
-    }
+  console.log(`[venice] Calling model: ${MODEL}`);
+  const data = await callVenice(apiKey, prompt);
+  const content = data.choices[0]?.message?.content ?? "";
+  if (!content.trim()) {
+    throw new Error(`Venice: risposta vuota dal modello ${MODEL}`);
   }
-
-  throw new Error(`Kimi: tutti i modelli hanno fallito. Ultimo errore: ${String(lastError)}`);
+  console.log(`[venice] Draft generated successfully`);
+  return content
+    .replace(/^```html?\s*/i, "")
+    .replace(/```\s*$/i, "")
+    .trim();
 }
 
 export async function generateSEO(
   title: string,
   content: string
 ): Promise<{ meta_description: string; keywords: string[]; slug: string }> {
-  const apiKey = process.env.KIMI_API_KEY;
+  const apiKey = process.env.VENICE_API_KEY;
   if (!apiKey) {
     throw new Error(
-      "KIMI_API_KEY non configurata. Aggiungila su Vercel → Settings → Environment Variables."
+      "VENICE_API_KEY non configurata. Aggiungila su Vercel → Settings → Environment Variables."
     );
   }
 
@@ -149,29 +136,18 @@ Titolo: ${title}
 Contenuto:
 ${plainText}`;
 
-  let lastError: unknown;
-
-  for (const model of MODELS) {
-    try {
-      console.log(`[kimi-seo] Trying model: ${model}`);
-      const data = await callKimi(apiKey, model, prompt);
-      const raw = data.choices[0]?.message?.content ?? "";
-      const cleaned = raw
-        .replace(/^```json?\s*/i, "")
-        .replace(/```\s*$/i, "")
-        .trim();
-      const parsed = JSON.parse(cleaned) as {
-        meta_description: string;
-        keywords: string[];
-        slug: string;
-      };
-      console.log(`[kimi-seo] Success with model: ${model}`);
-      return parsed;
-    } catch (err) {
-      console.warn(`[kimi-seo] Model ${model} failed:`, String(err));
-      lastError = err;
-    }
-  }
-
-  throw new Error(`Kimi SEO: tutti i modelli hanno fallito. Ultimo errore: ${String(lastError)}`);
+  console.log(`[venice-seo] Calling model: ${MODEL}`);
+  const data = await callVenice(apiKey, prompt);
+  const raw = data.choices[0]?.message?.content ?? "";
+  const cleaned = raw
+    .replace(/^```json?\s*/i, "")
+    .replace(/```\s*$/i, "")
+    .trim();
+  const parsed = JSON.parse(cleaned) as {
+    meta_description: string;
+    keywords: string[];
+    slug: string;
+  };
+  console.log(`[venice-seo] SEO generated successfully`);
+  return parsed;
 }

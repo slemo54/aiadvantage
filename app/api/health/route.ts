@@ -22,7 +22,7 @@ export async function GET() {
     service_key_length: serviceKey?.length ?? 0,
     perplexity_key_set: Boolean(process.env.PERPLEXITY_API_KEY),
     cron_secret_set: Boolean(process.env.CRON_SECRET),
-    kimi_key_set: Boolean(process.env.KIMI_API_KEY),
+    venice_key_set: Boolean(process.env.VENICE_API_KEY),
     anthropic_key_set: Boolean(process.env.ANTHROPIC_API_KEY),
   };
 

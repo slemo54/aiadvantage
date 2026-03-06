@@ -15,7 +15,7 @@ export async function GET(request: NextRequest) {
 
   const status: Record<string, boolean | number> = {
     PERPLEXITY_API_KEY: Boolean(process.env.PERPLEXITY_API_KEY?.trim()),
-    KIMI_API_KEY: Boolean(process.env.KIMI_API_KEY?.trim()),
+    VENICE_API_KEY: Boolean(process.env.VENICE_API_KEY?.trim()),
     ANTHROPIC_API_KEY: Boolean(process.env.ANTHROPIC_API_KEY?.trim()),
     GEMINI_API_KEY: Boolean(
       (process.env.GEMINI_API_KEY ?? process.env.GOOGLE_AI_API_KEY)?.trim()

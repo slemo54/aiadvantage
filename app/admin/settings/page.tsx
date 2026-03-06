@@ -224,9 +224,9 @@ const ENV_VAR_CONFIGS: EnvVarConfig[] = [
     service: "Ricerca & Trend",
   },
   {
-    key: "KIMI_API_KEY",
-    label: "Kimi (Moonshot)",
-    service: "Kimi 2.5 — Strutturazione bozza",
+    key: "VENICE_API_KEY",
+    label: "Venice AI",
+    service: "venice-uncensored — Strutturazione bozza & SEO",
   },
   {
     key: "ANTHROPIC_API_KEY",
@@ -369,7 +369,7 @@ function TabAIPipeline() {
           <div className="flex flex-wrap gap-2 items-center">
             {[
               { label: "Perplexity", role: "Ricerca" },
-              { label: "Kimi 2.5", role: "Bozza" },
+              { label: "Venice AI", role: "Bozza" },
               { label: "Claude", role: "Revisione" },
               { label: "Gemini", role: "Immagini" },
             ].map((step, i, arr) => (
