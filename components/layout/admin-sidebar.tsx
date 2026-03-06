@@ -3,8 +3,6 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
-  LayoutDashboard,
-  Lightbulb,
   PenTool,
   Bot,
   CalendarDays,
@@ -14,11 +12,9 @@ import {
 import { cn } from "@/lib/utils";
 
 const NAV_ITEMS = [
-  { href: "/admin/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/admin/ideas", label: "Idee & Topic", icon: Lightbulb },
+  { href: "/admin/agent", label: "Pipeline", icon: Bot },
   { href: "/admin/editor", label: "Editor", icon: PenTool },
   { href: "/admin/calendar", label: "Calendario", icon: CalendarDays },
-  { href: "/admin/agent", label: "AI Pipelines", icon: Bot },
   { href: "/admin/settings", label: "Impostazioni", icon: Settings },
 ];
 
@@ -34,7 +30,7 @@ export function AdminSidebar() {
   return (
     <aside className="hidden w-64 flex-shrink-0 border-r border-border bg-card md:flex md:flex-col">
       <div className="flex h-16 items-center border-b border-border px-6">
-        <Link href="/admin/dashboard" className="text-xl font-bold text-primary">
+        <Link href="/admin/agent" className="text-xl font-bold text-primary">
           IlVantaggioAI.it
         </Link>
       </div>
