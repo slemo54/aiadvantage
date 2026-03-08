@@ -1,5 +1,7 @@
 // Venice AI API — api.venice.ai (OpenAI-compatible)
 
+import { resolvePrompt, interpolatePrompt, appendKnowledgeBase } from "./prompt-resolver";
+
 interface VeniceMessage {
   role: string;
   content: string;
@@ -95,7 +97,11 @@ export async function generateDraft(
     );
   }
 
-  const prompt = buildDraftPrompt(research, category);
+  // Resolve prompt from DB or fallback to hardcoded
+  const { promptText: dbDraftPrompt, knowledgeContext: draftKB } = await resolvePrompt("draft");
+  const prompt = dbDraftPrompt
+    ? appendKnowledgeBase(interpolatePrompt(dbDraftPrompt, { research, category }), draftKB)
+    : buildDraftPrompt(research, category);
   console.log(`[venice] Calling model: ${MODEL}`);
   const data = await callVenice(apiKey, prompt);
   const content = data.choices[0]?.message?.content ?? "";
@@ -121,11 +127,11 @@ export async function humanizeText(draft: string, tone = "conversational"): Prom
   } as const;
   const toneLabel = toneMap[tone as keyof typeof toneMap] ?? toneMap.conversational;
 
-  const prompt = `Sei un editor esperto. Riscrivi questo articolo in italiano con tono ${toneLabel}.
-Mantieni il formato HTML, i fatti e le fonti. Rimuovi frasi generiche/robotiche.
-Rispondi SOLO con l'HTML riscritto.
-
-${draft}`;
+  // Resolve prompt from DB or fallback to hardcoded
+  const { promptText: hPrompt, knowledgeContext: hKB } = await resolvePrompt("humanize");
+  const prompt = hPrompt
+    ? appendKnowledgeBase(interpolatePrompt(hPrompt, { draft }), hKB)
+    : `Sei un editor esperto. Riscrivi questo articolo in italiano con tono ${toneLabel}.\nMantieni il formato HTML, i fatti e le fonti. Rimuovi frasi generiche/robotiche.\nRispondi SOLO con l'HTML riscritto.\n\n${draft}`;
 
   console.log(`[venice-humanize] Calling model: ${MODEL}`);
   const data = await callVenice(apiKey, prompt);
@@ -197,15 +203,11 @@ export async function generateSEO(
     .trim()
     .slice(0, 3000);
 
-  const prompt = `Sei un esperto SEO italiano. Analizza questo articolo e restituisci SOLO un JSON valido senza markdown:
-{
-  "meta_description": "massimo 155 caratteri, include keyword principale, chiara e invitante",
-  "keywords": ["keyword1", "keyword2", "keyword3", "keyword4", "keyword5"],
-  "slug": "url-slug-ottimizzato-senza-accenti"
-}
-Titolo: ${title}
-Contenuto:
-${plainText}`;
+  // Resolve prompt from DB or fallback to hardcoded
+  const { promptText: seoPromptText, knowledgeContext: seoKB } = await resolvePrompt("seo");
+  const prompt = seoPromptText
+    ? appendKnowledgeBase(interpolatePrompt(seoPromptText, { title, content: plainText }), seoKB)
+    : `Sei un esperto SEO italiano. Analizza questo articolo e restituisci SOLO un JSON valido senza markdown:\n{\n  "meta_description": "massimo 155 caratteri, include keyword principale, chiara e invitante",\n  "keywords": ["keyword1", "keyword2", "keyword3", "keyword4", "keyword5"],\n  "slug": "url-slug-ottimizzato-senza-accenti"\n}\nTitolo: ${title}\nContenuto:\n${plainText}`;
 
   console.log(`[venice-seo] Calling model: ${MODEL}`);
   const data = await callVenice(apiKey, prompt);

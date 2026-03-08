@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { generateImageVenice } from "@/lib/ai/kimi";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { resolvePrompt, interpolatePrompt, appendKnowledgeBase } from "@/lib/ai/prompt-resolver";
 
 function buildImagePrompt(title: string, category: string): string {
   return (
@@ -58,10 +59,17 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const imagePrompt = buildImagePrompt(
-      article.title as string,
-      article.category as string
-    );
+    // Resolve prompt from DB or fallback to hardcoded
+    const { promptText: dbImgPrompt, knowledgeContext: imgKB } = await resolvePrompt("images");
+    const imagePrompt = dbImgPrompt
+      ? appendKnowledgeBase(
+          interpolatePrompt(dbImgPrompt, {
+            title: article.title as string,
+            category: article.category as string,
+          }),
+          imgKB
+        )
+      : buildImagePrompt(article.title as string, article.category as string);
 
     const imageDataUri = await generateImageVenice(imagePrompt);
 

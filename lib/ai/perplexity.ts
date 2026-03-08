@@ -1,5 +1,7 @@
 // Perplexity API wrapper — sonar-pro with sonar fallback
 
+import { resolvePrompt, appendKnowledgeBase } from "./prompt-resolver";
+
 interface PerplexityTopicResult {
   titolo: string;
   descrizione: string;
@@ -135,9 +137,13 @@ export async function researchTopic(
     );
   }
 
+  // Resolve prompt from DB (falls back to hardcoded RESEARCH_PROMPT)
+  const { promptText, knowledgeContext } = await resolvePrompt("research");
+  const basePrompt = promptText || RESEARCH_PROMPT;
+  const withKB = appendKnowledgeBase(basePrompt, knowledgeContext);
   const prompt = topic
-    ? `${RESEARCH_PROMPT}\n\nFocus particolare su: ${topic}`
-    : RESEARCH_PROMPT;
+    ? `${withKB}\n\nFocus particolare su: ${topic}`
+    : withKB;
 
   const data = await callWithFallback(apiKey, prompt);
 

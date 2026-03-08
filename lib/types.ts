@@ -1,4 +1,4 @@
-import type { CategoryKey, WorkflowState } from "./constants";
+import type { CategoryKey, PipelineStage, WorkflowState } from "./constants";
 
 export interface Article {
   id: string;
@@ -48,4 +48,25 @@ export interface PipelineState {
   current_status: WorkflowState;
   started_at: string;
   error: string | null;
+}
+
+export interface PromptConfig {
+  id: string;
+  stage: PipelineStage;
+  prompt_text: string;
+  version: number;
+  is_active: boolean;
+  created_at: string;
+  created_by: string;
+}
+
+export interface KnowledgeBaseFile {
+  id: string;
+  stage: PipelineStage;
+  file_name: string;
+  file_type: string;
+  storage_path: string;
+  extracted_text: string | null;
+  file_size_bytes: number;
+  created_at: string;
 }
