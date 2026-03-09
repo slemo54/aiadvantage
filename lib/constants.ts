@@ -43,3 +43,39 @@ export const WORKFLOW_COLORS: Record<WorkflowState, string> = {
   ready: "bg-green-500",
   published: "bg-emerald-600",
 };
+
+// ─── Pipeline Stage Management ──────────────────────────────────────────────
+
+export const PIPELINE_STAGES = [
+  "research",
+  "draft",
+  "humanize",
+  "images",
+  "seo",
+] as const;
+
+export type PipelineStage = (typeof PIPELINE_STAGES)[number];
+
+export const PIPELINE_STAGE_LABELS: Record<PipelineStage, string> = {
+  research: "Ricerca",
+  draft: "Bozza",
+  humanize: "Umanizzazione",
+  images: "Immagini",
+  seo: "SEO",
+};
+
+export const PIPELINE_STAGE_MODELS: Record<PipelineStage, string> = {
+  research: "Perplexity sonar-pro",
+  draft: "Venice venice-uncensored",
+  humanize: "Claude claude-sonnet-4-6",
+  images: "Venice fluently-xl",
+  seo: "Venice venice-uncensored",
+};
+
+export const PIPELINE_STAGE_VARIABLES: Record<PipelineStage, string[]> = {
+  research: ["topic"],
+  draft: ["research", "category"],
+  humanize: ["draft"],
+  images: ["title", "category"],
+  seo: ["title", "content"],
+};

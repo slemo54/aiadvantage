@@ -9,6 +9,7 @@ import {
   Settings,
   LogOut,
   BookOpen,
+  FileText,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -17,6 +18,7 @@ const NAV_ITEMS = [
   { href: "/admin/editor", label: "Editor", icon: PenTool },
   { href: "/admin/blog", label: "Blog", icon: BookOpen },
   { href: "/admin/calendar", label: "Calendario", icon: CalendarDays },
+  { href: "/admin/prompts", label: "Prompt", icon: FileText },
   { href: "/admin/settings", label: "Impostazioni", icon: Settings },
 ];
 

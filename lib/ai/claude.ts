@@ -1,5 +1,7 @@
 // Claude API wrapper — direct fetch (no SDK dependency)
 
+import { resolvePrompt, interpolatePrompt, appendKnowledgeBase } from "./prompt-resolver";
+
 interface AnthropicContentBlock {
   type: string;
   text?: string;
@@ -86,7 +88,11 @@ export async function humanizeText(draft: string): Promise<string> {
     throw new Error("Il testo da umanizzare è vuoto.");
   }
 
-  const prompt = buildHumanizePrompt(draft);
+  // Resolve prompt from DB or fallback to hardcoded
+  const { promptText: dbPrompt, knowledgeContext } = await resolvePrompt("humanize");
+  const prompt = dbPrompt
+    ? appendKnowledgeBase(interpolatePrompt(dbPrompt, { draft }), knowledgeContext)
+    : buildHumanizePrompt(draft);
   const data = await callAnthropic(apiKey, prompt);
 
   const textBlock = data.content.find((block) => block.type === "text");
