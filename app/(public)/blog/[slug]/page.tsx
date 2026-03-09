@@ -264,14 +264,14 @@ export default function BlogArticlePage() {
       {/* Hero Image */}
       <section className="relative">
         <div className="mx-auto max-w-7xl px-4 pt-6 sm:px-6 lg:px-8">
-          <div className={`relative aspect-[21/9] overflow-hidden rounded-2xl bg-gradient-to-br ${gradient}`}>
+          <div className={`relative aspect-[16/9] overflow-hidden rounded-2xl bg-gradient-to-br ${gradient}`}>
             {/* Featured image or fallback gradient */}
             {(article.featured_image_url || article.hero_image_url) ? (
               <Image
                 src={article.featured_image_url || article.hero_image_url!}
                 alt={article.title}
                 fill
-                className="object-cover"
+                className="object-cover object-center"
                 priority
               />
             ) : (
@@ -294,8 +294,8 @@ export default function BlogArticlePage() {
                 </div>
               </>
             )}
-            {/* Gradient overlay for readability */}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
+            {/* Gradient overlays: bottom fade for category badge + subtle vignette */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-black/10 pointer-events-none" />
             <div className="absolute bottom-4 left-4">
               <span className="inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold text-white"
                 style={{ backgroundColor: `${category.accent}dd` }}>
