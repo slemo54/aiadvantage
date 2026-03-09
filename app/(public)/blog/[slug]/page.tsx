@@ -6,8 +6,6 @@ import { useParams } from "next/navigation";
 import {
   ArrowLeft,
   Clock,
-  Share2,
-  Bookmark,
   ThumbsUp,
   MessageCircle,
   ChevronRight,
@@ -15,6 +13,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { ArticleShareMenu } from "@/components/blog/article-share-menu";
 import { CATEGORIES } from "@/lib/constants";
 import type { Article } from "@/lib/types";
 import type { CategoryKey } from "@/lib/constants";
@@ -334,14 +333,11 @@ export default function BlogArticlePage() {
                   </div>
                 </div>
               </div>
-              <div className="flex items-center gap-1">
-                <Button variant="ghost" size="icon" className="h-8 w-8 text-zinc-400 hover:text-white">
-                  <Share2 className="h-4 w-4" />
-                </Button>
-                <Button variant="ghost" size="icon" className="h-8 w-8 text-zinc-400 hover:text-white">
-                  <Bookmark className="h-4 w-4" />
-                </Button>
-              </div>
+              <ArticleShareMenu
+                title={article.title}
+                slug={slug}
+                contentHtml={rawContent}
+              />
             </div>
 
             {/* Lead / description */}
