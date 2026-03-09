@@ -62,9 +62,9 @@ export function FeaturedArticles({ articles }: FeaturedArticlesProps) {
                 <article className="group relative h-[500px] rounded-2xl overflow-hidden cursor-pointer">
                   {/* Background Image */}
                   <div className="absolute inset-0">
-                    {mainArticle.hero_image_url ? (
+                    {(mainArticle.featured_image_url || mainArticle.hero_image_url) ? (
                       <img
-                        src={mainArticle.hero_image_url}
+                        src={mainArticle.featured_image_url || mainArticle.hero_image_url!}
                         alt={mainArticle.title}
                         className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                       />
@@ -112,9 +112,9 @@ export function FeaturedArticles({ articles }: FeaturedArticlesProps) {
                   <article className="group flex gap-4 p-4 rounded-xl bg-[#0a0a0a] border border-gray-800 hover:border-[#22c55e]/30 transition-all cursor-pointer">
                     {/* Thumbnail */}
                     <div className="w-24 h-24 rounded-lg overflow-hidden shrink-0">
-                      {article.hero_image_url ? (
+                      {(article.featured_image_url || article.hero_image_url) ? (
                         <img
-                          src={article.hero_image_url}
+                          src={article.featured_image_url || article.hero_image_url!}
                           alt={article.title}
                           className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                         />

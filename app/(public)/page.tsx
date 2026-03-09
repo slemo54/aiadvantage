@@ -22,6 +22,7 @@ const PLACEHOLDER_ARTICLES: Article[] = [
     category: s.category as CategoryKey,
     freshness_score: 92,
     hero_image_url: null,
+    featured_image_url: null,
     meta_description: s.meta_description,
     keywords: s.keywords,
     published_at: s.published_at,
@@ -37,6 +38,7 @@ const PLACEHOLDER_ARTICLES: Article[] = [
     category: "opinioni" as CategoryKey,
     freshness_score: 88,
     hero_image_url: null,
+    featured_image_url: null,
     meta_description:
       "Cosa cambia per le startup AI con il nuovo regolamento europeo. Tutto quello che devi sapere.",
     keywords: ["AI Act", "startup", "Europa"],
@@ -53,6 +55,7 @@ const PLACEHOLDER_ARTICLES: Article[] = [
     category: "casi_duso" as CategoryKey,
     freshness_score: 91,
     hero_image_url: null,
+    featured_image_url: null,
     meta_description:
       "Come deployare agenti AI in produzione senza perdere il controllo. Architetture, guardrail e best practice.",
     keywords: ["agenti", "AI", "produzione"],
@@ -69,6 +72,7 @@ const PLACEHOLDER_ARTICLES: Article[] = [
     category: "ai_news" as CategoryKey,
     freshness_score: 85,
     hero_image_url: null,
+    featured_image_url: null,
     meta_description:
       "Confronto completo tra i migliori modelli open source del 2026: performance, costi e casi d'uso.",
     keywords: ["Mistral", "Llama", "open source"],
@@ -85,6 +89,7 @@ const PLACEHOLDER_ARTICLES: Article[] = [
     category: "tutorial" as CategoryKey,
     freshness_score: 82,
     hero_image_url: null,
+    featured_image_url: null,
     meta_description:
       "A deep dive into why typography matters for coding speed and legibility.",
     keywords: ["typography", "devtools", "fonts"],
@@ -101,6 +106,7 @@ const PLACEHOLDER_ARTICLES: Article[] = [
     category: "tools" as CategoryKey,
     freshness_score: 89,
     hero_image_url: null,
+    featured_image_url: null,
     meta_description:
       "Come implementare ChatGPT Enterprise nella tua azienda: sicurezza, privacy e best practice GDPR.",
     keywords: ["ChatGPT", "Enterprise", "GDPR"],
@@ -117,6 +123,7 @@ const PLACEHOLDER_ARTICLES: Article[] = [
     category: "web_dev" as CategoryKey,
     freshness_score: 93,
     hero_image_url: null,
+    featured_image_url: null,
     meta_description:
       "Come integrare l'AI nelle app Next.js 15: streaming, RSC e pattern avanzati.",
     keywords: ["Next.js", "AI", "streaming", "RSC"],

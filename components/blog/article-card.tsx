@@ -31,9 +31,9 @@ export function ArticleCard({ article, author, readTime, index = 0 }: ArticleCar
         <article className="h-full bg-[#0a0a0a] rounded-2xl overflow-hidden border border-gray-800 hover:border-[#22c55e]/30 transition-all duration-300 card-glow">
           {/* Image Container */}
           <div className="relative h-52 overflow-hidden">
-            {article.hero_image_url ? (
+            {(article.featured_image_url || article.hero_image_url) ? (
               <Image
-                src={article.hero_image_url}
+                src={article.featured_image_url || article.hero_image_url!}
                 alt={article.title}
                 fill
                 className="object-cover transition-transform duration-500 group-hover:scale-110"

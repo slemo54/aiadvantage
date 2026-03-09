@@ -50,9 +50,9 @@ export function Sidebar({ articles }: SidebarProps) {
             <Link key={article.id} href={`/blog/${article.slug}`}>
               <article className="group flex gap-4 p-3 rounded-xl hover:bg-gray-800/50 transition-colors cursor-pointer">
                 <div className="w-20 h-16 rounded-lg overflow-hidden shrink-0">
-                  {article.hero_image_url ? (
+                  {(article.featured_image_url || article.hero_image_url) ? (
                     <img
-                      src={article.hero_image_url}
+                      src={article.featured_image_url || article.hero_image_url!}
                       alt={article.title}
                       className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                     />

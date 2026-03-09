@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useParams } from "next/navigation";
 import {
   ArrowLeft,
@@ -178,6 +179,7 @@ function seedToArticle(s: SeedArticle): Article {
     category: s.category as CategoryKey,
     freshness_score: 90,
     hero_image_url: null,
+    featured_image_url: null,
     meta_description: s.meta_description,
     keywords: s.keywords,
     published_at: s.published_at,
@@ -263,23 +265,37 @@ export default function BlogArticlePage() {
       <section className="relative">
         <div className="mx-auto max-w-7xl px-4 pt-6 sm:px-6 lg:px-8">
           <div className={`relative aspect-[21/9] overflow-hidden rounded-2xl bg-gradient-to-br ${gradient}`}>
-            {/* Grid overlay */}
-            <div className="pointer-events-none absolute inset-0 opacity-10"
-              style={{ backgroundImage: "linear-gradient(rgba(255,255,255,.15) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.15) 1px, transparent 1px)", backgroundSize: "40px 40px" }} />
-            {/* Category badge */}
-            <div className="absolute inset-0 flex items-center justify-center">
-              <svg viewBox="0 0 200 200" className="h-48 w-48 opacity-10" fill="none">
-                <circle cx="100" cy="100" r="80" stroke="white" strokeWidth="1"/>
-                <circle cx="100" cy="100" r="55" stroke="white" strokeWidth="1"/>
-                <circle cx="100" cy="100" r="30" stroke="white" strokeWidth="1"/>
-                <line x1="20" y1="100" x2="180" y2="100" stroke="white" strokeWidth="1"/>
-                <line x1="100" y1="20" x2="100" y2="180" stroke="white" strokeWidth="1"/>
-                <circle cx="100" cy="40" r="5" fill="white"/>
-                <circle cx="100" cy="160" r="5" fill="white"/>
-                <circle cx="40" cy="100" r="5" fill="white"/>
-                <circle cx="160" cy="100" r="5" fill="white"/>
-              </svg>
-            </div>
+            {/* Featured image or fallback gradient */}
+            {(article.featured_image_url || article.hero_image_url) ? (
+              <Image
+                src={article.featured_image_url || article.hero_image_url!}
+                alt={article.title}
+                fill
+                className="object-cover"
+                priority
+              />
+            ) : (
+              <>
+                {/* Grid overlay */}
+                <div className="pointer-events-none absolute inset-0 opacity-10"
+                  style={{ backgroundImage: "linear-gradient(rgba(255,255,255,.15) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.15) 1px, transparent 1px)", backgroundSize: "40px 40px" }} />
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <svg viewBox="0 0 200 200" className="h-48 w-48 opacity-10" fill="none">
+                    <circle cx="100" cy="100" r="80" stroke="white" strokeWidth="1"/>
+                    <circle cx="100" cy="100" r="55" stroke="white" strokeWidth="1"/>
+                    <circle cx="100" cy="100" r="30" stroke="white" strokeWidth="1"/>
+                    <line x1="20" y1="100" x2="180" y2="100" stroke="white" strokeWidth="1"/>
+                    <line x1="100" y1="20" x2="100" y2="180" stroke="white" strokeWidth="1"/>
+                    <circle cx="100" cy="40" r="5" fill="white"/>
+                    <circle cx="100" cy="160" r="5" fill="white"/>
+                    <circle cx="40" cy="100" r="5" fill="white"/>
+                    <circle cx="160" cy="100" r="5" fill="white"/>
+                  </svg>
+                </div>
+              </>
+            )}
+            {/* Gradient overlay for readability */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
             <div className="absolute bottom-4 left-4">
               <span className="inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold text-white"
                 style={{ backgroundColor: `${category.accent}dd` }}>

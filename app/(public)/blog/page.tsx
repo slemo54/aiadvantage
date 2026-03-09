@@ -35,6 +35,7 @@ const PLACEHOLDER_ARTICLES: Article[] = [
     category: "casi_duso",
     freshness_score: 95,
     hero_image_url: null,
+    featured_image_url: null,
     meta_description:
       "Discover how to deploy Llama 3 for internal data processing without compromising privacy.",
     keywords: ["LLM", "privacy", "enterprise"],
@@ -51,6 +52,7 @@ const PLACEHOLDER_ARTICLES: Article[] = [
     category: "ai_news",
     freshness_score: 90,
     hero_image_url: null,
+    featured_image_url: null,
     meta_description:
       "A comprehensive look at the foundation models dominating the market this year.",
     keywords: ["AI", "report", "generative"],
@@ -67,6 +69,7 @@ const PLACEHOLDER_ARTICLES: Article[] = [
     category: "web_dev",
     freshness_score: 88,
     hero_image_url: null,
+    featured_image_url: null,
     meta_description:
       "Architecting your frontend to handle real-time generative streaming responses.",
     keywords: ["API", "web", "scalable"],
@@ -83,6 +86,7 @@ const PLACEHOLDER_ARTICLES: Article[] = [
     category: "casi_duso",
     freshness_score: 91,
     hero_image_url: null,
+    featured_image_url: null,
     meta_description:
       "Practical implementations of diagnostic AI currently saving lives in clinics.",
     keywords: ["healthcare", "AI", "diagnostic"],
@@ -99,6 +103,7 @@ const PLACEHOLDER_ARTICLES: Article[] = [
     category: "ai_news",
     freshness_score: 85,
     hero_image_url: null,
+    featured_image_url: null,
     meta_description:
       "Why the next shift in AI isn't better models, but autonomous agents.",
     keywords: ["agents", "workflow", "autonomous"],
@@ -115,6 +120,7 @@ const PLACEHOLDER_ARTICLES: Article[] = [
     category: "tutorial",
     freshness_score: 82,
     hero_image_url: null,
+    featured_image_url: null,
     meta_description:
       "A deep dive into why typography matters for coding speed and legibility.",
     keywords: ["typography", "devtools", "fonts"],
@@ -131,6 +137,7 @@ const PLACEHOLDER_ARTICLES: Article[] = [
     category: "tutorial",
     freshness_score: 94,
     hero_image_url: null,
+    featured_image_url: null,
     meta_description:
       "Quando conviene usare modelli locali e quando il cloud è la scelta migliore.",
     keywords: ["LLM", "tutorial", "privacy"],
@@ -147,6 +154,7 @@ const PLACEHOLDER_ARTICLES: Article[] = [
     category: "opinioni",
     freshness_score: 87,
     hero_image_url: null,
+    featured_image_url: null,
     meta_description:
       "Un'analisi critica su bias, fairness e responsabilità nei sistemi AI.",
     keywords: ["etica", "bias", "fairness"],
@@ -163,6 +171,7 @@ const PLACEHOLDER_ARTICLES: Article[] = [
     category: "tools",
     freshness_score: 93,
     hero_image_url: null,
+    featured_image_url: null,
     meta_description:
       "Come Cursor sta rivoluzionando il modo in cui scriviamo codice.",
     keywords: ["cursor", "IDE", "coding"],

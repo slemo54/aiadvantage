@@ -64,6 +64,7 @@ export async function POST(
         freshness_score: idea.freshness_score ?? 50,
         content_html: null,
         hero_image_url: null,
+        featured_image_url: null,
         meta_description: null,
       })
       .select()

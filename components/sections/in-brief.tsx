@@ -56,9 +56,9 @@ export function InBrief({ articles }: InBriefProps) {
                 <article className="group flex gap-4 p-4 rounded-xl bg-[#0a0a0a] border border-gray-800 hover:border-gray-700 transition-all cursor-pointer">
                   {/* Thumbnail */}
                   <div className="w-28 h-20 rounded-lg overflow-hidden shrink-0">
-                    {article.hero_image_url ? (
+                    {(article.featured_image_url || article.hero_image_url) ? (
                       <img
-                        src={article.hero_image_url}
+                        src={article.featured_image_url || article.hero_image_url!}
                         alt={article.title}
                         className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                       />

@@ -20,6 +20,7 @@ const ArticleCreateSchema = z.object({
   category: z.enum(CATEGORY_KEYS),
   freshness_score: z.number().int().min(0).max(100).optional().default(50),
   hero_image_url: z.string().url().nullable().optional(),
+  featured_image_url: z.string().url().nullable().optional(),
   meta_description: z.string().max(160).nullable().optional(),
   keywords: z.array(z.string()).optional().default([]),
   published_at: z.string().datetime().nullable().optional(),

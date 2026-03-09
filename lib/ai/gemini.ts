@@ -6,6 +6,7 @@ interface ImagenInstance {
 
 interface ImagenParameters {
   sampleCount: number;
+  aspectRatio?: string;
 }
 
 interface ImagenPrediction {
@@ -39,6 +40,7 @@ const REVIEW_MODEL = "gemini-1.5-pro";
 async function callImagen(
   apiKey: string,
   prompt: string,
+  aspectRatio?: string,
   attempt: number = 1
 ): Promise<ImagenResponse> {
   const controller = new AbortController();
@@ -46,9 +48,14 @@ async function callImagen(
 
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${IMAGEN_MODEL}:predict?key=${apiKey}`;
 
+  const parameters: ImagenParameters = { sampleCount: 1 };
+  if (aspectRatio) {
+    parameters.aspectRatio = aspectRatio;
+  }
+
   const body: { instances: ImagenInstance[]; parameters: ImagenParameters } = {
     instances: [{ prompt }],
-    parameters: { sampleCount: 1 },
+    parameters,
   };
 
   try {
@@ -63,7 +70,7 @@ async function callImagen(
       const errorText = await response.text();
       if (response.status === 429 && attempt < 3) {
         await new Promise((resolve) => setTimeout(resolve, attempt * 3000));
-        return callImagen(apiKey, prompt, attempt + 1);
+        return callImagen(apiKey, prompt, aspectRatio, attempt + 1);
       }
       throw new Error(`Gemini Imagen error ${response.status}: ${errorText}`);
     }
@@ -74,7 +81,7 @@ async function callImagen(
   }
 }
 
-export async function generateImage(prompt: string): Promise<string | null> {
+export async function generateImage(prompt: string, aspectRatio?: string): Promise<string | null> {
   const apiKey = process.env.GEMINI_API_KEY ?? process.env.GOOGLE_AI_API_KEY;
   if (!apiKey) {
     throw new Error(
@@ -83,7 +90,7 @@ export async function generateImage(prompt: string): Promise<string | null> {
   }
 
   try {
-    const data = await callImagen(apiKey, prompt);
+    const data = await callImagen(apiKey, prompt, aspectRatio);
     const prediction = data.predictions?.[0];
     if (!prediction?.bytesBase64Encoded) {
       return null;

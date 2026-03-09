@@ -77,9 +77,9 @@ export function CategorySection({
             <Link href={`/blog/${mainArticle.slug}`}>
               <article className="group cursor-pointer">
                 <div className="aspect-[4/3] rounded-xl overflow-hidden mb-4">
-                  {mainArticle.hero_image_url ? (
+                  {(mainArticle.featured_image_url || mainArticle.hero_image_url) ? (
                     <img
-                      src={mainArticle.hero_image_url}
+                      src={mainArticle.featured_image_url || mainArticle.hero_image_url!}
                       alt={mainArticle.title}
                       className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                     />
@@ -118,9 +118,9 @@ export function CategorySection({
                 <Link href={`/blog/${article.slug}`}>
                   <article className="group flex items-center gap-4 py-4 border-b border-gray-800 cursor-pointer hover:border-gray-700 transition-colors">
                     <div className="w-20 h-20 rounded-lg overflow-hidden shrink-0">
-                      {article.hero_image_url ? (
+                      {(article.featured_image_url || article.hero_image_url) ? (
                         <img
-                          src={article.hero_image_url}
+                          src={article.featured_image_url || article.hero_image_url!}
                           alt={article.title}
                           className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                         />

@@ -9,6 +9,7 @@ export interface Article {
   category: CategoryKey;
   freshness_score: number;
   hero_image_url: string | null;
+  featured_image_url: string | null;
   meta_description: string | null;
   keywords: string[];
   published_at: string | null;

@@ -2,11 +2,21 @@ import { NextRequest, NextResponse } from "next/server";
 import { generateImage } from "@/lib/ai/gemini";
 import { createAdminClient } from "@/lib/supabase/admin";
 
-function buildImagePrompt(title: string, category: string): string {
+function buildHeroPrompt(title: string, category: string): string {
   return (
     `Professional blog hero image for an Italian AI technology article. ` +
     `Article title: "${title}". Category: ${category}. ` +
     `Style: modern, clean, tech-focused, abstract digital illustration. ` +
+    `Colors: deep blue and purple gradient with bright accents. ` +
+    `No text, no letters, no words in the image. Photorealistic quality.`
+  );
+}
+
+function buildFeaturedPrompt(title: string, category: string): string {
+  return (
+    `Wide landscape featured image for an Italian AI blog article card. ` +
+    `Article title: "${title}". Category: ${category}. ` +
+    `Style: modern, sleek, tech-focused composition optimized for a wide rectangular card. ` +
     `Colors: deep blue and purple gradient with bright accents. ` +
     `No text, no letters, no words in the image. Photorealistic quality.`
   );
@@ -58,15 +68,23 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const imagePrompt = buildImagePrompt(
+    const heroPrompt = buildHeroPrompt(
+      article.title as string,
+      article.category as string
+    );
+    const featuredPrompt = buildFeaturedPrompt(
       article.title as string,
       article.category as string
     );
 
-    const imageDataUri = await generateImage(imagePrompt);
+    // Generate both images in parallel: hero (square) and featured (16:9 landscape)
+    const [heroDataUri, featuredDataUri] = await Promise.all([
+      generateImage(heroPrompt),
+      generateImage(featuredPrompt, "16:9"),
+    ]);
 
-    if (!imageDataUri) {
-      // Non-fatal: continue without image and move to reviewing
+    if (!heroDataUri && !featuredDataUri) {
+      // Non-fatal: continue without images and move to reviewing
       await supabase
         .from("articles")
         .update({ status: "reviewing", updated_at: new Date().toISOString() })
@@ -76,17 +94,21 @@ export async function POST(request: NextRequest) {
         success: true,
         articleId,
         hero_image_url: null,
-        warning: "Gemini Imagen non ha restituito un'immagine. Articolo in revisione senza hero image.",
+        featured_image_url: null,
+        warning: "Gemini Imagen non ha restituito immagini. Articolo in revisione senza immagini.",
       });
     }
 
+    const updatePayload: Record<string, unknown> = {
+      status: "reviewing",
+      updated_at: new Date().toISOString(),
+    };
+    if (heroDataUri) updatePayload.hero_image_url = heroDataUri;
+    if (featuredDataUri) updatePayload.featured_image_url = featuredDataUri;
+
     const { error: updateError } = await supabase
       .from("articles")
-      .update({
-        hero_image_url: imageDataUri,
-        status: "reviewing",
-        updated_at: new Date().toISOString(),
-      })
+      .update(updatePayload)
       .eq("id", articleId);
 
     if (updateError) {
@@ -96,7 +118,8 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       articleId,
-      hero_image_url: imageDataUri.slice(0, 60) + "…[base64]",
+      hero_image_url: heroDataUri ? heroDataUri.slice(0, 60) + "…[base64]" : null,
+      featured_image_url: featuredDataUri ? featuredDataUri.slice(0, 60) + "…[base64]" : null,
     });
   } catch (err) {
     console.error("[workflow/images] Errore:", err);
