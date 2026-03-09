@@ -193,6 +193,7 @@ function TabStagePrompt({ stage }: { stage: PipelineStage }) {
   }
 
   async function handleDeleteFile(fileId: string, fileName: string) {
+    if (!confirm(`Eliminare "${fileName}"? Azione irreversibile.`)) return;
     try {
       const res = await fetch(`/api/admin/knowledge-base/${fileId}`, {
         method: "DELETE",
@@ -306,6 +307,7 @@ function TabStagePrompt({ stage }: { stage: PipelineStage }) {
                     <Button
                       variant="ghost"
                       size="sm"
+                      title="Elimina file"
                       className="h-7 w-7 p-0 text-muted-foreground hover:text-red-500"
                       onClick={() => handleDeleteFile(f.id, f.file_name)}
                     >
