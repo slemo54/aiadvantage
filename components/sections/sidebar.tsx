@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo } from "react";
 import { motion } from "framer-motion";
 import { TrendingUp, Sparkles, Clock } from "lucide-react";
 import type { Article } from "@/lib/types";
@@ -12,9 +13,13 @@ interface SidebarProps {
 
 export function Sidebar({ articles }: SidebarProps) {
   const latest = articles.slice(0, 4);
-  const popular = [...articles]
-    .sort((a, b) => (b.freshness_score || 0) - (a.freshness_score || 0))
-    .slice(0, 5);
+  
+  // ⚡ Performance: Memoize expensive sort operation to avoid O(n log n) on every render
+  const popular = useMemo(() => {
+    return [...articles]
+      .sort((a, b) => (b.freshness_score || 0) - (a.freshness_score || 0))
+      .slice(0, 5);
+  }, [articles]);
 
   const formatDate = (dateString: string | null) => {
     if (!dateString) return "Data sconosciuta";
