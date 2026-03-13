@@ -162,7 +162,6 @@ export async function generateImageVenice(prompt: string): Promise<string | null
       body: JSON.stringify({
         model: "nano-banana-2",
         prompt,
-        n: 1,
         size: "1024x1024",
         response_format: "b64_json",
       }),
@@ -171,13 +170,18 @@ export async function generateImageVenice(prompt: string): Promise<string | null
 
     if (!response.ok) {
       const err = await response.text();
-      console.error(`[venice-image] HTTP ${response.status}:`, err.slice(0, 200));
-      return null;
+      console.error(`[venice-image] HTTP ${response.status}:`, err.slice(0, 400));
+      throw new Error(`Venice image API HTTP ${response.status}: ${err.slice(0, 200)}`);
     }
 
     const data = (await response.json()) as VeniceImageResponse;
+    console.log(`[venice-image] Response keys:`, Object.keys(data));
     const b64 = data.data?.[0]?.b64_json;
-    return b64 ? `data:image/png;base64,${b64}` : null;
+    if (!b64) {
+      console.error("[venice-image] No b64_json in response. data.data:", JSON.stringify(data.data)?.slice(0, 300));
+      return null;
+    }
+    return `data:image/png;base64,${b64}`;
   } catch (err) {
     console.error("[venice-image] Error:", err);
     return null;
