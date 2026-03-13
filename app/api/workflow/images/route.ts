@@ -5,11 +5,13 @@ import { resolvePrompt, interpolatePrompt, appendKnowledgeBase } from "@/lib/ai/
 
 function buildImagePrompt(title: string, category: string): string {
   return (
-    `Professional blog hero image for an Italian AI technology article. ` +
-    `Article title: "${title}". Category: ${category}. ` +
-    `Style: modern, clean, tech-focused, abstract digital illustration. ` +
-    `Colors: deep blue and purple gradient with bright accents. ` +
-    `No text, no letters, no words in the image. Photorealistic quality.`
+    `Editorial magazine-quality hero photograph for a professional Italian AI technology blog. ` +
+    `Article: "${title}". Topic area: ${category}. ` +
+    `Style: cinematic, high-end editorial photography or photorealistic digital art. ` +
+    `Mood: thoughtful, innovative, human-centered technology. ` +
+    `Composition: wide 16:9, dramatic lighting, shallow depth of field. ` +
+    `Avoid: circuit boards, clipart, stock photo clichés, generic blue tech backgrounds. ` +
+    `No text, no letters, no watermarks, no UI elements in the image.`
   );
 }
 
