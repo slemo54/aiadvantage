@@ -5,11 +5,13 @@ import { resolvePrompt, interpolatePrompt, appendKnowledgeBase } from "@/lib/ai/
 
 function buildImagePrompt(title: string, category: string): string {
   return (
-    `Professional blog hero image for an Italian AI technology article. ` +
-    `Article title: "${title}". Category: ${category}. ` +
-    `Style: modern, clean, tech-focused, abstract digital illustration. ` +
-    `Colors: deep blue and purple gradient with bright accents. ` +
-    `No text, no letters, no words in the image. Photorealistic quality.`
+    `Create a highly professional, cinematic, and modern hero image for an Italian AI technology blog named "ilvantaggioai.it". ` +
+    `The article title is: "${title}". The category is: "${category}". ` +
+    `Style constraints: Minimalist, tech-focused, elegant abstract digital illustration or photorealistic render. ` +
+    `Color palette: Deep midnight blues, neon cyans, and rich purples with bright, glowing accents. ` +
+    `Subject: Conceptual representation of the article title related to artificial intelligence, automation, or future tech. ` +
+    `Crucial rule: ABSOLUTELY NO TEXT, NO LETTERS, NO WORDS, NO LOGOS, NO WATERMARKS anywhere in the image. ` +
+    `The final output must be visually striking, suitable for a 16:9 widescreen blog header.`
   );
 }
 
