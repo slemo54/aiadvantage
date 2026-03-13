@@ -160,7 +160,7 @@ export async function generateImageVenice(prompt: string): Promise<string | null
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "fluently-xl",
+        model: "nano-banana-2",
         prompt,
         n: 1,
         size: "1024x1024",
