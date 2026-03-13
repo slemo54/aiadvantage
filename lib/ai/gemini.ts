@@ -6,6 +6,7 @@ interface ImagenInstance {
 
 interface ImagenParameters {
   sampleCount: number;
+  aspectRatio?: string;
 }
 
 interface ImagenPrediction {
@@ -48,7 +49,7 @@ async function callImagen(
 
   const body: { instances: ImagenInstance[]; parameters: ImagenParameters } = {
     instances: [{ prompt }],
-    parameters: { sampleCount: 1 },
+    parameters: { sampleCount: 1, aspectRatio: "16:9" },
   };
 
   try {
