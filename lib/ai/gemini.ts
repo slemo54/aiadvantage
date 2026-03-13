@@ -33,7 +33,7 @@ interface GeminiResponse {
   candidates: GeminiCandidate[];
 }
 
-const IMAGEN_MODEL = "imagen-3.0-generate-001";
+const IMAGEN_MODEL = "gemini-nano-banana-2";
 const REVIEW_MODEL = "gemini-1.5-pro";
 
 async function callImagen(

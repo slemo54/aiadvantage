@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { generateImageVenice } from "@/lib/ai/kimi";
+import { generateImage } from "@/lib/ai/gemini";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { resolvePrompt, interpolatePrompt, appendKnowledgeBase } from "@/lib/ai/prompt-resolver";
 
@@ -71,7 +71,7 @@ export async function POST(request: NextRequest) {
         )
       : buildImagePrompt(article.title as string, article.category as string);
 
-    const imageDataUri = await generateImageVenice(imagePrompt);
+    const imageDataUri = await generateImage(imagePrompt);
 
     if (!imageDataUri) {
       // Non-fatal: continue without image and move to reviewing
@@ -84,7 +84,7 @@ export async function POST(request: NextRequest) {
         success: true,
         articleId,
         hero_image_url: null,
-        warning: "Venice AI non ha restituito un'immagine. Articolo in revisione senza hero image.",
+        warning: "Gemini non ha restituito un'immagine. Articolo in revisione senza hero image.",
       });
     }
 
