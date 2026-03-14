@@ -1,7 +1,7 @@
 "use client";
 
-import { motion } from "framer-motion";
-import { TrendingUp, Sparkles, Clock } from "lucide-react";
+import Image from "next/image";
+import { TrendingUp, Sparkles, Clock, ArrowRight } from "lucide-react";
 import type { Article } from "@/lib/types";
 import { CATEGORIES } from "@/lib/constants";
 import Link from "next/link";
@@ -31,126 +31,92 @@ export function Sidebar({ articles }: SidebarProps) {
   };
 
   return (
-    <aside className="space-y-8">
-      {/* Latest News */}
-      <motion.div
-        initial={{ opacity: 0, x: 20 }}
-        whileInView={{ opacity: 1, x: 0 }}
-        viewport={{ once: true }}
-        className="bg-[#0a0a0a] border border-gray-800 rounded-2xl overflow-hidden"
-      >
-        <div className="flex items-center justify-between px-5 py-4 border-b border-gray-800">
-          <h3 className="font-bold text-white flex items-center gap-2">
-            <Clock className="w-4 h-4 text-[#22c55e]" />
-            Ultime News
+    <aside className="space-y-6">
+      <div className="reveal-on-scroll overflow-hidden rounded-[1.8rem] border border-white/10 bg-white/[0.03]">
+        <div className="flex items-center justify-between border-b border-white/10 px-5 py-4">
+          <h3 className="flex items-center gap-2 text-sm font-black uppercase tracking-[0.2em] text-white">
+            <Clock className="h-4 w-4 text-[#10b981]" />
+            Ultime notizie
           </h3>
+          <Link href="/blog" className="text-xs font-semibold text-[#86efac] hover:text-white">Vedi tutte</Link>
         </div>
-        <div className="p-2">
+        <div className="space-y-3 p-3">
           {latest.map((article) => (
-            <Link key={article.id} href={`/blog/${article.slug}`}>
-              <article className="group flex gap-4 p-3 rounded-xl hover:bg-gray-800/50 transition-colors cursor-pointer">
-                <div className="w-20 h-16 rounded-lg overflow-hidden shrink-0">
+            <Link key={article.id} href={`/blog/${article.slug}`} className="group block">
+              <article className="bento-card grid grid-cols-[92px_1fr] gap-3 rounded-[1.2rem] border border-white/6 bg-black/20 p-3">
+                <div className="relative overflow-hidden rounded-xl bg-[linear-gradient(135deg,#0f172a,#111827)]">
                   {article.hero_image_url ? (
-                    <img
+                    <Image
                       src={article.hero_image_url}
                       alt={article.title}
-                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                      fill
+                      sizes="160px"
+                      className="object-cover transition-transform duration-300 group-hover:scale-105"
                     />
                   ) : (
-                    <div className="w-full h-full bg-gradient-to-br from-gray-800 to-gray-700 flex items-center justify-center">
-                      <span className="text-lg">🤖</span>
-                    </div>
+                    <div className="flex h-full min-h-[76px] w-full items-center justify-center text-xl">🤖</div>
                   )}
                 </div>
-                <div className="flex-1 min-w-0">
-                  <span 
-                    className="text-[10px] font-bold tracking-wider"
-                    style={{ color: CATEGORIES[article.category]?.accent || '#22c55e' }}
-                  >
-                    {article.category.replace("_", " ").toUpperCase()}
+                <div className="min-w-0">
+                  <span className="text-[10px] font-bold tracking-[0.18em] uppercase" style={{ color: CATEGORIES[article.category]?.accent || '#22c55e' }}>
+                    {CATEGORIES[article.category]?.label ?? article.category}
                   </span>
-                  <h4 className="text-white text-sm font-semibold line-clamp-2 group-hover:text-[#22c55e] transition-colors">
+                  <h4 className="mt-1 line-clamp-2 text-sm font-semibold leading-6 text-white group-hover:text-[#86efac]">
                     {article.title}
                   </h4>
-                  <span className="text-gray-500 text-xs mt-1 block">
-                    {formatDate(article.published_at)}
-                  </span>
+                  <span className="mt-2 block text-xs text-zinc-500">{formatDate(article.published_at)}</span>
                 </div>
               </article>
             </Link>
           ))}
         </div>
-      </motion.div>
+      </div>
 
-      {/* Most Popular */}
-      <motion.div
-        initial={{ opacity: 0, x: 20 }}
-        whileInView={{ opacity: 1, x: 0 }}
-        viewport={{ once: true }}
-        transition={{ delay: 0.1 }}
-        className="bg-[#0a0a0a] border border-gray-800 rounded-2xl overflow-hidden"
-      >
-        <div className="flex items-center justify-between px-5 py-4 border-b border-gray-800">
-          <h3 className="font-bold text-white flex items-center gap-2">
-            <TrendingUp className="w-4 h-4 text-[#ef4444]" />
-            Più Popolari
+      <div className="reveal-on-scroll overflow-hidden rounded-[1.8rem] border border-white/10 bg-white/[0.03]">
+        <div className="flex items-center justify-between border-b border-white/10 px-5 py-4">
+          <h3 className="flex items-center gap-2 text-sm font-black uppercase tracking-[0.2em] text-white">
+            <TrendingUp className="h-4 w-4 text-[#f97316]" />
+            Più letti
           </h3>
         </div>
-        <div className="p-2">
+        <div className="space-y-2 p-3">
           {popular.map((article, idx) => (
-            <Link key={article.id} href={`/blog/${article.slug}`}>
-              <article className="group flex items-start gap-3 p-3 rounded-xl hover:bg-gray-800/50 transition-colors cursor-pointer">
-                <span className="w-6 h-6 rounded-full bg-[#22c55e] text-black text-xs font-bold flex items-center justify-center shrink-0 mt-0.5">
-                  {idx + 1}
-                </span>
-                <div className="flex-1 min-w-0">
-                  <h4 className="text-white text-sm font-semibold line-clamp-2 group-hover:text-[#22c55e] transition-colors">
-                    {article.title}
-                  </h4>
-                  <span className="text-gray-500 text-xs mt-1 block">
-                    {formatDate(article.published_at)}
+            <Link key={article.id} href={`/blog/${article.slug}`} className="group block">
+              <article className="rounded-[1.2rem] border border-white/6 bg-black/20 p-4 transition hover:border-[#10b981]/30 hover:bg-white/[0.04]">
+                <div className="flex items-start gap-3">
+                  <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#10b981] text-xs font-black text-black">
+                    {idx + 1}
                   </span>
+                  <div className="min-w-0">
+                    <h4 className="line-clamp-2 text-sm font-semibold leading-6 text-white group-hover:text-[#86efac]">
+                      {article.title}
+                    </h4>
+                    <span className="mt-1 block text-xs text-zinc-500">{formatDate(article.published_at)}</span>
+                  </div>
                 </div>
               </article>
             </Link>
           ))}
         </div>
-      </motion.div>
+      </div>
 
-      {/* Promo Box */}
-      <motion.div
-        initial={{ opacity: 0, x: 20 }}
-        whileInView={{ opacity: 1, x: 0 }}
-        viewport={{ once: true }}
-        transition={{ delay: 0.2 }}
-        className="relative p-6 rounded-2xl border-2 border-[#22c55e]/30 bg-gradient-to-br from-[#0a0a0a] to-[#111] overflow-hidden"
-        style={{
-          backgroundImage: `
-            linear-gradient(rgba(34, 197, 94, 0.03) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(34, 197, 94, 0.03) 1px, transparent 1px)
-          `,
-          backgroundSize: "24px 24px",
-        }}
-      >
-        <div className="relative z-10">
-          <div className="flex items-center gap-2 mb-3">
-            <Sparkles className="w-5 h-5 text-[#22c55e]" />
-            <span className="text-[#22c55e] font-bold text-sm">Newsletter</span>
-          </div>
-          <h4 className="text-white font-bold mb-2">
-            Resta aggiornato sull&apos;AI
-          </h4>
-          <p className="text-gray-400 text-sm mb-4">
-            Ricevi le ultime news sull&apos;intelligenza artificiale direttamente nella tua inbox.
-          </p>
-          <a
-            href="#newsletter"
-            className="inline-flex items-center justify-center w-full px-4 py-2.5 bg-[#22c55e] text-black font-semibold rounded-lg hover:bg-[#4ade80] transition-colors"
-          >
-            Iscriviti gratis
-          </a>
+      <div className="reveal-on-scroll dots-pattern overflow-hidden rounded-[1.8rem] border border-[#10b981]/20 bg-[radial-gradient(circle_at_top_left,rgba(16,185,129,0.14),transparent_30%),linear-gradient(135deg,#07110d,#0a0f14)] p-6">
+        <div className="flex items-center gap-2">
+          <Sparkles className="h-5 w-5 text-[#10b981]" />
+          <span className="text-sm font-bold text-[#86efac]">Newsletter</span>
         </div>
-      </motion.div>
+        <h4 className="mt-3 text-xl font-black text-white">Ricevi il vantaggio prima degli altri</h4>
+        <p className="mt-3 text-sm leading-7 text-zinc-300">
+          Ogni settimana: trend selezionati, tool utili e insight rapidi da applicare subito.
+        </p>
+        <a
+          href="#newsletter"
+          className="cta-cursor relative mt-5 inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-[#10b981] px-4 py-3 text-sm font-black text-black transition hover:bg-[#34d399]"
+        >
+          Iscriviti gratis
+          <ArrowRight className="h-4 w-4" />
+        </a>
+      </div>
     </aside>
   );
 }

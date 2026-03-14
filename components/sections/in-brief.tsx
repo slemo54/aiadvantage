@@ -1,7 +1,7 @@
 "use client";
 
-import { motion } from "framer-motion";
-import { Zap, Clock } from "lucide-react";
+import Image from "next/image";
+import { Zap, Clock3, ArrowUpRight } from "lucide-react";
 import type { Article } from "@/lib/types";
 import { CATEGORIES } from "@/lib/constants";
 import Link from "next/link";
@@ -29,72 +29,52 @@ export function InBrief({ articles }: InBriefProps) {
   };
 
   return (
-    <section className="py-12 bg-black">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="mb-8"
-        >
-          <h2 className="text-2xl font-bold text-white flex items-center gap-2">
-            <Zap className="w-6 h-6 text-[#22c55e]" />
-            In Breve
+    <section className="bg-black py-14">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="reveal-on-scroll mb-8 flex items-center justify-between gap-4">
+          <h2 className="flex items-center gap-2 text-2xl font-black text-white sm:text-3xl">
+            <Zap className="h-6 w-6 text-[#10b981]" />
+            In breve
           </h2>
-        </motion.div>
+          <Link href="/blog" className="inline-flex items-center gap-2 text-sm font-semibold text-[#86efac] hover:text-white">
+            Tutti gli articoli
+            <ArrowUpRight className="h-4 w-4" />
+          </Link>
+        </div>
 
-        <div className="grid md:grid-cols-2 gap-4">
-          {briefArticles.map((article, index) => (
-            <motion.div
-              key={article.id}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: index * 0.05 }}
-            >
-              <Link href={`/blog/${article.slug}`}>
-                <article className="group flex gap-4 p-4 rounded-xl bg-[#0a0a0a] border border-gray-800 hover:border-gray-700 transition-all cursor-pointer">
-                  {/* Thumbnail */}
-                  <div className="w-28 h-20 rounded-lg overflow-hidden shrink-0">
-                    {article.hero_image_url ? (
-                      <img
-                        src={article.hero_image_url}
-                        alt={article.title}
-                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                      />
-                    ) : (
-                      <div className="w-full h-full bg-gradient-to-br from-gray-800 to-gray-700 flex items-center justify-center">
-                        <span className="text-2xl">🤖</span>
-                      </div>
-                    )}
-                  </div>
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+          {briefArticles.map((article) => (
+            <Link key={article.id} href={`/blog/${article.slug}`} className="group block reveal-on-scroll">
+              <article className="bento-card overflow-hidden rounded-[1.5rem] border border-white/10 bg-white/[0.03] p-4">
+                <div className="relative mb-4 h-44 overflow-hidden rounded-[1.1rem] bg-[linear-gradient(135deg,#111827,#0f172a)]">
+                  {article.hero_image_url ? (
+                    <Image
+                      src={article.hero_image_url}
+                      alt={article.title}
+                      fill
+                      sizes="(max-width: 1280px) 50vw, 33vw"
+                      className="object-cover transition-transform duration-300 group-hover:scale-105"
+                    />
+                  ) : (
+                    <div className="flex h-full w-full items-center justify-center text-3xl">🤖</div>
+                  )}
+                </div>
 
-                  {/* Content */}
-                  <div className="flex flex-col justify-center min-w-0 flex-1">
-                    <span 
-                      className="text-xs font-bold tracking-wider mb-1"
-                      style={{ color: CATEGORIES[article.category]?.accent || '#22c55e' }}
-                    >
-                      {article.category.replace("_", " ").toUpperCase()}
-                    </span>
-                    
-                    <div className="flex items-start gap-2">
-                      <span className="w-5 h-5 rounded bg-[#22c55e] flex items-center justify-center shrink-0 mt-0.5">
-                        <Zap className="w-3 h-3 text-black" />
-                      </span>
-                      <h4 className="text-white font-semibold text-sm line-clamp-2 group-hover:text-[#22c55e] transition-colors">
-                        {article.title}
-                      </h4>
-                    </div>
-                    
-                    <div className="flex items-center gap-1 text-gray-500 text-xs mt-2">
-                      <Clock className="w-3 h-3" />
-                      <span>{formatDate(article.published_at)}</span>
-                    </div>
-                  </div>
-                </article>
-              </Link>
-            </motion.div>
+                <div className="flex items-center justify-between gap-3 text-[11px] text-zinc-500">
+                  <span className="font-bold uppercase tracking-[0.18em]" style={{ color: CATEGORIES[article.category]?.accent || '#22c55e' }}>
+                    {CATEGORIES[article.category]?.label ?? article.category}
+                  </span>
+                  <span className="inline-flex items-center gap-1"><Clock3 className="h-3.5 w-3.5" /> {formatDate(article.published_at)}</span>
+                </div>
+
+                <h4 className="link-underline mt-3 text-lg font-bold leading-7 text-white">
+                  {article.title}
+                </h4>
+                <p className="mt-3 line-clamp-3 text-sm leading-7 text-zinc-400">
+                  {article.meta_description ?? "Insight rapido, concreto e leggibile in pochi minuti."}
+                </p>
+              </article>
+            </Link>
           ))}
         </div>
       </div>
