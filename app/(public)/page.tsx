@@ -262,7 +262,7 @@ function HeroRevolution() {
 
 function WhyReadUsSection() {
   return (
-    <section className="bg-black py-20">
+    <section className="reveal-on-scroll bg-black py-20">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="reveal-on-scroll mx-auto max-w-3xl text-center">
           <h2 className="mt-4 text-3xl font-black text-white sm:text-4xl">
@@ -293,7 +293,7 @@ function MidPageNewsletter() {
   const counter = useCounter(2547);
 
   return (
-    <section className="bg-black py-14">
+    <section className="reveal-on-scroll bg-black py-14">
       <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
         <div className="reveal-on-scroll dots-pattern relative overflow-hidden rounded-[2rem] border border-[#10b981]/15 bg-[radial-gradient(circle_at_top_left,rgba(16,185,129,0.2),transparent_30%),linear-gradient(135deg,#07110d,#0a0f14)] p-8 sm:p-10 lg:p-12">
           <div className="grid gap-8 lg:grid-cols-[1.2fr_.8fr] lg:items-center">
@@ -359,7 +359,7 @@ export default function HomePage() {
       <MidPageNewsletter />
       <Newsletter />
 
-      <section className="bg-black pb-20">
+      <section className="reveal-on-scroll bg-black pb-20">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="reveal-on-scroll overflow-hidden rounded-[2rem] border border-white/10 bg-[linear-gradient(135deg,rgba(16,185,129,0.12),rgba(255,255,255,0.03),rgba(13,17,23,0.9))] p-8 sm:p-10 lg:p-12">
             <div className="grid gap-8 lg:grid-cols-[1.2fr_.8fr] lg:items-center">
