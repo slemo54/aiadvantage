@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Link from "next/link";
+import { ArrowRight, ShieldCheck, Sparkles, TrendingUp } from "lucide-react";
 import { Hero3D } from "@/components/sections/hero-3d";
 import { FeaturedArticles } from "@/components/sections/featured-articles";
 import { CategorySection } from "@/components/sections/category-section";
@@ -126,6 +128,24 @@ const PLACEHOLDER_ARTICLES: Article[] = [
   },
 ];
 
+const trustPillars = [
+  {
+    title: "Strategia prima della moda",
+    description: "Analisi editoriali che traducono l’AI in opportunità concrete per aziende, creator e team tech.",
+    icon: ShieldCheck,
+  },
+  {
+    title: "Selezione ad alta utilità",
+    description: "Tutorial, tool e use case scelti per ridurre rumore, accelerare decisioni e generare risultati.",
+    icon: TrendingUp,
+  },
+  {
+    title: "Media brand con conversione",
+    description: "Design premium e funnel editoriale pensati per aumentare attenzione, fiducia e iscrizioni.",
+    icon: Sparkles,
+  },
+];
+
 export default function HomePage() {
   const [articles, setArticles] = useState<Article[]>(PLACEHOLDER_ARTICLES);
   const [isLoading, setIsLoading] = useState(true);
@@ -158,19 +178,48 @@ export default function HomePage() {
 
   return (
     <main className="min-h-screen bg-black">
-      {/* Hero with 3D Crystal */}
       <Hero3D />
 
-      {/* Featured Articles Section */}
+      <section className="border-y border-white/5 bg-[#050505] py-6">
+        <div className="mx-auto grid max-w-7xl gap-4 px-4 sm:px-6 lg:grid-cols-3 lg:px-8">
+          {trustPillars.map((pillar) => (
+            <div key={pillar.title} className="rounded-2xl border border-white/8 bg-white/[0.03] p-5 backdrop-blur-sm">
+              <pillar.icon className="h-5 w-5 text-[#22c55e]" />
+              <h3 className="mt-3 text-base font-bold text-white">{pillar.title}</h3>
+              <p className="mt-2 text-sm leading-7 text-zinc-400">{pillar.description}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
       <FeaturedArticles articles={articles} />
 
-      {/* Main Content Grid with Sidebar */}
-      <section className="py-8 bg-black">
+      <section className="py-12 bg-black">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="mb-8 flex flex-col gap-4 rounded-[2rem] border border-white/8 bg-gradient-to-r from-[#22c55e]/10 via-white/[0.03] to-cyan-400/10 p-6 lg:flex-row lg:items-center lg:justify-between">
+            <div>
+              <span className="inline-flex items-center gap-2 rounded-full border border-[#22c55e]/20 bg-[#22c55e]/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-[#86efac]">
+                <Sparkles className="h-3.5 w-3.5" />
+                Feed premium AI italiano
+              </span>
+              <h2 className="mt-4 text-2xl font-black text-white sm:text-3xl">
+                Contenuti costruiti per far crescere attenzione, autorevolezza e iscritti
+              </h2>
+              <p className="mt-3 max-w-3xl text-sm leading-7 text-zinc-400 sm:text-base">
+                Ogni sezione del magazine è pensata per guidare il lettore dal primo insight all’azione: leggere, salvare, condividere e iscriversi.
+              </p>
+            </div>
+            <Link
+              href="/blog"
+              className="inline-flex items-center justify-center gap-2 rounded-full bg-white px-6 py-3 text-sm font-bold text-black transition hover:bg-[#22c55e]"
+            >
+              Vai all’archivio completo
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+          </div>
+
           <div className="grid lg:grid-cols-12 gap-8">
-            {/* Main Content */}
             <div className="lg:col-span-8 space-y-8">
-              {/* Category: AI News */}
               <CategorySection 
                 articles={articles} 
                 category="ai_news" 
@@ -178,7 +227,6 @@ export default function HomePage() {
                 accentColor="#3b82f6"
               />
 
-              {/* Category: Casi d'Uso */}
               <CategorySection 
                 articles={articles} 
                 category="casi_duso" 
@@ -186,7 +234,6 @@ export default function HomePage() {
                 accentColor="#22c55e"
               />
 
-              {/* Category: Tools */}
               <CategorySection 
                 articles={articles} 
                 category="tools" 
@@ -194,11 +241,9 @@ export default function HomePage() {
                 accentColor="#a855f7"
               />
 
-              {/* In Brief */}
               <InBrief articles={articles} />
             </div>
 
-            {/* Sidebar */}
             <div className="lg:col-span-4">
               <div className="sticky top-24">
                 <Sidebar articles={articles} />
@@ -208,7 +253,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* More Categories */}
       <CategorySection 
         articles={articles} 
         category="tutorial" 
@@ -230,7 +274,6 @@ export default function HomePage() {
         accentColor="#14b8a6"
       />
 
-      {/* Newsletter */}
       <Newsletter />
     </main>
   );

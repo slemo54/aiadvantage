@@ -1,167 +1,162 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
+import { ArrowRight, ChevronDown, Sparkles, TrendingUp, ShieldCheck } from "lucide-react";
 import dynamic from "next/dynamic";
 
-// Dynamic import to avoid SSR issues with Three.js
 const CrystalShape3D = dynamic(
   () => import("./crystal-shape").then((mod) => ({ default: mod.CrystalShape3D })),
   {
     ssr: false,
     loading: () => (
-      <div className="w-full h-[500px] lg:h-[600px] flex items-center justify-center">
-        <div className="w-12 h-12 border-4 border-[#22c55e]/30 border-t-[#22c55e] rounded-full animate-spin" />
+      <div className="flex h-[500px] w-full items-center justify-center lg:h-[600px]">
+        <div className="h-12 w-12 rounded-full border-4 border-[#22c55e]/30 border-t-[#22c55e] animate-spin" />
       </div>
     ),
   }
 );
 
+const proofItems = [
+  "Analisi pratiche, non hype",
+  "Tutorial immediatamente applicabili",
+  "Focus su business, web e automazione",
+];
+
 export function Hero3D() {
   return (
-    <section className="relative min-h-screen bg-black overflow-hidden">
-      {/* Subtle grid background */}
-      <div 
+    <section className="relative min-h-screen overflow-hidden bg-black">
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(34,197,94,0.18),transparent_28%),radial-gradient(circle_at_top_right,rgba(34,211,238,0.12),transparent_26%),linear-gradient(to_bottom,rgba(255,255,255,0.02),transparent_40%)]" />
+      <div
         className="absolute inset-0 opacity-10"
         style={{
           backgroundImage: `
-            linear-gradient(rgba(34, 197, 94, 0.2) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(34, 197, 94, 0.2) 1px, transparent 1px)
+            linear-gradient(rgba(34, 197, 94, 0.22) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(34, 197, 94, 0.22) 1px, transparent 1px)
           `,
-          backgroundSize: "64px 64px",
+          backgroundSize: "72px 72px",
         }}
       />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
-        <div className="grid lg:grid-cols-12 gap-8 lg:gap-12 items-center min-h-screen pt-24 pb-16">
-          
-          {/* Left Side Panel */}
-          <motion.div 
+      <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="grid min-h-screen items-center gap-10 pt-28 pb-16 lg:grid-cols-12 lg:gap-12">
+          <motion.div
             initial={{ opacity: 0, x: -30 }}
             animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-            className="lg:col-span-2 hidden lg:flex flex-col items-center"
+            transition={{ duration: 0.7 }}
+            className="lg:col-span-6"
           >
-            <div className="bg-[#0a0a0a] border border-gray-800 rounded-3xl p-6 text-center hover:border-[#22c55e]/30 transition-colors group cursor-pointer">
-              <span className="text-gray-400 text-sm block mb-2 group-hover:text-[#22c55e] transition-colors">
-                Esplora i
+            <div className="inline-flex items-center gap-2 rounded-full border border-[#22c55e]/20 bg-[#22c55e]/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.22em] text-[#86efac]">
+              <Sparkles className="h-3.5 w-3.5" />
+              AI insights per chi deve decidere e costruire
+            </div>
+
+            <h1 className="mt-6 max-w-4xl text-4xl font-black leading-[0.98] text-white sm:text-5xl lg:text-7xl">
+              Il blog AI più
+              <span className="block bg-gradient-to-r from-[#22c55e] via-[#7dd3fc] to-[#4ade80] bg-clip-text text-transparent">
+                utile d’Italia
               </span>
-              <span className="text-white font-semibold block mb-4">
-                nostri articoli
-              </span>
-              <div className="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center mx-auto group-hover:bg-[#22c55e]/20 transition-colors">
-                <ChevronLeft className="w-5 h-5 text-gray-400 group-hover:text-[#22c55e]" />
-              </div>
-            </div>
+              per professionisti, founder e developer
+            </h1>
 
-            {/* Vertical line */}
-            <div className="w-px h-24 bg-gradient-to-b from-gray-800 to-transparent my-6" />
+            <p className="mt-6 max-w-2xl text-base leading-8 text-zinc-300 sm:text-lg">
+              Strategie AI, tutorial operativi, tool selezionati e casi d’uso reali per trasformare l’intelligenza artificiale in vantaggio competitivo.
+            </p>
 
-            <div className="text-xs text-gray-500 uppercase tracking-widest">
-              Scroll
-            </div>
-          </motion.div>
-
-          {/* Center 3D Visualization */}
-          <motion.div 
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.8 }}
-            className="lg:col-span-8 relative"
-          >
-            {/* Header text overlay */}
-            <div className="absolute top-0 left-0 right-0 z-10 text-center pointer-events-none">
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 0.3 }}
-              >
-                <span className="inline-block px-4 py-1.5 rounded-full bg-[#22c55e]/10 border border-[#22c55e]/20 text-[#22c55e] text-sm font-medium mb-4">
-                  Il Vantaggio AI
-                </span>
-              </motion.div>
-              <motion.h1
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 0.4 }}
-                className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-4"
-              >
-                L&apos;AI che evolve
-                <br />
-                <span className="text-[#22c55e]">il tuo business</span>
-              </motion.h1>
-              <motion.p
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 0.5 }}
-                className="text-gray-400 text-lg max-w-xl mx-auto mb-8"
-              >
-                Scopri come l&apos;intelligenza artificiale può trasformare 
-                il tuo modo di lavorare. Articoli, guide e news sull&apos;AI.
-              </motion.p>
-            </div>
-
-            {/* 3D Crystal */}
-            <div className="pt-40">
-              <CrystalShape3D />
-            </div>
-
-            {/* CTA Buttons */}
-            <motion.div 
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.7 }}
-              className="flex flex-col sm:flex-row gap-4 justify-center mt-8"
-            >
+            <div className="mt-8 flex flex-col gap-4 sm:flex-row">
               <a
                 href="#articles"
-                className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-[#22c55e] text-black font-semibold rounded-full hover:bg-[#4ade80] transition-all hover:scale-105"
+                className="inline-flex items-center justify-center gap-2 rounded-full bg-[#22c55e] px-7 py-3.5 text-sm font-bold text-black transition-all hover:scale-[1.02] hover:bg-[#4ade80]"
               >
-                Esplora gli articoli
-                <ArrowRight className="w-4 h-4" />
+                Scopri gli articoli migliori
+                <ArrowRight className="h-4 w-4" />
               </a>
               <a
                 href="#newsletter"
-                className="inline-flex items-center justify-center gap-2 px-6 py-3 border border-gray-700 text-white font-semibold rounded-full hover:border-[#22c55e] hover:text-[#22c55e] transition-all"
+                className="inline-flex items-center justify-center gap-2 rounded-full border border-white/10 px-7 py-3.5 text-sm font-semibold text-white transition-all hover:border-[#22c55e]/40 hover:text-[#86efac]"
               >
-                Iscriviti alla newsletter
+                Ricevi il vantaggio AI ogni settimana
               </a>
-            </motion.div>
-          </motion.div>
+            </div>
 
-          {/* Right Side Panel */}
-          <motion.div 
-            initial={{ opacity: 0, x: 30 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.6, delay: 0.4 }}
-            className="lg:col-span-2 hidden lg:flex flex-col items-center"
-          >
-            <div className="bg-[#0a0a0a] border border-gray-800 rounded-3xl p-6 text-center hover:border-[#22c55e]/30 transition-colors group cursor-pointer">
-              <span className="text-gray-400 text-sm block mb-2 group-hover:text-[#22c55e] transition-colors">
-                Ultime
-              </span>
-              <span className="text-white font-semibold block mb-4">
-                novità AI
-              </span>
-              <div className="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center mx-auto group-hover:bg-[#22c55e]/20 transition-colors">
-                <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-[#22c55e]" />
+            <div className="mt-10 grid gap-4 sm:grid-cols-3">
+              <div className="rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur-sm">
+                <div className="flex items-center gap-2 text-[#22c55e]">
+                  <TrendingUp className="h-4 w-4" />
+                  <span className="text-xs font-semibold uppercase tracking-[0.18em]">Posizionamento</span>
+                </div>
+                <p className="mt-2 text-sm text-zinc-300">Contenuti pensati per diventare riferimento autorevole nel mercato AI italiano.</p>
+              </div>
+              <div className="rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur-sm">
+                <div className="flex items-center gap-2 text-cyan-300">
+                  <ShieldCheck className="h-4 w-4" />
+                  <span className="text-xs font-semibold uppercase tracking-[0.18em]">Credibilità</span>
+                </div>
+                <p className="mt-2 text-sm text-zinc-300">Taglio editoriale premium, utile e concreto: zero hype, solo segnali utili.</p>
+              </div>
+              <div className="rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur-sm">
+                <div className="flex items-center gap-2 text-emerald-300">
+                  <Sparkles className="h-4 w-4" />
+                  <span className="text-xs font-semibold uppercase tracking-[0.18em]">Conversione</span>
+                </div>
+                <p className="mt-2 text-sm text-zinc-300">CTA, lead magnet editoriale e layout disegnati per aumentare fiducia e iscrizioni.</p>
               </div>
             </div>
 
-            {/* Vertical line */}
-            <div className="w-px h-24 bg-gradient-to-b from-gray-800 to-transparent my-6" />
+            <div className="mt-8 flex flex-wrap gap-3">
+              {proofItems.map((item) => (
+                <span
+                  key={item}
+                  className="rounded-full border border-white/10 bg-black/40 px-4 py-2 text-xs font-medium text-zinc-300"
+                >
+                  {item}
+                </span>
+              ))}
+            </div>
+          </motion.div>
 
-            {/* Stats */}
-            <div className="text-center">
-              <div className="text-2xl font-bold text-[#22c55e]">50+</div>
-              <div className="text-xs text-gray-500">Articoli</div>
+          <motion.div
+            initial={{ opacity: 0, scale: 0.92 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.8, delay: 0.1 }}
+            className="relative lg:col-span-6"
+          >
+            <div className="pointer-events-none absolute -inset-8 rounded-[2rem] bg-[radial-gradient(circle,rgba(34,197,94,0.18),transparent_60%)] blur-2xl" />
+            <div className="relative overflow-hidden rounded-[2rem] border border-white/10 bg-gradient-to-br from-white/10 to-white/5 p-4 shadow-[0_0_80px_rgba(34,197,94,.08)] backdrop-blur-xl">
+              <div className="mb-4 flex items-center justify-between rounded-2xl border border-white/10 bg-black/40 px-4 py-3">
+                <div>
+                  <p className="text-xs uppercase tracking-[0.28em] text-zinc-500">Editorial intelligence</p>
+                  <p className="mt-1 text-sm font-semibold text-white">Trend AI, tools e use case ad alto impatto</p>
+                </div>
+                <div className="rounded-full bg-[#22c55e]/15 px-3 py-1 text-xs font-semibold text-[#86efac]">
+                  Updated daily
+                </div>
+              </div>
+
+              <CrystalShape3D />
+
+              <div className="grid gap-3 sm:grid-cols-3">
+                <div className="rounded-2xl border border-white/10 bg-black/40 p-4">
+                  <p className="text-xs uppercase tracking-[0.2em] text-zinc-500">AI News</p>
+                  <p className="mt-2 text-sm font-semibold text-white">Novità filtrate e contestualizzate</p>
+                </div>
+                <div className="rounded-2xl border border-white/10 bg-black/40 p-4">
+                  <p className="text-xs uppercase tracking-[0.2em] text-zinc-500">Tutorial</p>
+                  <p className="mt-2 text-sm font-semibold text-white">Guide operative per mettere in pratica</p>
+                </div>
+                <div className="rounded-2xl border border-white/10 bg-black/40 p-4">
+                  <p className="text-xs uppercase tracking-[0.2em] text-zinc-500">Casi reali</p>
+                  <p className="mt-2 text-sm font-semibold text-white">Applicazioni concrete per business e team</p>
+                </div>
+              </div>
             </div>
           </motion.div>
         </div>
       </div>
 
-      {/* Bottom decorative gradient */}
-      <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-black to-transparent pointer-events-none" />
+      <div className="absolute bottom-6 left-1/2 hidden -translate-x-1/2 items-center gap-2 rounded-full border border-white/10 bg-black/40 px-4 py-2 text-xs text-zinc-400 backdrop-blur-md md:flex">
+        <ChevronDown className="h-4 w-4 animate-bounce text-[#22c55e]" />
+        Scorri per entrare nel feed AI più utile d’Italia
+      </div>
     </section>
   );
 }
