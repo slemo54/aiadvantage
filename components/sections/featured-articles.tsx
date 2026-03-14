@@ -1,152 +1,183 @@
 "use client";
 
-import { motion } from "framer-motion";
-import { ArrowUpRight, Clock } from "lucide-react";
+import Image from "next/image";
+import { ArrowUpRight, CalendarDays, Clock } from "lucide-react";
 import type { Article } from "@/lib/types";
 import { CATEGORIES } from "@/lib/constants";
 import Link from "next/link";
 
 interface FeaturedArticlesProps {
   articles: Article[];
+  isLoading?: boolean;
 }
 
-export function FeaturedArticles({ articles }: FeaturedArticlesProps) {
-  const featured = articles.slice(0, 5);
+function formatRelativeDate(dateString: string | null) {
+  if (!dateString) return "Data sconosciuta";
+  const date = new Date(dateString);
+  const now = new Date();
+  const diff = now.getTime() - date.getTime();
+  const hours = Math.floor(diff / (1000 * 60 * 60));
+  const days = Math.floor(hours / 24);
+
+  if (hours < 1) return "Adesso";
+  if (hours < 24) return `${hours} ore fa`;
+  if (days === 1) return "1 giorno fa";
+  if (days < 7) return `${days} giorni fa`;
+  return date.toLocaleDateString("it-IT", { day: "numeric", month: "short" });
+}
+
+function estimateReadTime(article: Article) {
+  const base = article.meta_description?.split(" ").length ?? 18;
+  return Math.max(4, Math.min(9, Math.round(base / 4)));
+}
+
+function BentoImage({ article, priority = false }: { article: Article; priority?: boolean }) {
+  const category = CATEGORIES[article.category];
+
+  if (article.hero_image_url) {
+    return (
+      <Image
+        src={article.hero_image_url}
+        alt={article.title}
+        fill
+        sizes={priority ? "(max-width: 1024px) 100vw, 66vw" : "(max-width: 1024px) 100vw, 33vw"}
+        priority={priority}
+        className="object-cover transition-transform duration-300 group-hover:scale-105"
+      />
+    );
+  }
+
+  return (
+    <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-[#111827] via-[#0f172a] to-[#020617]">
+      <span className="text-5xl opacity-80">{category.icon}</span>
+    </div>
+  );
+}
+
+function BentoCard({
+  article,
+  large = false,
+}: {
+  article: Article;
+  large?: boolean;
+}) {
+  const category = CATEGORIES[article.category];
+  const readTime = estimateReadTime(article);
+  const relativeDate = formatRelativeDate(article.published_at);
+
+  return (
+    <Link href={`/blog/${article.slug}`} className="group block h-full reveal-on-scroll">
+      <article className={[
+        "bento-card relative h-full overflow-hidden rounded-[1.75rem] border border-white/10 bg-white/[0.03]",
+        large ? "min-h-[420px] lg:min-h-[520px]" : "min-h-[250px]",
+      ].join(" ")}>
+        <div className="absolute inset-0">
+          <BentoImage article={article} priority={large} />
+          <div className="absolute inset-0 bg-gradient-to-t from-black via-black/45 to-black/5" />
+        </div>
+
+        <div className="relative flex h-full flex-col justify-end p-6 lg:p-8">
+          <div className="mb-4 flex flex-wrap items-center gap-3">
+            <span
+              className="inline-flex w-fit rounded-full px-3 py-1 text-xs font-semibold text-white"
+              style={{ backgroundColor: category.accent }}
+            >
+              {category.label}
+            </span>
+            <span className="inline-flex items-center gap-1 text-xs text-zinc-300">
+              <Clock className="h-3.5 w-3.5" /> {readTime} min lettura
+            </span>
+            <span className="inline-flex items-center gap-1 text-xs text-zinc-400">
+              <CalendarDays className="h-3.5 w-3.5" /> {relativeDate}
+            </span>
+          </div>
+
+          <h3 className={[
+            "link-underline max-w-3xl font-black text-white",
+            large ? "text-3xl leading-tight lg:text-4xl" : "text-lg leading-snug lg:text-xl",
+          ].join(" ")}>
+            {article.title}
+          </h3>
+
+          {article.meta_description && (
+            <p className={[
+              "mt-3 max-w-2xl text-zinc-300",
+              large ? "text-sm leading-7 lg:text-base" : "line-clamp-2 text-sm leading-6",
+            ].join(" ")}>
+              {article.meta_description}
+            </p>
+          )}
+        </div>
+      </article>
+    </Link>
+  );
+}
+
+function FeaturedSkeleton() {
+  return (
+    <div className="grid gap-5 lg:grid-cols-12">
+      <div className="lg:col-span-8 rounded-[1.75rem] border border-white/10 bg-white/[0.03] p-5">
+        <div className="skeleton-shimmer h-[420px] rounded-[1.5rem]" />
+      </div>
+      <div className="space-y-5 lg:col-span-4">
+        {[1, 2, 3].map((item) => (
+          <div key={item} className="rounded-[1.5rem] border border-white/10 bg-white/[0.03] p-4">
+            <div className="skeleton-shimmer h-[150px] rounded-[1.2rem]" />
+            <div className="mt-4 space-y-3">
+              <div className="skeleton-shimmer h-3 w-24 rounded-full" />
+              <div className="skeleton-shimmer h-5 w-4/5 rounded-full" />
+              <div className="skeleton-shimmer h-4 w-3/5 rounded-full" />
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+export function FeaturedArticles({ articles, isLoading = false }: FeaturedArticlesProps) {
+  const featured = articles.slice(0, 4);
   const mainArticle = featured[0];
   const sideArticles = featured.slice(1, 4);
 
-  const formatDate = (dateString: string | null) => {
-    if (!dateString) return "Data sconosciuta";
-    const date = new Date(dateString);
-    const now = new Date();
-    const diff = now.getTime() - date.getTime();
-    const hours = Math.floor(diff / (1000 * 60 * 60));
-    const days = Math.floor(hours / 24);
-    
-    if (hours < 1) return "Adesso";
-    if (hours < 24) return `${hours}h fa`;
-    if (days < 7) return `${days}g fa`;
-    return date.toLocaleDateString("it-IT", { day: "numeric", month: "short" });
-  };
-
   return (
-    <section id="articles" className="py-16 bg-black">
+    <section id="articles" className="bg-black py-20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Section Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="flex items-center justify-between mb-8"
-        >
-          <h2 className="text-3xl font-bold text-white">In evidenza</h2>
-          <Link 
-            href="/blog" 
-            className="text-[#22c55e] hover:text-[#4ade80] flex items-center gap-1 text-sm font-medium transition-colors"
-          >
-            Vedi tutti
-            <ArrowUpRight className="w-4 h-4" />
-          </Link>
-        </motion.div>
-
-        <div className="grid lg:grid-cols-12 gap-6">
-          {/* Main Featured Article */}
-          {mainArticle && (
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              className="lg:col-span-8"
-            >
-              <Link href={`/blog/${mainArticle.slug}`}>
-                <article className="group relative h-[500px] rounded-2xl overflow-hidden cursor-pointer">
-                  {/* Background Image */}
-                  <div className="absolute inset-0">
-                    {mainArticle.hero_image_url ? (
-                      <img
-                        src={mainArticle.hero_image_url}
-                        alt={mainArticle.title}
-                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                      />
-                    ) : (
-                      <div className="w-full h-full bg-gradient-to-br from-gray-900 to-gray-800" />
-                    )}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent" />
-                  </div>
-
-                  {/* Content */}
-                  <div className="absolute inset-0 p-8 flex flex-col justify-end">
-                    <span 
-                      className="inline-block px-3 py-1 rounded-full text-xs font-semibold w-fit mb-4"
-                      style={{ 
-                        backgroundColor: `${CATEGORIES[mainArticle.category]?.accent || '#22c55e'}20`,
-                        color: CATEGORIES[mainArticle.category]?.accent || '#22c55e'
-                      }}
-                    >
-                      {mainArticle.category.replace("_", " ").toUpperCase()}
-                    </span>
-                    <h3 className="text-2xl lg:text-4xl font-bold text-white mb-3 group-hover:text-[#22c55e] transition-colors line-clamp-3">
-                      {mainArticle.title}
-                    </h3>
-                    <div className="flex items-center gap-2 text-gray-400 text-sm">
-                      <Clock className="w-4 h-4" />
-                      <span>{formatDate(mainArticle.published_at)}</span>
-                    </div>
-                  </div>
-                </article>
-              </Link>
-            </motion.div>
-          )}
-
-          {/* Side Articles */}
-          <div className="lg:col-span-4 flex flex-col gap-4">
-            {sideArticles.map((article, index) => (
-              <motion.div
-                key={article.id}
-                initial={{ opacity: 0, x: 30 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.1 }}
-              >
-                <Link href={`/blog/${article.slug}`}>
-                  <article className="group flex gap-4 p-4 rounded-xl bg-[#0a0a0a] border border-gray-800 hover:border-[#22c55e]/30 transition-all cursor-pointer">
-                    {/* Thumbnail */}
-                    <div className="w-24 h-24 rounded-lg overflow-hidden shrink-0">
-                      {article.hero_image_url ? (
-                        <img
-                          src={article.hero_image_url}
-                          alt={article.title}
-                          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                        />
-                      ) : (
-                        <div className="w-full h-full bg-gradient-to-br from-gray-800 to-gray-700 flex items-center justify-center">
-                          <span className="text-2xl">🤖</span>
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Content */}
-                    <div className="flex flex-col justify-center min-w-0">
-                      <span 
-                        className="text-xs font-semibold mb-1"
-                        style={{ color: CATEGORIES[article.category]?.accent || '#22c55e' }}
-                      >
-                        {article.category.replace("_", " ").toUpperCase()}
-                      </span>
-                      <h4 className="text-white font-semibold text-sm line-clamp-2 group-hover:text-[#22c55e] transition-colors">
-                        {article.title}
-                      </h4>
-                      <div className="flex items-center gap-1 text-gray-500 text-xs mt-2">
-                        <Clock className="w-3 h-3" />
-                        <span>{formatDate(article.published_at)}</span>
-                      </div>
-                    </div>
-                  </article>
-                </Link>
-              </motion.div>
-            ))}
+        <div className="mb-10 flex flex-col gap-4 md:flex-row md:items-end md:justify-between reveal-on-scroll">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[#34d399]">
+              In evidenza ora
+            </p>
+            <h2 className="mt-3 text-3xl font-black text-white sm:text-4xl">
+              Il feed AI che cattura attenzione e genera ritorni
+            </h2>
+            <p className="mt-3 max-w-2xl text-sm leading-7 text-zinc-400 sm:text-base">
+              Una selezione editoriale progettata per massimizzare lettura, condivisione e iscrizioni.
+            </p>
           </div>
+          <Link
+            href="/blog"
+            className="cta-cursor relative inline-flex items-center gap-2 rounded-full border border-white/10 px-5 py-3 text-sm font-semibold text-white transition hover:border-[#10b981]/40 hover:text-[#34d399]"
+          >
+            Vedi tutti gli articoli
+            <ArrowUpRight className="h-4 w-4" />
+          </Link>
         </div>
+
+        {isLoading || !mainArticle ? (
+          <FeaturedSkeleton />
+        ) : (
+          <div className="grid gap-5 lg:grid-cols-12">
+            <div className="lg:col-span-8">
+              <BentoCard article={mainArticle} large />
+            </div>
+            <div className="space-y-5 lg:col-span-4">
+              {sideArticles.map((article) => (
+                <BentoCard key={article.id} article={article} />
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </section>
   );

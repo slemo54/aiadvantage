@@ -1,21 +1,17 @@
-"use client";
-
-import { motion } from "framer-motion";
 import Link from "next/link";
-import { Github, Twitter, Linkedin, Instagram } from "lucide-react";
+import { Github, Twitter, Linkedin, Instagram, ArrowRight } from "lucide-react";
 
 const footerLinks = {
   explore: [
     { label: "Home", href: "/" },
     { label: "Blog", href: "/blog" },
-    { label: "About", href: "/about" },
-    { label: "Contact", href: "/contact" },
+    { label: "Chi siamo", href: "/about" },
   ],
   categories: [
     { label: "AI News", href: "/blog?category=ai_news" },
     { label: "Casi d'uso", href: "/blog?category=casi_duso" },
-    { label: "Tools", href: "/blog?category=tools" },
-    { label: "Tutorials", href: "/blog?category=tutorial" },
+    { label: "Strumenti", href: "/blog?category=tools" },
+    { label: "Tutorial", href: "/blog?category=tutorial" },
   ],
   social: [
     { label: "Twitter", href: "#", icon: Twitter },
@@ -44,14 +40,13 @@ export function Footer() {
             {/* Social Links */}
             <div className="flex gap-3">
               {footerLinks.social.map((item) => (
-                <motion.a
+                <a
                   key={item.label}
                   href={item.href}
-                  whileHover={{ scale: 1.1, y: -2 }}
-                  className="w-9 h-9 rounded-full bg-[#171717] border border-gray-800 flex items-center justify-center text-gray-400 hover:bg-[#22c55e] hover:text-black hover:border-[#22c55e] transition-all"
+                  className="cta-cursor relative flex h-9 w-9 items-center justify-center rounded-full border border-gray-800 bg-[#171717] text-gray-400 transition-all hover:border-[#22c55e] hover:bg-[#22c55e] hover:text-black"
                 >
                   <item.icon className="w-4 h-4" />
-                </motion.a>
+                </a>
               ))}
             </div>
           </div>
@@ -90,18 +85,23 @@ export function Footer() {
             </ul>
           </div>
 
-          {/* Newsletter Mini */}
-          <div>
-            <h3 className="font-semibold text-white mb-4">Resta aggiornato</h3>
-            <p className="text-gray-500 text-sm mb-4">
-              Iscriviti per ricevere le ultime novità sull&apos;AI.
+          <div className="col-span-2 rounded-[1.75rem] border border-white/10 bg-[linear-gradient(135deg,rgba(16,185,129,0.12),rgba(255,255,255,0.03),rgba(0,0,0,0.92))] p-6 md:col-span-1">
+            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[#86efac]">Newsletter</p>
+            <h3 className="mt-3 text-2xl font-black text-white">Hai un progetto? Parliamone.</h3>
+            <p className="mt-3 text-sm leading-7 text-zinc-400">
+              Iscriviti alla newsletter per ricevere aggiornamenti settimanali sul mondo dell&apos;AI.
             </p>
-            <Link
-              href="/#contact"
-              className="inline-flex items-center text-[#22c55e] font-medium text-sm hover:underline"
-            >
-              Iscriviti ora →
-            </Link>
+            <form className="mt-5 flex flex-col gap-3">
+              <input
+                type="email"
+                placeholder="Inserisci la tua email"
+                className="min-h-[48px] rounded-2xl border border-white/10 bg-black/40 px-4 text-sm text-white placeholder:text-zinc-500 focus:border-[#10b981] focus:outline-none"
+              />
+              <button className="cta-cursor relative inline-flex items-center justify-center gap-2 rounded-2xl bg-[#10b981] px-5 py-3 text-sm font-bold text-black transition hover:bg-[#34d399]">
+                Iscriviti
+                <ArrowRight className="h-4 w-4" />
+              </button>
+            </form>
           </div>
         </div>
 
@@ -112,10 +112,10 @@ export function Footer() {
           </p>
           <div className="flex gap-6 text-sm">
             <Link href="#" className="text-gray-600 hover:text-gray-400">
-              Privacy Policy
+              Privacy
             </Link>
             <Link href="#" className="text-gray-600 hover:text-gray-400">
-              Terms of Service
+              Termini
             </Link>
           </div>
         </div>

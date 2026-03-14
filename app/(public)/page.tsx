@@ -1,13 +1,9 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { ArrowRight, ShieldCheck, Sparkles, TrendingUp } from "lucide-react";
-import { Hero3D } from "@/components/sections/hero-3d";
+import { ArrowRight, Check, Zap, Target, Rocket } from "lucide-react";
 import { FeaturedArticles } from "@/components/sections/featured-articles";
-import { CategorySection } from "@/components/sections/category-section";
-import { Sidebar } from "@/components/sections/sidebar";
-import { InBrief } from "@/components/sections/in-brief";
 import { Newsletter } from "@/components/sections/newsletter";
 import type { Article } from "@/lib/types";
 import { SEED_ARTICLES } from "@/lib/seed-articles";
@@ -128,23 +124,210 @@ const PLACEHOLDER_ARTICLES: Article[] = [
   },
 ];
 
-const trustPillars = [
+const whyReadUs = [
   {
-    title: "Strategia prima della moda",
-    description: "Analisi editoriali che traducono l’AI in opportunità concrete per aziende, creator e team tech.",
-    icon: ShieldCheck,
+    title: "Sempre Primi",
+    description: "Le notizie AI che contano, prima degli altri. In italiano.",
+    icon: Zap,
   },
   {
-    title: "Selezione ad alta utilità",
-    description: "Tutorial, tool e use case scelti per ridurre rumore, accelerare decisioni e generare risultati.",
-    icon: TrendingUp,
+    title: "Zero Fuffa",
+    description: "Solo contenuti pratici e applicabili. Niente clickbait.",
+    icon: Target,
   },
   {
-    title: "Media brand con conversione",
-    description: "Design premium e funnel editoriale pensati per aumentare attenzione, fiducia e iscrizioni.",
-    icon: Sparkles,
+    title: "Vantaggio Competitivo",
+    description: "Chi legge IlVantaggioAI prende decisioni migliori.",
+    icon: Rocket,
   },
 ];
+
+const mediaBoxes = ["Media 01", "Media 02", "Media 03", "Media 04", "Media 05"];
+const avatars = ["#10b981", "#3b82f6", "#f59e0b", "#8b5cf6", "#ef4444"];
+
+function useCounter(target: number, start = 2500, duration = 1200) {
+  const [count, setCount] = useState(start);
+
+  useEffect(() => {
+    let frame = 0;
+    const totalFrames = Math.max(1, Math.round(duration / 16));
+
+    const tick = () => {
+      frame += 1;
+      const progress = Math.min(frame / totalFrames, 1);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      const value = Math.round(start + (target - start) * eased);
+      setCount(value);
+      if (progress < 1) requestAnimationFrame(tick);
+    };
+
+    requestAnimationFrame(tick);
+  }, [duration, start, target]);
+
+  return count;
+}
+
+function HeroRevolution() {
+  const [email, setEmail] = useState("");
+  const sectionRef = useRef<HTMLElement | null>(null);
+
+  useEffect(() => {
+    const element = sectionRef.current;
+    if (!element) return;
+
+    const onMove = (event: MouseEvent) => {
+      const rect = element.getBoundingClientRect();
+      const x = ((event.clientX - rect.left) / rect.width) * 100;
+      const y = ((event.clientY - rect.top) / rect.height) * 100;
+      element.style.setProperty("--hero-mouse-x", `${x}%`);
+      element.style.setProperty("--hero-mouse-y", `${y}%`);
+    };
+
+    element.addEventListener("mousemove", onMove);
+    return () => element.removeEventListener("mousemove", onMove);
+  }, []);
+
+  return (
+    <section ref={sectionRef} className="hero-wow relative min-h-screen pt-28">
+      <div className="mx-auto flex max-w-7xl flex-col px-4 pb-14 pt-8 sm:px-6 lg:px-8 lg:pb-20 lg:pt-14">
+        <div className="mx-auto flex max-w-4xl flex-col items-center text-center">
+          <div className="reveal-on-scroll inline-flex items-center gap-3 rounded-full border border-[#10b981]/20 bg-[#10b981]/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.24em] text-[#a7f3d0]">
+            <span className="pulse-badge inline-flex h-2.5 w-2.5 rounded-full bg-[#10b981]" />
+            Il blog AI più letto d&apos;Italia
+          </div>
+
+          <h1 className="reveal-on-scroll mt-8 text-balance text-[clamp(2.5rem,5vw,4.5rem)] font-black leading-[0.95] text-white">
+            <span className="gradient-text">L&apos;AI Non Aspetta. Tu?</span>
+          </h1>
+
+          <p className="reveal-on-scroll mt-6 max-w-3xl text-lg font-light leading-8 text-zinc-300 sm:text-xl">
+            Ogni settimana, migliaia di professionisti italiani leggono IlVantaggioAI per restare un passo avanti. Unisciti a loro.
+          </p>
+
+          <form className="reveal-on-scroll mt-10 w-full max-w-2xl rounded-[1.6rem] border border-white/10 bg-white/[0.04] p-3 shadow-[0_10px_80px_rgba(0,0,0,.25)] backdrop-blur-xl">
+            <div className="flex flex-col gap-3 sm:flex-row">
+              <input
+                type="email"
+                value={email}
+                onChange={(event) => setEmail(event.target.value)}
+                placeholder="La tua email professionale"
+                className="min-h-[58px] flex-1 rounded-[1.2rem] border border-white/10 bg-black/40 px-5 text-base text-white placeholder:text-zinc-500 focus:border-[#10b981] focus:outline-none"
+              />
+              <button
+                type="submit"
+                className="cta-cursor relative min-h-[58px] rounded-[1.2rem] bg-[#10b981] px-7 text-base font-black text-black transition hover:bg-[#34d399]"
+              >
+                Unisciti Gratis
+              </button>
+            </div>
+            <div className="mt-4 flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-sm text-zinc-300">
+              <span className="inline-flex items-center gap-2"><Check className="h-4 w-4 text-[#10b981]" />Unisciti a 2,500+ professionisti</span>
+              <span className="inline-flex items-center gap-2"><Check className="h-4 w-4 text-[#10b981]" />Zero spam</span>
+              <span className="inline-flex items-center gap-2"><Check className="h-4 w-4 text-[#10b981]" />Cancella quando vuoi</span>
+            </div>
+          </form>
+
+          <div className="reveal-on-scroll mt-8 flex flex-col items-center gap-4 sm:flex-row">
+            <div className="flex -space-x-3">
+              {avatars.map((color, index) => (
+                <span
+                  key={color}
+                  className="h-11 w-11 rounded-full border-2 border-black"
+                  style={{ background: color, zIndex: avatars.length - index }}
+                />
+              ))}
+            </div>
+            <p className="text-sm font-medium text-zinc-300">2,547 iscritti questa settimana</p>
+          </div>
+        </div>
+      </div>
+
+      <div className="reveal-on-scroll mx-auto mb-10 mt-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="rounded-[1.4rem] border border-white/10 bg-black/45 px-5 py-5 backdrop-blur-xl">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-zinc-500">Come visto su:</p>
+            <div className="grid flex-1 gap-3 sm:grid-cols-5">
+              {mediaBoxes.map((box) => (
+                <div key={box} className="logo-placeholder flex h-14 items-center justify-center rounded-2xl text-xs font-semibold uppercase tracking-[0.18em] text-zinc-500">
+                  {box}
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function WhyReadUsSection() {
+  return (
+    <section className="bg-black py-20">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="reveal-on-scroll mx-auto max-w-3xl text-center">
+          <h2 className="mt-4 text-3xl font-black text-white sm:text-4xl">
+            Perché 2,500+ professionisti ci leggono ogni settimana
+          </h2>
+        </div>
+
+        <div className="mt-10 grid gap-6 md:grid-cols-3">
+          {whyReadUs.map((item) => (
+            <article
+              key={item.title}
+              className="reveal-on-scroll rounded-[1.6rem] border border-white/10 bg-white/[0.03] p-7 transition hover:border-[#10b981]/40 hover:bg-white/[0.05]"
+            >
+              <div className="icon-glow flex h-14 w-14 items-center justify-center rounded-2xl border border-[#10b981]/20 bg-[#10b981]/10 text-[#10b981]">
+                <item.icon className="h-6 w-6" />
+              </div>
+              <h3 className="mt-5 text-xl font-black text-white">{item.title}</h3>
+              <p className="mt-3 text-sm leading-7 text-zinc-400">{item.description}</p>
+            </article>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function MidPageNewsletter() {
+  const counter = useCounter(2547);
+
+  return (
+    <section className="bg-black py-14">
+      <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+        <div className="reveal-on-scroll dots-pattern relative overflow-hidden rounded-[2rem] border border-[#10b981]/15 bg-[radial-gradient(circle_at_top_left,rgba(16,185,129,0.2),transparent_30%),linear-gradient(135deg,#07110d,#0a0f14)] p-8 sm:p-10 lg:p-12">
+          <div className="grid gap-8 lg:grid-cols-[1.2fr_.8fr] lg:items-center">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[#34d399]">Newsletter premium</p>
+              <h2 className="mt-4 text-3xl font-black text-white sm:text-4xl">
+                Non perderti il prossimo vantaggio
+              </h2>
+              <p className="mt-4 max-w-2xl text-base leading-8 text-zinc-300">
+                Ricevi ogni martedì il meglio dell&apos;AI in 5 minuti di lettura.
+              </p>
+            </div>
+
+            <div className="rounded-[1.6rem] border border-white/10 bg-black/35 p-5 backdrop-blur-xl">
+              <div className="flex flex-col gap-3">
+                <input
+                  type="email"
+                  placeholder="La tua email professionale"
+                  className="min-h-[56px] rounded-[1rem] border border-white/10 bg-white/[0.05] px-5 text-white placeholder:text-zinc-500 focus:border-[#10b981] focus:outline-none"
+                />
+                <button className="cta-cursor relative min-h-[56px] rounded-[1rem] bg-[#10b981] px-5 font-black text-black transition hover:bg-[#34d399]">
+                  Iscriviti Ora
+                </button>
+              </div>
+              <p className="counter-pop mt-4 text-sm font-medium text-zinc-300">
+                {counter.toLocaleString("it-IT")} professionisti già iscritti
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
 
 export default function HomePage() {
   const [articles, setArticles] = useState<Article[]>(PLACEHOLDER_ARTICLES);
@@ -168,113 +351,57 @@ export default function HomePage() {
     void loadArticles();
   }, []);
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
-        <div className="w-8 h-8 border-4 border-[#22c55e] border-t-transparent rounded-full animate-spin" />
-      </div>
-    );
-  }
-
   return (
     <main className="min-h-screen bg-black">
-      <Hero3D />
+      <HeroRevolution />
+      <FeaturedArticles articles={articles} isLoading={isLoading} />
+      <WhyReadUsSection />
+      <MidPageNewsletter />
+      <Newsletter />
 
-      <section className="border-y border-white/5 bg-[#050505] py-6">
-        <div className="mx-auto grid max-w-7xl gap-4 px-4 sm:px-6 lg:grid-cols-3 lg:px-8">
-          {trustPillars.map((pillar) => (
-            <div key={pillar.title} className="rounded-2xl border border-white/8 bg-white/[0.03] p-5 backdrop-blur-sm">
-              <pillar.icon className="h-5 w-5 text-[#22c55e]" />
-              <h3 className="mt-3 text-base font-bold text-white">{pillar.title}</h3>
-              <p className="mt-2 text-sm leading-7 text-zinc-400">{pillar.description}</p>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      <FeaturedArticles articles={articles} />
-
-      <section className="py-12 bg-black">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="mb-8 flex flex-col gap-4 rounded-[2rem] border border-white/8 bg-gradient-to-r from-[#22c55e]/10 via-white/[0.03] to-cyan-400/10 p-6 lg:flex-row lg:items-center lg:justify-between">
-            <div>
-              <span className="inline-flex items-center gap-2 rounded-full border border-[#22c55e]/20 bg-[#22c55e]/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-[#86efac]">
-                <Sparkles className="h-3.5 w-3.5" />
-                Feed premium AI italiano
-              </span>
-              <h2 className="mt-4 text-2xl font-black text-white sm:text-3xl">
-                Contenuti costruiti per far crescere attenzione, autorevolezza e iscritti
-              </h2>
-              <p className="mt-3 max-w-3xl text-sm leading-7 text-zinc-400 sm:text-base">
-                Ogni sezione del magazine è pensata per guidare il lettore dal primo insight all’azione: leggere, salvare, condividere e iscriversi.
-              </p>
-            </div>
-            <Link
-              href="/blog"
-              className="inline-flex items-center justify-center gap-2 rounded-full bg-white px-6 py-3 text-sm font-bold text-black transition hover:bg-[#22c55e]"
-            >
-              Vai all’archivio completo
-              <ArrowRight className="h-4 w-4" />
-            </Link>
-          </div>
-
-          <div className="grid lg:grid-cols-12 gap-8">
-            <div className="lg:col-span-8 space-y-8">
-              <CategorySection 
-                articles={articles} 
-                category="ai_news" 
-                title="AI News"
-                accentColor="#3b82f6"
-              />
-
-              <CategorySection 
-                articles={articles} 
-                category="casi_duso" 
-                title="Casi d'Uso"
-                accentColor="#22c55e"
-              />
-
-              <CategorySection 
-                articles={articles} 
-                category="tools" 
-                title="Tools"
-                accentColor="#a855f7"
-              />
-
-              <InBrief articles={articles} />
-            </div>
-
-            <div className="lg:col-span-4">
-              <div className="sticky top-24">
-                <Sidebar articles={articles} />
+      <section className="bg-black pb-20">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="reveal-on-scroll overflow-hidden rounded-[2rem] border border-white/10 bg-[linear-gradient(135deg,rgba(16,185,129,0.12),rgba(255,255,255,0.03),rgba(13,17,23,0.9))] p-8 sm:p-10 lg:p-12">
+            <div className="grid gap-8 lg:grid-cols-[1.2fr_.8fr] lg:items-center">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[#34d399]">Archivio editoriale</p>
+                <h2 className="mt-4 text-3xl font-black text-white sm:text-4xl">
+                  Approfondimenti, tool e casi d&apos;uso per restare davanti al mercato
+                </h2>
+                <p className="mt-4 max-w-2xl text-base leading-8 text-zinc-300">
+                  Un magazine costruito per trasformare trend complessi in decisioni semplici: cosa leggere, cosa testare e dove investire attenzione.
+                </p>
+              </div>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="rounded-[1.4rem] border border-white/10 bg-white/[0.04] p-5">
+                  <p className="text-3xl font-black text-white">{articles.length}+</p>
+                  <p className="mt-2 text-sm text-zinc-400">Contenuti pronti da leggere, salvare e condividere.</p>
+                </div>
+                <div className="rounded-[1.4rem] border border-white/10 bg-white/[0.04] p-5">
+                  <p className="text-3xl font-black text-white">5 min</p>
+                  <p className="mt-2 text-sm text-zinc-400">Il tempo medio per ottenere un insight utile ogni settimana.</p>
+                </div>
               </div>
             </div>
+
+            <div className="mt-8 flex flex-wrap gap-4">
+              <Link
+                href="/blog"
+                className="cta-cursor relative inline-flex items-center gap-2 rounded-full bg-[#10b981] px-6 py-3 text-sm font-black text-black transition hover:bg-[#34d399]"
+              >
+                Esplora tutti gli articoli
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+              <a
+                href="#newsletter"
+                className="inline-flex items-center gap-2 rounded-full border border-white/10 px-6 py-3 text-sm font-semibold text-white transition hover:border-[#10b981]/40 hover:text-[#34d399]"
+              >
+                Iscriviti alla newsletter
+              </a>
+            </div>
           </div>
         </div>
       </section>
-
-      <CategorySection 
-        articles={articles} 
-        category="tutorial" 
-        title="Tutorial"
-        accentColor="#f59e0b"
-      />
-
-      <CategorySection 
-        articles={articles} 
-        category="opinioni" 
-        title="Opinioni"
-        accentColor="#ec4899"
-      />
-
-      <CategorySection 
-        articles={articles} 
-        category="web_dev" 
-        title="Web Dev"
-        accentColor="#14b8a6"
-      />
-
-      <Newsletter />
     </main>
   );
 }

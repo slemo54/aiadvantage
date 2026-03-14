@@ -1,7 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Loader2, CheckCircle, Send, Sparkles, TrendingUp, ShieldCheck } from "lucide-react";
 
 const benefits = [
@@ -26,6 +25,26 @@ export function Newsletter() {
   const [email, setEmail] = useState("");
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
 
+  useEffect(() => {
+    const elements = Array.from(document.querySelectorAll<HTMLElement>(".reveal-on-scroll"));
+    if (elements.length === 0) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add("is-visible");
+            observer.unobserve(entry.target);
+          }
+        });
+      },
+      { threshold: 0.12, rootMargin: "0px 0px -40px 0px" }
+    );
+
+    elements.forEach((element) => observer.observe(element));
+    return () => observer.disconnect();
+  }, []);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email) return;
@@ -39,12 +58,7 @@ export function Newsletter() {
   return (
     <section id="newsletter" className="border-t border-white/5 bg-[#050505] py-20">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="overflow-hidden rounded-[2rem] border border-white/10 bg-[radial-gradient(circle_at_top_left,rgba(34,197,94,0.16),transparent_25%),radial-gradient(circle_at_bottom_right,rgba(34,211,238,0.14),transparent_22%),linear-gradient(135deg,#0a0a0a,#050505)] p-8 sm:p-10 lg:p-12"
-        >
+        <div className="reveal-on-scroll overflow-hidden rounded-[2rem] border border-white/10 bg-[radial-gradient(circle_at_top_left,rgba(34,197,94,0.16),transparent_25%),radial-gradient(circle_at_bottom_right,rgba(34,211,238,0.14),transparent_22%),linear-gradient(135deg,#0a0a0a,#050505)] p-8 sm:p-10 lg:p-12">
           <div className="grid gap-10 lg:grid-cols-[1.1fr_.9fr] lg:items-center">
             <div>
               <span className="inline-flex items-center gap-2 rounded-full border border-[#22c55e]/20 bg-[#22c55e]/10 px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.22em] text-[#86efac]">
@@ -87,12 +101,10 @@ export function Newsletter() {
                     disabled={status === "loading" || status === "success"}
                   />
                 </div>
-                <motion.button
+                <button
                   type="submit"
                   disabled={status === "loading" || status === "success"}
-                  whileHover={{ scale: 1.01 }}
-                  whileTap={{ scale: 0.99 }}
-                  className="flex items-center justify-center gap-2 rounded-2xl bg-[#22c55e] px-8 py-4 font-bold text-black transition-colors hover:bg-[#4ade80] disabled:opacity-50"
+                  className="cta-cursor relative flex items-center justify-center gap-2 rounded-2xl bg-[#22c55e] px-8 py-4 font-bold text-black transition-colors hover:bg-[#4ade80] disabled:opacity-50"
                 >
                   {status === "loading" ? (
                     <Loader2 className="h-5 w-5 animate-spin" />
@@ -107,7 +119,7 @@ export function Newsletter() {
                       Voglio il vantaggio AI
                     </>
                   )}
-                </motion.button>
+                </button>
               </form>
 
               <p className="mt-4 text-xs leading-6 text-zinc-500">
@@ -115,17 +127,13 @@ export function Newsletter() {
               </p>
 
               {status === "success" && (
-                <motion.p
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="mt-4 text-sm font-medium text-[#86efac]"
-                >
+                <p className="mt-4 text-sm font-medium text-[#86efac]">
                   Perfetto. Sei dentro: controlla la tua email.
-                </motion.p>
+                </p>
               )}
             </div>
           </div>
-        </motion.div>
+        </div>
       </div>
     </section>
   );
