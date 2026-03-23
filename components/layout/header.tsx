@@ -1,6 +1,5 @@
 "use client";
 
-import { motion } from "framer-motion";
 import Link from "next/link";
 import { useState } from "react";
 import { Menu, X, Search, Moon } from "lucide-react";
@@ -22,15 +21,10 @@ export function Header() {
   const [searchOpen, setSearchOpen] = useState(false);
 
   return (
-    <motion.header
-      initial={{ y: -20, opacity: 0 }}
-      animate={{ y: 0, opacity: 1 }}
-      transition={{ duration: 0.5 }}
-      className="fixed top-0 left-0 right-0 z-50 bg-black/90 backdrop-blur-md border-b border-white/5"
-    >
+    <header className="fixed top-0 left-0 right-0 z-50 bg-black/90 backdrop-blur-md border-b border-white/5 animate-slide-down">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-14">
-          {/* Desktop Navigation - Left */}
+          {/* Desktop Navigation */}
           <nav className="hidden lg:flex items-center gap-1">
             {navLinks.map((link) => (
               <Link
@@ -77,32 +71,19 @@ export function Header() {
 
         {/* Search bar */}
         {searchOpen && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
-            exit={{ opacity: 0, height: 0 }}
-            className="pb-3"
-          >
+          <div className="pb-3">
             <input
               type="text"
               placeholder="Cerca articoli..."
               className="w-full px-4 py-2.5 rounded-lg bg-[#111] border border-gray-800 text-white placeholder-gray-500 focus:outline-none focus:border-[#22c55e] transition-colors text-sm"
               autoFocus
             />
-          </motion.div>
+          </div>
         )}
 
         {/* Mobile Menu */}
-        <motion.div
-          initial={false}
-          animate={{
-            height: isOpen ? "auto" : 0,
-            opacity: isOpen ? 1 : 0,
-          }}
-          transition={{ duration: 0.3 }}
-          className="lg:hidden overflow-hidden"
-        >
-          <nav className="py-4 space-y-1">
+        {isOpen && (
+          <nav className="lg:hidden py-4 space-y-1 border-t border-gray-800">
             {navLinks.map((link) => (
               <Link
                 key={link.href}
@@ -114,8 +95,8 @@ export function Header() {
               </Link>
             ))}
           </nav>
-        </motion.div>
+        )}
       </div>
-    </motion.header>
+    </header>
   );
 }

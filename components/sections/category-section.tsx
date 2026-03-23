@@ -1,11 +1,12 @@
 "use client";
 
-import { motion } from "framer-motion";
 import { ArrowUpRight, Clock } from "lucide-react";
 import type { Article } from "@/lib/types";
 import type { CategoryKey } from "@/lib/constants";
 import { CATEGORIES } from "@/lib/constants";
 import Link from "next/link";
+import Image from "next/image";
+import { FadeIn } from "@/components/animations/fade-in";
 
 interface CategorySectionProps {
   articles: Article[];
@@ -44,11 +45,8 @@ export function CategorySection({
   return (
     <section
       className="py-12 relative overflow-hidden"
-      style={{
-        backgroundColor: `${accentColor}10`,
-      }}
+      style={{ backgroundColor: `${accentColor}10` }}
     >
-      {/* Subtle grid overlay */}
       <div
         className="absolute inset-0 opacity-5"
         style={{
@@ -61,50 +59,44 @@ export function CategorySection({
       />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
-        {/* Section Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="flex items-center gap-4 mb-8"
-        >
-          <h2
-            className="text-3xl lg:text-4xl font-black tracking-tight"
-            style={{ color: accentColor }}
-          >
-            {title}
-          </h2>
-          <Link
-            href={`/category/${category}`}
-            className="inline-flex items-center gap-1 px-4 py-2 rounded-full border-2 text-sm font-bold transition-all hover:scale-105"
-            style={{
-              borderColor: accentColor,
-              color: accentColor,
-              backgroundColor: `${accentColor}15`,
-            }}
-          >
-            Vedi tutti
-            <ArrowUpRight className="w-4 h-4" />
-          </Link>
-        </motion.div>
+        {/* Header */}
+        <FadeIn>
+          <div className="flex items-center gap-4 mb-8">
+            <h2
+              className="text-3xl lg:text-4xl font-black tracking-tight"
+              style={{ color: accentColor }}
+            >
+              {title}
+            </h2>
+            <Link
+              href={`/category/${category}`}
+              className="inline-flex items-center gap-1 px-4 py-2 rounded-full border-2 text-sm font-bold transition-all hover:scale-105"
+              style={{
+                borderColor: accentColor,
+                color: accentColor,
+                backgroundColor: `${accentColor}15`,
+              }}
+            >
+              Vedi tutti
+              <ArrowUpRight className="w-4 h-4" />
+            </Link>
+          </div>
+        </FadeIn>
 
-        {/* Top row: main article + side grid */}
+        {/* Top row */}
         <div className="grid lg:grid-cols-12 gap-6 mb-8">
-          {/* Main Article — left */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="lg:col-span-5"
-          >
+          {/* Main article */}
+          <FadeIn className="lg:col-span-5">
             <Link href={`/blog/${mainArticle.slug}`}>
               <article className="group cursor-pointer">
                 <div className="aspect-[4/3] rounded-2xl overflow-hidden mb-4 relative">
                   {mainArticle.hero_image_url ? (
-                    <img
+                    <Image
                       src={mainArticle.hero_image_url}
                       alt={mainArticle.title}
-                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                      fill
+                      className="object-cover transition-transform duration-700 group-hover:scale-105"
+                      sizes="(max-width: 768px) 100vw, 40vw"
                     />
                   ) : (
                     <div className="w-full h-full bg-gradient-to-br from-gray-900 to-gray-800 relative">
@@ -120,11 +112,8 @@ export function CategorySection({
                       />
                     </div>
                   )}
-                  {/* Category badge */}
                   <div className="absolute bottom-4 left-4">
-                    <span
-                      className="px-3 py-1 rounded text-xs font-bold tracking-wider uppercase bg-black/70 text-white"
-                    >
+                    <span className="px-3 py-1 rounded text-xs font-bold tracking-wider uppercase bg-black/70 text-white">
                       {CATEGORIES[mainArticle.category]?.label || category}
                     </span>
                   </div>
@@ -138,27 +127,22 @@ export function CategorySection({
                 </div>
               </article>
             </Link>
-          </motion.div>
+          </FadeIn>
 
-          {/* Side articles — right grid */}
+          {/* Side articles grid */}
           <div className="lg:col-span-7 grid sm:grid-cols-2 gap-4">
             {sideArticles.map((article, index) => (
-              <motion.div
-                key={article.id}
-                initial={{ opacity: 0, x: 20 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.08 }}
-              >
+              <FadeIn key={article.id} direction="right" delay={index * 80}>
                 <Link href={`/blog/${article.slug}`}>
                   <article className="group flex gap-4 p-3 rounded-xl bg-black/30 hover:bg-black/50 transition-all cursor-pointer">
-                    {/* Thumbnail */}
-                    <div className="w-20 h-16 rounded-lg overflow-hidden shrink-0">
+                    <div className="w-20 h-16 rounded-lg overflow-hidden shrink-0 relative">
                       {article.hero_image_url ? (
-                        <img
+                        <Image
                           src={article.hero_image_url}
                           alt={article.title}
-                          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                          fill
+                          className="object-cover transition-transform duration-500 group-hover:scale-110"
+                          sizes="80px"
                         />
                       ) : (
                         <div className="w-full h-full bg-gradient-to-br from-gray-800 to-gray-700 relative">
@@ -191,18 +175,11 @@ export function CategorySection({
                     </div>
                   </article>
                 </Link>
-              </motion.div>
+              </FadeIn>
             ))}
 
-            {/* Site info mini card in bottom-right slot */}
             {sideArticles.length >= 2 && (
-              <motion.div
-                initial={{ opacity: 0, x: 20 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: 0.3 }}
-                className="flex items-center"
-              >
+              <FadeIn direction="right" delay={300}>
                 <div className="bg-black/40 border border-gray-800/50 rounded-xl p-4 w-full">
                   <div className="flex items-center gap-2 mb-2">
                     <div className="w-8 h-8 bg-[#22c55e] rounded-lg flex items-center justify-center">
@@ -221,30 +198,26 @@ export function CategorySection({
                     </li>
                   </ul>
                 </div>
-              </motion.div>
+              </FadeIn>
             )}
           </div>
         </div>
 
-        {/* Bottom row: extra articles in horizontal strip */}
+        {/* Bottom row */}
         {bottomArticles.length > 0 && (
           <div className="grid sm:grid-cols-3 gap-4 pt-4 border-t border-white/5">
             {bottomArticles.map((article, index) => (
-              <motion.div
-                key={article.id}
-                initial={{ opacity: 0, y: 15 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.08 }}
-              >
+              <FadeIn key={article.id} delay={index * 80}>
                 <Link href={`/blog/${article.slug}`}>
                   <article className="group flex gap-3 py-3 cursor-pointer">
-                    <div className="w-16 h-14 rounded-lg overflow-hidden shrink-0">
+                    <div className="w-16 h-14 rounded-lg overflow-hidden shrink-0 relative">
                       {article.hero_image_url ? (
-                        <img
+                        <Image
                           src={article.hero_image_url}
                           alt={article.title}
-                          className="w-full h-full object-cover"
+                          fill
+                          className="object-cover"
+                          sizes="64px"
                         />
                       ) : (
                         <div className="w-full h-full bg-gradient-to-br from-gray-800 to-gray-700" />
@@ -266,7 +239,7 @@ export function CategorySection({
                     </div>
                   </article>
                 </Link>
-              </motion.div>
+              </FadeIn>
             ))}
           </div>
         )}

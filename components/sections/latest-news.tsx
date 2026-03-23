@@ -1,10 +1,11 @@
 "use client";
 
-import { motion } from "framer-motion";
 import { ArrowUpRight, Clock, TrendingUp } from "lucide-react";
 import type { Article } from "@/lib/types";
 import { CATEGORIES } from "@/lib/constants";
 import Link from "next/link";
+import Image from "next/image";
+import { FadeIn } from "@/components/animations/fade-in";
 
 interface LatestNewsProps {
   articles: Article[];
@@ -33,51 +34,41 @@ export function LatestNews({ articles }: LatestNewsProps) {
     <section className="py-12 bg-black">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="flex items-center gap-5 mb-8"
-        >
-          <h2
-            className="text-3xl sm:text-4xl font-black text-white tracking-tight"
-            style={{ fontFamily: "'JetBrains Mono', monospace" }}
-          >
-            Ultime <span className="text-[#22c55e]">News</span>
-          </h2>
-          <Link
-            href="/blog"
-            className="inline-flex items-center gap-1 px-5 py-2 rounded-full border-2 border-gray-700 text-sm font-bold text-gray-300 hover:border-[#22c55e] hover:text-[#22c55e] transition-all"
-          >
-            Vedi tutti
-            <ArrowUpRight className="w-4 h-4" />
-          </Link>
-        </motion.div>
+        <FadeIn>
+          <div className="flex items-center gap-5 mb-8">
+            <h2
+              className="text-3xl sm:text-4xl font-black text-white tracking-tight"
+              style={{ fontFamily: "'JetBrains Mono', monospace" }}
+            >
+              Ultime <span className="text-[#22c55e]">News</span>
+            </h2>
+            <Link
+              href="/blog"
+              className="inline-flex items-center gap-1 px-5 py-2 rounded-full border-2 border-gray-700 text-sm font-bold text-gray-300 hover:border-[#22c55e] hover:text-[#22c55e] transition-all"
+            >
+              Vedi tutti
+              <ArrowUpRight className="w-4 h-4" />
+            </Link>
+          </div>
+        </FadeIn>
 
-        {/* Divider */}
         <div className="h-px bg-gray-800 mb-8" />
 
-        {/* Articles list + sidebar */}
         <div className="grid lg:grid-cols-12 gap-8">
           {/* Left — Article list */}
           <div className="lg:col-span-8 space-y-0 divide-y divide-gray-800">
             {newsArticles.map((article, index) => (
-              <motion.div
-                key={article.id}
-                initial={{ opacity: 0, y: 15 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.05 }}
-              >
+              <FadeIn key={article.id} delay={index * 50}>
                 <Link href={`/blog/${article.slug}`}>
                   <article className="group flex gap-5 py-5 cursor-pointer">
-                    {/* Thumbnail */}
-                    <div className="w-28 h-20 sm:w-36 sm:h-24 rounded-xl overflow-hidden shrink-0">
+                    <div className="w-28 h-20 sm:w-36 sm:h-24 rounded-xl overflow-hidden shrink-0 relative">
                       {article.hero_image_url ? (
-                        <img
+                        <Image
                           src={article.hero_image_url}
                           alt={article.title}
-                          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                          fill
+                          className="object-cover transition-transform duration-500 group-hover:scale-105"
+                          sizes="160px"
                         />
                       ) : (
                         <div className="w-full h-full bg-gradient-to-br from-gray-800 to-gray-700 relative">
@@ -94,8 +85,6 @@ export function LatestNews({ articles }: LatestNewsProps) {
                         </div>
                       )}
                     </div>
-
-                    {/* Content */}
                     <div className="flex flex-col justify-center min-w-0 flex-1">
                       <span
                         className="text-xs font-bold tracking-wider mb-1 uppercase"
@@ -115,7 +104,7 @@ export function LatestNews({ articles }: LatestNewsProps) {
                     </div>
                   </article>
                 </Link>
-              </motion.div>
+              </FadeIn>
             ))}
           </div>
 
@@ -123,79 +112,72 @@ export function LatestNews({ articles }: LatestNewsProps) {
           <div className="lg:col-span-4">
             <div className="sticky top-16 space-y-6">
               {/* Site info card */}
-              <motion.div
-                initial={{ opacity: 0, x: 20 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-                className="bg-[#0a0a0a] border border-gray-800 rounded-2xl p-6"
-              >
-                <div className="flex items-center gap-3 mb-5">
-                  <div className="w-10 h-10 bg-[#22c55e] rounded-xl flex items-center justify-center">
-                    <span className="text-black font-bold text-sm">AI</span>
+              <FadeIn direction="right">
+                <div className="bg-[#0a0a0a] border border-gray-800 rounded-2xl p-6">
+                  <div className="flex items-center gap-3 mb-5">
+                    <div className="w-10 h-10 bg-[#22c55e] rounded-xl flex items-center justify-center">
+                      <span className="text-black font-bold text-sm">AI</span>
+                    </div>
+                    <span className="text-white font-bold text-lg">IlVantaggioAI</span>
                   </div>
-                  <span className="text-white font-bold text-lg">IlVantaggioAI</span>
+                  <ul className="space-y-3 text-sm">
+                    <li className="flex items-start gap-2">
+                      <span className="text-[#22c55e] mt-0.5">&#9679;</span>
+                      <span className="text-gray-300">
+                        <strong className="text-white">AI-powered.</strong> Contenuti generati e curati con AI.
+                      </span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-[#22c55e] mt-0.5">&#9679;</span>
+                      <span className="text-gray-300">
+                        <strong className="text-white">In italiano.</strong> News e guide sull&apos;AI in italiano.
+                      </span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-[#22c55e] mt-0.5">&#9679;</span>
+                      <span className="text-gray-300">
+                        <strong className="text-white">Sempre aggiornato.</strong> Novit&agrave; ogni giorno.
+                      </span>
+                    </li>
+                  </ul>
                 </div>
-                <ul className="space-y-3 text-sm">
-                  <li className="flex items-start gap-2">
-                    <span className="text-[#22c55e] mt-0.5">&#9679;</span>
-                    <span className="text-gray-300">
-                      <strong className="text-white">AI-powered.</strong> Contenuti generati e curati con AI.
-                    </span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <span className="text-[#22c55e] mt-0.5">&#9679;</span>
-                    <span className="text-gray-300">
-                      <strong className="text-white">In italiano.</strong> News e guide sull&apos;AI in italiano.
-                    </span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <span className="text-[#22c55e] mt-0.5">&#9679;</span>
-                    <span className="text-gray-300">
-                      <strong className="text-white">Sempre aggiornato.</strong> Novit&agrave; ogni giorno.
-                    </span>
-                  </li>
-                </ul>
-              </motion.div>
+              </FadeIn>
 
               {/* Most Popular */}
-              <motion.div
-                initial={{ opacity: 0, x: 20 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: 0.1 }}
-                className="bg-[#0a0a0a] border border-gray-800 rounded-2xl overflow-hidden"
-              >
-                <div className="flex items-center justify-between px-5 py-4 border-b border-gray-800">
-                  <h3 className="font-bold text-white flex items-center gap-2">
-                    <TrendingUp className="w-4 h-4 text-[#22c55e]" />
-                    Pi&ugrave; Popolari
-                  </h3>
-                  <Link
-                    href="/blog"
-                    className="text-[#22c55e] hover:text-[#4ade80] transition-colors"
-                  >
-                    <ArrowUpRight className="w-4 h-4" />
-                  </Link>
-                </div>
-                <div className="p-3 space-y-1">
-                  {popular.map((article) => (
-                    <Link key={article.id} href={`/blog/${article.slug}`}>
-                      <div className="group flex items-start gap-3 p-2.5 rounded-xl hover:bg-gray-800/50 transition-colors cursor-pointer">
-                        <span
-                          className="w-2 h-2 rounded-full mt-1.5 shrink-0"
-                          style={{
-                            backgroundColor:
-                              CATEGORIES[article.category]?.accent || "#22c55e",
-                          }}
-                        />
-                        <span className="text-sm text-gray-300 group-hover:text-[#22c55e] transition-colors line-clamp-2 leading-snug">
-                          {article.title}
-                        </span>
-                      </div>
+              <FadeIn direction="right" delay={100}>
+                <div className="bg-[#0a0a0a] border border-gray-800 rounded-2xl overflow-hidden">
+                  <div className="flex items-center justify-between px-5 py-4 border-b border-gray-800">
+                    <h3 className="font-bold text-white flex items-center gap-2">
+                      <TrendingUp className="w-4 h-4 text-[#22c55e]" />
+                      Pi&ugrave; Popolari
+                    </h3>
+                    <Link
+                      href="/blog"
+                      className="text-[#22c55e] hover:text-[#4ade80] transition-colors"
+                    >
+                      <ArrowUpRight className="w-4 h-4" />
                     </Link>
-                  ))}
+                  </div>
+                  <div className="p-3 space-y-1">
+                    {popular.map((article) => (
+                      <Link key={article.id} href={`/blog/${article.slug}`}>
+                        <div className="group flex items-start gap-3 p-2.5 rounded-xl hover:bg-gray-800/50 transition-colors cursor-pointer">
+                          <span
+                            className="w-2 h-2 rounded-full mt-1.5 shrink-0"
+                            style={{
+                              backgroundColor:
+                                CATEGORIES[article.category]?.accent || "#22c55e",
+                            }}
+                          />
+                          <span className="text-sm text-gray-300 group-hover:text-[#22c55e] transition-colors line-clamp-2 leading-snug">
+                            {article.title}
+                          </span>
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
                 </div>
-              </motion.div>
+              </FadeIn>
             </div>
           </div>
         </div>

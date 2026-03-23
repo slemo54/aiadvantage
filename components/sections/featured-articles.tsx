@@ -1,10 +1,11 @@
 "use client";
 
-import { motion } from "framer-motion";
 import { Clock } from "lucide-react";
 import type { Article } from "@/lib/types";
 import { CATEGORIES } from "@/lib/constants";
 import Link from "next/link";
+import Image from "next/image";
+import { FadeIn } from "@/components/animations/fade-in";
 
 interface FeaturedArticlesProps {
   articles: Article[];
@@ -25,6 +26,23 @@ function formatDate(dateString: string | null): string {
   return date.toLocaleDateString("it-IT", { day: "numeric", month: "short" });
 }
 
+function ArticleImage({ src, alt }: { src: string | null; alt: string }) {
+  if (src) {
+    return (
+      <Image
+        src={src}
+        alt={alt}
+        fill
+        className="object-cover transition-transform duration-700 group-hover:scale-105"
+        sizes="(max-width: 768px) 100vw, 50vw"
+      />
+    );
+  }
+  return (
+    <div className="absolute inset-0 bg-gradient-to-br from-gray-900 to-gray-800" />
+  );
+}
+
 export function FeaturedArticles({ articles }: FeaturedArticlesProps) {
   const featured = articles.slice(0, 6);
   const mainArticle = featured[0];
@@ -35,28 +53,13 @@ export function FeaturedArticles({ articles }: FeaturedArticlesProps) {
     <section className="py-6 bg-black">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid lg:grid-cols-12 gap-5">
-          {/* Left — Main Featured Article */}
+          {/* Left — Main Featured */}
           {mainArticle && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              className="lg:col-span-5"
-            >
+            <FadeIn className="lg:col-span-5">
               <Link href={`/blog/${mainArticle.slug}`}>
                 <article className="group relative h-full min-h-[420px] rounded-2xl overflow-hidden cursor-pointer">
-                  {/* Background */}
                   <div className="absolute inset-0">
-                    {mainArticle.hero_image_url ? (
-                      <img
-                        src={mainArticle.hero_image_url}
-                        alt={mainArticle.title}
-                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                      />
-                    ) : (
-                      <div className="w-full h-full bg-gradient-to-br from-gray-900 to-gray-800" />
-                    )}
-                    {/* Grid overlay */}
+                    <ArticleImage src={mainArticle.hero_image_url} alt={mainArticle.title} />
                     <div
                       className="absolute inset-0 opacity-20"
                       style={{
@@ -69,12 +72,8 @@ export function FeaturedArticles({ articles }: FeaturedArticlesProps) {
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-transparent" />
                   </div>
-
-                  {/* Content */}
                   <div className="absolute inset-0 p-6 flex flex-col justify-end">
-                    <span
-                      className="inline-block px-3 py-1 rounded text-xs font-bold tracking-wider w-fit mb-3 bg-black/60 text-white uppercase"
-                    >
+                    <span className="inline-block px-3 py-1 rounded text-xs font-bold tracking-wider w-fit mb-3 bg-black/60 text-white uppercase">
                       {CATEGORIES[mainArticle.category]?.label || mainArticle.category}
                     </span>
                     <h3 className="text-xl sm:text-2xl lg:text-3xl font-bold text-white mb-2 group-hover:text-[#22c55e] transition-colors line-clamp-3">
@@ -92,34 +91,17 @@ export function FeaturedArticles({ articles }: FeaturedArticlesProps) {
                   </div>
                 </article>
               </Link>
-            </motion.div>
+            </FadeIn>
           )}
 
           {/* Center — Two stacked medium articles */}
           <div className="lg:col-span-4 flex flex-col gap-5">
             {rightArticles.map((article, index) => (
-              <motion.div
-                key={article.id}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.1 }}
-                className="flex-1"
-              >
+              <FadeIn key={article.id} delay={index * 100} className="flex-1">
                 <Link href={`/blog/${article.slug}`}>
                   <article className="group relative h-full min-h-[195px] rounded-2xl overflow-hidden cursor-pointer">
-                    {/* Background */}
                     <div className="absolute inset-0">
-                      {article.hero_image_url ? (
-                        <img
-                          src={article.hero_image_url}
-                          alt={article.title}
-                          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                        />
-                      ) : (
-                        <div className="w-full h-full bg-gradient-to-br from-gray-900 to-gray-800" />
-                      )}
-                      {/* Grid overlay */}
+                      <ArticleImage src={article.hero_image_url} alt={article.title} />
                       <div
                         className="absolute inset-0 opacity-15"
                         style={{
@@ -132,12 +114,8 @@ export function FeaturedArticles({ articles }: FeaturedArticlesProps) {
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent" />
                     </div>
-
-                    {/* Content */}
                     <div className="absolute inset-0 p-5 flex flex-col justify-end">
-                      <span
-                        className="inline-block px-3 py-1 rounded text-xs font-bold tracking-wider w-fit mb-2 bg-black/60 text-white uppercase"
-                      >
+                      <span className="inline-block px-3 py-1 rounded text-xs font-bold tracking-wider w-fit mb-2 bg-black/60 text-white uppercase">
                         {CATEGORIES[article.category]?.label || article.category}
                       </span>
                       <h4 className="text-base sm:text-lg font-bold text-white group-hover:text-[#22c55e] transition-colors line-clamp-2">
@@ -150,17 +128,12 @@ export function FeaturedArticles({ articles }: FeaturedArticlesProps) {
                     </div>
                   </article>
                 </Link>
-              </motion.div>
+              </FadeIn>
             ))}
           </div>
 
-          {/* Right — Top Headlines sidebar */}
-          <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            className="lg:col-span-3"
-          >
+          {/* Right — Top Headlines */}
+          <FadeIn direction="right" className="lg:col-span-3">
             <div className="bg-[#0a0a0a] border border-gray-800 rounded-2xl p-5 h-full">
               <h3 className="text-lg font-bold text-white mb-5">Top Headlines</h3>
               <div className="space-y-4">
@@ -181,7 +154,7 @@ export function FeaturedArticles({ articles }: FeaturedArticlesProps) {
                 ))}
               </div>
             </div>
-          </motion.div>
+          </FadeIn>
         </div>
       </div>
     </section>

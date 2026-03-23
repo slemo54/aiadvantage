@@ -1,8 +1,8 @@
 "use client";
 
-import { motion } from "framer-motion";
 import { useState } from "react";
 import { Loader2, CheckCircle, Send } from "lucide-react";
+import { FadeIn } from "@/components/animations/fade-in";
 
 export function Newsletter() {
   const [email, setEmail] = useState("");
@@ -13,75 +13,64 @@ export function Newsletter() {
     if (!email) return;
 
     setStatus("loading");
-    // Simulate API call
     await new Promise((resolve) => setTimeout(resolve, 1000));
     setStatus("success");
     setEmail("");
   };
 
   return (
-    <section id="contact" className="py-20 bg-[#0a0a0a] border-t border-gray-800">
+    <section id="newsletter" className="py-20 bg-[#0a0a0a] border-t border-gray-800">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="text-center"
-        >
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-6">
-            Do You have Project{" "}
-            <span className="text-[#22c55e]">Let&apos;s discusses</span>{" "}
-            With us.
-          </h2>
-          <p className="text-gray-400 text-lg mb-8 max-w-xl mx-auto">
-            Iscriviti alla nostra newsletter per ricevere aggiornamenti settimanali 
-            sul mondo dell&apos;AI.
-          </p>
+        <FadeIn>
+          <div className="text-center">
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-6">
+              Resta aggiornato{" "}
+              <span className="text-[#22c55e]">sull&apos;AI</span>
+            </h2>
+            <p className="text-gray-400 text-lg mb-8 max-w-xl mx-auto">
+              Iscriviti alla nostra newsletter per ricevere aggiornamenti settimanali
+              sul mondo dell&apos;AI.
+            </p>
 
-          <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-4 max-w-lg mx-auto">
-            <div className="flex-1 relative">
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="Enter your email"
-                className="w-full px-6 py-4 rounded-full bg-black border border-gray-800 text-white placeholder-gray-500 focus:outline-none focus:border-[#22c55e] transition-colors"
+            <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-4 max-w-lg mx-auto">
+              <div className="flex-1">
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="La tua email"
+                  className="w-full px-6 py-4 rounded-full bg-black border border-gray-800 text-white placeholder-gray-500 focus:outline-none focus:border-[#22c55e] transition-colors"
+                  disabled={status === "loading" || status === "success"}
+                />
+              </div>
+              <button
+                type="submit"
                 disabled={status === "loading" || status === "success"}
-              />
-            </div>
-            <motion.button
-              type="submit"
-              disabled={status === "loading" || status === "success"}
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              className="px-8 py-4 bg-[#22c55e] text-black font-semibold rounded-full hover:bg-[#4ade80] transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
-            >
-              {status === "loading" ? (
-                <Loader2 className="w-5 h-5 animate-spin" />
-              ) : status === "success" ? (
-                <>
-                  <CheckCircle className="w-5 h-5" />
-                  Subscribed!
-                </>
-              ) : (
-                <>
-                  <Send className="w-4 h-4" />
-                  Subscribe
-                </>
-              )}
-            </motion.button>
-          </form>
+                className="px-8 py-4 bg-[#22c55e] text-black font-semibold rounded-full hover:bg-[#4ade80] transition-colors flex items-center justify-center gap-2 disabled:opacity-50 active:scale-95"
+              >
+                {status === "loading" ? (
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                ) : status === "success" ? (
+                  <>
+                    <CheckCircle className="w-5 h-5" />
+                    Iscritto!
+                  </>
+                ) : (
+                  <>
+                    <Send className="w-4 h-4" />
+                    Iscriviti
+                  </>
+                )}
+              </button>
+            </form>
 
-          {status === "success" && (
-            <motion.p
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="text-[#22c55e] mt-4"
-            >
-              Grazie per l&apos;iscrizione! Controlla la tua email.
-            </motion.p>
-          )}
-        </motion.div>
+            {status === "success" && (
+              <p className="text-[#22c55e] mt-4">
+                Grazie per l&apos;iscrizione! Controlla la tua email.
+              </p>
+            )}
+          </div>
+        </FadeIn>
       </div>
     </section>
   );

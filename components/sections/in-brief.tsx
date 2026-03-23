@@ -1,9 +1,10 @@
 "use client";
 
-import { motion } from "framer-motion";
 import { Clock } from "lucide-react";
 import type { Article } from "@/lib/types";
 import Link from "next/link";
+import Image from "next/image";
+import { FadeIn } from "@/components/animations/fade-in";
 
 interface InBriefProps {
   articles: Article[];
@@ -30,22 +31,17 @@ export function InBrief({ articles }: InBriefProps) {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="space-y-0 divide-y divide-gray-800">
           {briefArticles.map((article, index) => (
-            <motion.div
-              key={article.id}
-              initial={{ opacity: 0, y: 12 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: index * 0.05 }}
-            >
+            <FadeIn key={article.id} delay={index * 50}>
               <Link href={`/blog/${article.slug}`}>
                 <article className="group flex gap-4 py-4 cursor-pointer">
-                  {/* Thumbnail */}
-                  <div className="w-24 h-18 sm:w-28 sm:h-20 rounded-lg overflow-hidden shrink-0">
+                  <div className="w-24 h-18 sm:w-28 sm:h-20 rounded-lg overflow-hidden shrink-0 relative">
                     {article.hero_image_url ? (
-                      <img
+                      <Image
                         src={article.hero_image_url}
                         alt={article.title}
-                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                        fill
+                        className="object-cover transition-transform duration-500 group-hover:scale-105"
+                        sizes="112px"
                       />
                     ) : (
                       <div className="w-full h-full bg-gradient-to-br from-gray-800 to-gray-700 relative">
@@ -62,8 +58,6 @@ export function InBrief({ articles }: InBriefProps) {
                       </div>
                     )}
                   </div>
-
-                  {/* Content */}
                   <div className="flex flex-col justify-center min-w-0 flex-1">
                     <div className="flex items-center gap-2 mb-1">
                       <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-[#22c55e] text-black text-[10px] font-bold tracking-wider uppercase">
@@ -80,7 +74,7 @@ export function InBrief({ articles }: InBriefProps) {
                   </div>
                 </article>
               </Link>
-            </motion.div>
+            </FadeIn>
           ))}
         </div>
       </div>
