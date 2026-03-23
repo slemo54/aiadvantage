@@ -1,17 +1,16 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Hero3D } from "@/components/sections/hero-3d";
+import { HeroBanner } from "@/components/sections/hero-banner";
 import { FeaturedArticles } from "@/components/sections/featured-articles";
+import { LatestNews } from "@/components/sections/latest-news";
 import { CategorySection } from "@/components/sections/category-section";
-import { Sidebar } from "@/components/sections/sidebar";
 import { InBrief } from "@/components/sections/in-brief";
 import { Newsletter } from "@/components/sections/newsletter";
 import type { Article } from "@/lib/types";
 import { SEED_ARTICLES } from "@/lib/seed-articles";
 import type { CategoryKey } from "@/lib/constants";
 
-// Seed articles first, then fallback placeholders
 const PLACEHOLDER_ARTICLES: Article[] = [
   ...SEED_ARTICLES.map((s) => ({
     id: s.id,
@@ -158,77 +157,58 @@ export default function HomePage() {
 
   return (
     <main className="min-h-screen bg-black">
-      {/* Hero with 3D Crystal */}
-      <Hero3D />
+      {/* Branded Banner */}
+      <HeroBanner />
 
-      {/* Featured Articles Section */}
+      {/* Featured Bento Grid + Top Headlines */}
       <FeaturedArticles articles={articles} />
 
-      {/* Main Content Grid with Sidebar */}
-      <section className="py-8 bg-black">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid lg:grid-cols-12 gap-8">
-            {/* Main Content */}
-            <div className="lg:col-span-8 space-y-8">
-              {/* Category: AI News */}
-              <CategorySection 
-                articles={articles} 
-                category="ai_news" 
-                title="AI News"
-                accentColor="#3b82f6"
-              />
+      {/* Green accent divider */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="h-1 bg-gradient-to-r from-transparent via-[#22c55e]/30 to-transparent" />
+      </div>
 
-              {/* Category: Casi d'Uso */}
-              <CategorySection 
-                articles={articles} 
-                category="casi_duso" 
-                title="Casi d'Uso"
-                accentColor="#22c55e"
-              />
+      {/* Latest News + Sidebar */}
+      <LatestNews articles={articles} />
 
-              {/* Category: Tools */}
-              <CategorySection 
-                articles={articles} 
-                category="tools" 
-                title="Tools"
-                accentColor="#a855f7"
-              />
+      {/* Category Sections */}
+      <CategorySection
+        articles={articles}
+        category="ai_news"
+        title="AI News"
+        accentColor="#3b82f6"
+      />
 
-              {/* In Brief */}
-              <InBrief articles={articles} />
-            </div>
+      <CategorySection
+        articles={articles}
+        category="casi_duso"
+        title="Casi d'Uso"
+        accentColor="#22c55e"
+      />
 
-            {/* Sidebar */}
-            <div className="lg:col-span-4">
-              <div className="sticky top-24">
-                <Sidebar articles={articles} />
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
+      <CategorySection
+        articles={articles}
+        category="tools"
+        title="Tools"
+        accentColor="#a855f7"
+      />
 
-      {/* More Categories */}
-      <CategorySection 
-        articles={articles} 
-        category="tutorial" 
+      <CategorySection
+        articles={articles}
+        category="tutorial"
         title="Tutorial"
         accentColor="#f59e0b"
       />
 
-      <CategorySection 
-        articles={articles} 
-        category="opinioni" 
-        title="Opinioni"
-        accentColor="#ec4899"
-      />
-
-      <CategorySection 
-        articles={articles} 
-        category="web_dev" 
+      <CategorySection
+        articles={articles}
+        category="web_dev"
         title="Web Dev"
         accentColor="#14b8a6"
       />
+
+      {/* In Brief */}
+      <InBrief articles={articles} />
 
       {/* Newsletter */}
       <Newsletter />

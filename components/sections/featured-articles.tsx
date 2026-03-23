@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { ArrowUpRight, Clock } from "lucide-react";
+import { Clock } from "lucide-react";
 import type { Article } from "@/lib/types";
 import { CATEGORIES } from "@/lib/constants";
 import Link from "next/link";
@@ -10,57 +10,42 @@ interface FeaturedArticlesProps {
   articles: Article[];
 }
 
-export function FeaturedArticles({ articles }: FeaturedArticlesProps) {
-  const featured = articles.slice(0, 5);
-  const mainArticle = featured[0];
-  const sideArticles = featured.slice(1, 4);
+function formatDate(dateString: string | null): string {
+  if (!dateString) return "Data sconosciuta";
+  const date = new Date(dateString);
+  const now = new Date();
+  const diff = now.getTime() - date.getTime();
+  const minutes = Math.floor(diff / (1000 * 60));
+  const hours = Math.floor(diff / (1000 * 60 * 60));
+  const days = Math.floor(hours / 24);
 
-  const formatDate = (dateString: string | null) => {
-    if (!dateString) return "Data sconosciuta";
-    const date = new Date(dateString);
-    const now = new Date();
-    const diff = now.getTime() - date.getTime();
-    const hours = Math.floor(diff / (1000 * 60 * 60));
-    const days = Math.floor(hours / 24);
-    
-    if (hours < 1) return "Adesso";
-    if (hours < 24) return `${hours}h fa`;
-    if (days < 7) return `${days}g fa`;
-    return date.toLocaleDateString("it-IT", { day: "numeric", month: "short" });
-  };
+  if (minutes < 60) return `${minutes} min fa`;
+  if (hours < 24) return `${hours} ore fa`;
+  if (days < 7) return `${days}g fa`;
+  return date.toLocaleDateString("it-IT", { day: "numeric", month: "short" });
+}
+
+export function FeaturedArticles({ articles }: FeaturedArticlesProps) {
+  const featured = articles.slice(0, 6);
+  const mainArticle = featured[0];
+  const rightArticles = featured.slice(1, 3);
+  const headlineArticles = featured.slice(0, 5);
 
   return (
-    <section id="articles" className="py-16 bg-black">
+    <section className="py-6 bg-black">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Section Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="flex items-center justify-between mb-8"
-        >
-          <h2 className="text-3xl font-bold text-white">In evidenza</h2>
-          <Link 
-            href="/blog" 
-            className="text-[#22c55e] hover:text-[#4ade80] flex items-center gap-1 text-sm font-medium transition-colors"
-          >
-            Vedi tutti
-            <ArrowUpRight className="w-4 h-4" />
-          </Link>
-        </motion.div>
-
-        <div className="grid lg:grid-cols-12 gap-6">
-          {/* Main Featured Article */}
+        <div className="grid lg:grid-cols-12 gap-5">
+          {/* Left — Main Featured Article */}
           {mainArticle && (
             <motion.div
-              initial={{ opacity: 0, y: 30 }}
+              initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              className="lg:col-span-8"
+              className="lg:col-span-5"
             >
               <Link href={`/blog/${mainArticle.slug}`}>
-                <article className="group relative h-[500px] rounded-2xl overflow-hidden cursor-pointer">
-                  {/* Background Image */}
+                <article className="group relative h-full min-h-[420px] rounded-2xl overflow-hidden cursor-pointer">
+                  {/* Background */}
                   <div className="absolute inset-0">
                     {mainArticle.hero_image_url ? (
                       <img
@@ -71,25 +56,37 @@ export function FeaturedArticles({ articles }: FeaturedArticlesProps) {
                     ) : (
                       <div className="w-full h-full bg-gradient-to-br from-gray-900 to-gray-800" />
                     )}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent" />
+                    {/* Grid overlay */}
+                    <div
+                      className="absolute inset-0 opacity-20"
+                      style={{
+                        backgroundImage: `
+                          linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px),
+                          linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)
+                        `,
+                        backgroundSize: "40px 40px",
+                      }}
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-transparent" />
                   </div>
 
                   {/* Content */}
-                  <div className="absolute inset-0 p-8 flex flex-col justify-end">
-                    <span 
-                      className="inline-block px-3 py-1 rounded-full text-xs font-semibold w-fit mb-4"
-                      style={{ 
-                        backgroundColor: `${CATEGORIES[mainArticle.category]?.accent || '#22c55e'}20`,
-                        color: CATEGORIES[mainArticle.category]?.accent || '#22c55e'
-                      }}
+                  <div className="absolute inset-0 p-6 flex flex-col justify-end">
+                    <span
+                      className="inline-block px-3 py-1 rounded text-xs font-bold tracking-wider w-fit mb-3 bg-black/60 text-white uppercase"
                     >
-                      {mainArticle.category.replace("_", " ").toUpperCase()}
+                      {CATEGORIES[mainArticle.category]?.label || mainArticle.category}
                     </span>
-                    <h3 className="text-2xl lg:text-4xl font-bold text-white mb-3 group-hover:text-[#22c55e] transition-colors line-clamp-3">
+                    <h3 className="text-xl sm:text-2xl lg:text-3xl font-bold text-white mb-2 group-hover:text-[#22c55e] transition-colors line-clamp-3">
                       {mainArticle.title}
                     </h3>
-                    <div className="flex items-center gap-2 text-gray-400 text-sm">
-                      <Clock className="w-4 h-4" />
+                    {mainArticle.meta_description && (
+                      <p className="text-gray-300 text-sm line-clamp-2 mb-3">
+                        {mainArticle.meta_description}
+                      </p>
+                    )}
+                    <div className="flex items-center gap-2 text-gray-400 text-xs">
+                      <Clock className="w-3.5 h-3.5" />
                       <span>{formatDate(mainArticle.published_at)}</span>
                     </div>
                   </div>
@@ -98,45 +95,55 @@ export function FeaturedArticles({ articles }: FeaturedArticlesProps) {
             </motion.div>
           )}
 
-          {/* Side Articles */}
-          <div className="lg:col-span-4 flex flex-col gap-4">
-            {sideArticles.map((article, index) => (
+          {/* Center — Two stacked medium articles */}
+          <div className="lg:col-span-4 flex flex-col gap-5">
+            {rightArticles.map((article, index) => (
               <motion.div
                 key={article.id}
-                initial={{ opacity: 0, x: 30 }}
-                whileInView={{ opacity: 1, x: 0 }}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.1 }}
+                className="flex-1"
               >
                 <Link href={`/blog/${article.slug}`}>
-                  <article className="group flex gap-4 p-4 rounded-xl bg-[#0a0a0a] border border-gray-800 hover:border-[#22c55e]/30 transition-all cursor-pointer">
-                    {/* Thumbnail */}
-                    <div className="w-24 h-24 rounded-lg overflow-hidden shrink-0">
+                  <article className="group relative h-full min-h-[195px] rounded-2xl overflow-hidden cursor-pointer">
+                    {/* Background */}
+                    <div className="absolute inset-0">
                       {article.hero_image_url ? (
                         <img
                           src={article.hero_image_url}
                           alt={article.title}
-                          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                         />
                       ) : (
-                        <div className="w-full h-full bg-gradient-to-br from-gray-800 to-gray-700 flex items-center justify-center">
-                          <span className="text-2xl">🤖</span>
-                        </div>
+                        <div className="w-full h-full bg-gradient-to-br from-gray-900 to-gray-800" />
                       )}
+                      {/* Grid overlay */}
+                      <div
+                        className="absolute inset-0 opacity-15"
+                        style={{
+                          backgroundImage: `
+                            linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px),
+                            linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)
+                          `,
+                          backgroundSize: "40px 40px",
+                        }}
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent" />
                     </div>
 
                     {/* Content */}
-                    <div className="flex flex-col justify-center min-w-0">
-                      <span 
-                        className="text-xs font-semibold mb-1"
-                        style={{ color: CATEGORIES[article.category]?.accent || '#22c55e' }}
+                    <div className="absolute inset-0 p-5 flex flex-col justify-end">
+                      <span
+                        className="inline-block px-3 py-1 rounded text-xs font-bold tracking-wider w-fit mb-2 bg-black/60 text-white uppercase"
                       >
-                        {article.category.replace("_", " ").toUpperCase()}
+                        {CATEGORIES[article.category]?.label || article.category}
                       </span>
-                      <h4 className="text-white font-semibold text-sm line-clamp-2 group-hover:text-[#22c55e] transition-colors">
+                      <h4 className="text-base sm:text-lg font-bold text-white group-hover:text-[#22c55e] transition-colors line-clamp-2">
                         {article.title}
                       </h4>
-                      <div className="flex items-center gap-1 text-gray-500 text-xs mt-2">
+                      <div className="flex items-center gap-2 text-gray-400 text-xs mt-2">
                         <Clock className="w-3 h-3" />
                         <span>{formatDate(article.published_at)}</span>
                       </div>
@@ -146,6 +153,35 @@ export function FeaturedArticles({ articles }: FeaturedArticlesProps) {
               </motion.div>
             ))}
           </div>
+
+          {/* Right — Top Headlines sidebar */}
+          <motion.div
+            initial={{ opacity: 0, x: 20 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            className="lg:col-span-3"
+          >
+            <div className="bg-[#0a0a0a] border border-gray-800 rounded-2xl p-5 h-full">
+              <h3 className="text-lg font-bold text-white mb-5">Top Headlines</h3>
+              <div className="space-y-4">
+                {headlineArticles.map((article) => (
+                  <Link key={article.id} href={`/blog/${article.slug}`}>
+                    <div className="group flex items-start gap-3 py-2 cursor-pointer">
+                      <span
+                        className="w-2 h-2 rounded-full mt-1.5 shrink-0"
+                        style={{
+                          backgroundColor: CATEGORIES[article.category]?.accent || "#22c55e",
+                        }}
+                      />
+                      <span className="text-sm text-gray-300 group-hover:text-[#22c55e] transition-colors line-clamp-2 leading-snug">
+                        {article.title}
+                      </span>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          </motion.div>
         </div>
       </div>
     </section>
