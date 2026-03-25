@@ -16,14 +16,16 @@ import {
   ImagePlus,
   Undo,
   Redo,
+  Quote,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
 
 interface TiptapEditorProps {
-  content?: string;
+  content: string;
   onChange?: (html: string) => void;
+  editable?: boolean;
 }
 
 function ToolbarButton({
@@ -57,7 +59,7 @@ export function TiptapEditor({ content, onChange }: TiptapEditorProps) {
   const editor = useEditor({
     extensions: [
       StarterKit.configure({
-        heading: { levels: [1, 2, 3] },
+        heading: { levels: [2, 3] },
       }),
       Image,
       Link.configure({ openOnClick: false }),
@@ -140,18 +142,20 @@ export function TiptapEditor({ content, onChange }: TiptapEditorProps) {
           active={editor.isActive("blockquote")}
           title="Citazione"
         >
-          <span className="text-sm font-bold">&ldquo;</span>
+          <Quote className="h-4 w-4" />
         </ToolbarButton>
 
         <div className="ml-auto flex items-center gap-1">
           <ToolbarButton
             onClick={() => editor.chain().focus().undo().run()}
+            disabled={!editor.can().undo()}
             title="Annulla"
           >
             <Undo className="h-4 w-4" />
           </ToolbarButton>
           <ToolbarButton
             onClick={() => editor.chain().focus().redo().run()}
+            disabled={!editor.can().redo()}
             title="Ripeti"
           >
             <Redo className="h-4 w-4" />
@@ -188,4 +192,3 @@ export function TiptapEditor({ content, onChange }: TiptapEditorProps) {
     </div>
   );
 }
-

@@ -53,7 +53,7 @@ const CATEGORY_ART_DIRECTIONS: Record<
 
 function cleanTitleForImage(title: string): string {
   return title
-    .replace(/["'“”‘’]/g, "")
+    .replace(/["'""'']/g, "")
     .replace(/\s+/g, " ")
     .trim();
 }
@@ -209,12 +209,7 @@ export async function POST(request: NextRequest) {
     }
 
     if (!imageDataUri) {
-      // Non-fatal: continue without image and move to reviewing
-      await supabase
-        .from("articles")
-        .update({ status: "reviewing", updated_at: new Date().toISOString() })
-        .eq("id", articleId);
-
+      // Non-fatal: continue without image
       return NextResponse.json({
         success: true,
         articleId,

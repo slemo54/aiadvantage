@@ -152,7 +152,7 @@ export function EditorAISidebar({
                 onChange={() => setTone("conversational")}
                 className="text-primary"
               />
-              Conversazionale & Amichevole
+              Conversazionale &amp; Amichevole
             </label>
             <label className="flex items-center gap-2 text-sm">
               <input
@@ -162,7 +162,7 @@ export function EditorAISidebar({
                 onChange={() => setTone("professional")}
                 className="text-primary"
               />
-              Professionale & Autorevole
+              Professionale &amp; Autorevole
             </label>
             <label className="flex items-center gap-2 text-sm">
               <input
@@ -213,6 +213,7 @@ export function EditorAISidebar({
                 value={focusKeyword}
                 onChange={(e) => setFocusKeyword(e.target.value)}
                 className="h-8 text-sm"
+                disabled={!article}
               />
             </div>
             <div>
@@ -220,7 +221,13 @@ export function EditorAISidebar({
                 <label className="text-xs font-medium text-muted-foreground">
                   Meta Description
                 </label>
-                <span className="text-[10px] text-muted-foreground">
+                <span
+                  className={`text-[10px] ${
+                    metaDescription.length > 160
+                      ? "text-red-500"
+                      : "text-muted-foreground"
+                  }`}
+                >
                   {metaDescription.length}/160
                 </span>
               </div>
@@ -229,6 +236,7 @@ export function EditorAISidebar({
                 onChange={(e) => setMetaDescription(e.target.value)}
                 rows={3}
                 className="text-sm"
+                disabled={!article}
               />
             </div>
             <div>
@@ -239,6 +247,7 @@ export function EditorAISidebar({
                 value={slug}
                 onChange={(e) => setSlug(e.target.value)}
                 className="h-8 font-mono text-xs"
+                disabled={!article}
               />
             </div>
             <Button
@@ -291,6 +300,7 @@ export function EditorAISidebar({
                 placeholder="Descrivi l'immagine che vuoi..."
                 rows={2}
                 className="text-sm"
+                disabled={!article}
               />
             </div>
             <div className="flex gap-2">
@@ -298,6 +308,7 @@ export function EditorAISidebar({
                 value={imageRatio}
                 onChange={(e) => setImageRatio(e.target.value)}
                 className="flex-1 rounded-md border border-input bg-background px-2 py-1.5 text-sm"
+                disabled={!article}
               >
                 <option value="16:9">16:9 Landscape</option>
                 <option value="1:1">1:1 Quadrato</option>
@@ -307,6 +318,7 @@ export function EditorAISidebar({
                 value={imageStyle}
                 onChange={(e) => setImageStyle(e.target.value)}
                 className="flex-1 rounded-md border border-input bg-background px-2 py-1.5 text-sm"
+                disabled={!article}
               >
                 <option value="photorealistic">Fotorealistico</option>
                 <option value="illustration">Illustrazione</option>

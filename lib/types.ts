@@ -1,5 +1,7 @@
 import type { CategoryKey, PipelineStage, WorkflowState } from "./constants";
 
+// ---------- Core tables (001_initial_schema.sql) ----------
+
 export interface Article {
   id: string;
   title: string;
@@ -42,6 +44,33 @@ export interface CalendarEntry {
   status: "planned" | "in_progress" | "completed" | "skipped";
   created_at: string;
 }
+
+// ---------- Pipeline tables (002_prompt_configs.sql) ----------
+
+export type PipelineStage = "research" | "draft" | "humanize" | "images" | "seo";
+
+export interface PromptConfig {
+  id: string;
+  stage: PipelineStage;
+  prompt_text: string;
+  version: number;
+  is_active: boolean;
+  created_at: string;
+  created_by: string | null;
+}
+
+export interface KnowledgeBaseFile {
+  id: string;
+  stage: PipelineStage;
+  file_name: string;
+  file_type: string;
+  storage_path: string;
+  extracted_text: string | null;
+  file_size_bytes: number | null;
+  created_at: string;
+}
+
+// ---------- Runtime types (not stored in DB) ----------
 
 export interface PipelineState {
   article_id: string;

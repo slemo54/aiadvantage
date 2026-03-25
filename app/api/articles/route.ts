@@ -148,3 +148,81 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Errore interno." }, { status: 500 });
   }
 }
+
+// ---- PUT /api/articles ----
+
+const ArticleUpdateSchema = z.object({
+  id: z.string().uuid("ID articolo non valido"),
+  title: z.string().min(1).max(255).optional(),
+  slug: z
+    .string()
+    .max(255)
+    .regex(/^[a-z0-9-]+$/, "Slug: solo lettere minuscole, numeri e trattini")
+    .optional(),
+  content_html: z.string().nullable().optional(),
+  status: z.enum(WORKFLOW_STATES).optional(),
+  category: z.enum(CATEGORY_KEYS).optional(),
+  freshness_score: z.number().int().min(0).max(100).optional(),
+  hero_image_url: z.string().nullable().optional(),
+  meta_description: z.string().max(160).nullable().optional(),
+  keywords: z.array(z.string()).optional(),
+  published_at: z.string().datetime().nullable().optional(),
+});
+
+export async function PUT(request: NextRequest) {
+  if (!isSupabaseConfigured()) {
+    return NextResponse.json(
+      { error: "Supabase non configurato." },
+      { status: 503 }
+    );
+  }
+
+  try {
+    const body: unknown = await request.json();
+    const parsed = ArticleUpdateSchema.safeParse(body);
+
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: "Dati non validi.", details: parsed.error.flatten() },
+        { status: 400 }
+      );
+    }
+
+    const { id, ...updateFields } = parsed.data;
+
+    const supabase = createAdminClient();
+    const { data, error } = await supabase
+      .from("articles")
+      .update({ ...updateFields, updated_at: new Date().toISOString() })
+      .eq("id", id)
+      .select()
+      .single();
+
+    if (error) {
+      console.error("[PUT /api/articles] Supabase error:", error.message);
+
+      if (error.code === "23505") {
+        return NextResponse.json(
+          { error: "Slug gia' esistente." },
+          { status: 409 }
+        );
+      }
+
+      return NextResponse.json(
+        { error: "Errore nell'aggiornamento dell'articolo." },
+        { status: 500 }
+      );
+    }
+
+    if (!data) {
+      return NextResponse.json(
+        { error: "Articolo non trovato." },
+        { status: 404 }
+      );
+    }
+
+    return NextResponse.json({ success: true, article: data });
+  } catch {
+    return NextResponse.json({ error: "Errore interno." }, { status: 500 });
+  }
+}

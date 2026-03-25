@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { generateDraft } from "@/lib/ai/kimi";
+import { generateDraft } from "@/lib/ai/venice";
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { Idea } from "@/lib/types";
 

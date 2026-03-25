@@ -3,7 +3,7 @@ import { Github, Twitter, Linkedin, Instagram, ArrowRight } from "lucide-react";
 
 const footerLinks = {
   explore: [
-    { label: "Home", href: "/" },
+    { label: "Inizio", href: "/" },
     { label: "Blog", href: "/blog" },
     { label: "Chi siamo", href: "/about" },
   ],

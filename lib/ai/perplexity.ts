@@ -30,7 +30,7 @@ interface PerplexityResponse {
   choices: PerplexityChoice[];
 }
 
-const RESEARCH_PROMPT = `Sei un ricercatore esperto di tecnologia e intelligenza artificiale.
+const DEFAULT_RESEARCH_PROMPT = `Sei un ricercatore esperto di tecnologia e intelligenza artificiale.
 Analizza le ultime tendenze AI degli ultimi 3 giorni.
 
 Trova 5 topic interessanti per un blog italiano sull'AI, focalizzandoti su:
@@ -68,7 +68,7 @@ async function callPerplexity(
   attempt: number = 1
 ): Promise<PerplexityResponse> {
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 45000);
+  const timeout = setTimeout(() => controller.abort(), TIMEOUT_MS);
 
   try {
     const response = await fetch("https://api.perplexity.ai/chat/completions", {
@@ -89,9 +89,11 @@ async function callPerplexity(
     if (!response.ok) {
       const errorText = await response.text();
 
-      // Rate limit — retry with backoff
+      // Rate limit — retry with exponential backoff (max 3 attempts)
       if (response.status === 429 && attempt < 3) {
-        await new Promise((r) => setTimeout(r, attempt * 3000));
+        const delay = attempt * 3000;
+        console.warn(`${LOG} Rate limited (429), retry #${attempt + 1} in ${delay}ms`);
+        await new Promise((r) => setTimeout(r, delay));
         return callPerplexity(apiKey, model, prompt, attempt + 1);
       }
 
@@ -101,6 +103,11 @@ async function callPerplexity(
     }
 
     return response.json() as Promise<PerplexityResponse>;
+  } catch (err) {
+    if (err instanceof DOMException && err.name === "AbortError") {
+      throw new Error(`${LOG} Timeout after ${TIMEOUT_MS}ms (model: ${model})`);
+    }
+    throw err;
   } finally {
     clearTimeout(timeout);
   }
@@ -114,12 +121,12 @@ async function callWithFallback(
 
   for (const model of MODELS) {
     try {
-      console.log(`[perplexity] Trying model: ${model}`);
+      console.log(`${LOG} Trying model: ${model}`);
       const result = await callPerplexity(apiKey, model, prompt);
-      console.log(`[perplexity] Success with model: ${model}`);
+      console.log(`${LOG} Success with model: ${model}`);
       return result;
     } catch (err) {
-      console.warn(`[perplexity] Model ${model} failed:`, String(err));
+      console.warn(`${LOG} Model ${model} failed:`, String(err));
       lastError = err;
     }
   }
@@ -153,7 +160,7 @@ export async function researchTopic(
   const jsonMatch = content.match(/\[[\s\S]*\]/);
   if (!jsonMatch) {
     throw new Error(
-      `Perplexity non ha restituito JSON valido. Risposta ricevuta: ${content.slice(0, 300)}`
+      `${LOG} Non ha restituito JSON valido. Risposta: ${content.slice(0, 300)}`
     );
   }
 
@@ -162,12 +169,12 @@ export async function researchTopic(
     topics = JSON.parse(jsonMatch[0]) as PerplexityTopicResult[];
   } catch {
     throw new Error(
-      `Errore parsing JSON da Perplexity: ${jsonMatch[0].slice(0, 300)}`
+      `${LOG} Errore parsing JSON: ${jsonMatch[0].slice(0, 300)}`
     );
   }
 
   if (!Array.isArray(topics) || topics.length === 0) {
-    throw new Error("Perplexity ha restituito un array vuoto o non valido.");
+    throw new Error(`${LOG} Array vuoto o non valido.`);
   }
 
   const allSources = topics.flatMap((t) =>
@@ -181,6 +188,8 @@ export async function researchTopic(
   const summary = topics
     .map((t, i) => `${i + 1}. ${t.titolo}: ${t.descrizione}`)
     .join("\n\n");
+
+  console.log(`${LOG} Found ${topics.length} topics, avg freshness: ${Math.round(avgFreshness)}`);
 
   return {
     summary,

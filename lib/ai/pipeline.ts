@@ -1,4 +1,8 @@
+// Pipeline state machine — manages article workflow transitions
+
 import type { WorkflowState } from "@/lib/constants";
+
+const LOG = "[ai/pipeline]";
 
 const VALID_TRANSITIONS: Record<WorkflowState, WorkflowState | null> = {
   idea: "researching",
@@ -38,16 +42,22 @@ export async function advanceState(
   if (route) {
     try {
       const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+      console.log(`${LOG} Advancing ${articleId}: ${currentStatus} → ${nextStatus} via ${route}`);
       const res = await fetch(`${baseUrl}${route}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ articleId }),
       });
-      if (!res.ok) throw new Error(`Route ${route} returned ${res.status}`);
+      if (!res.ok) {
+        const errorText = await res.text().catch(() => "");
+        throw new Error(`Route ${route} returned ${res.status}: ${errorText.slice(0, 200)}`);
+      }
     } catch (err) {
+      console.error(`${LOG} advanceState failed for ${articleId}:`, String(err));
       return { success: false, newStatus: null, error: String(err) };
     }
   }
 
+  console.log(`${LOG} Advanced ${articleId} to ${nextStatus}`);
   return { success: true, newStatus: nextStatus };
 }

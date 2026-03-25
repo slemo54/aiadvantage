@@ -1,7 +1,13 @@
-// Gemini API wrapper — Imagen 3 for images, gemini-1.5-pro for content review
+// Image generation via Venice AI — fluently-xl model
 
-interface ImagenInstance {
-  prompt: string;
+const LOG = "[ai/gemini]";
+const TIMEOUT_MS = 30_000;
+const API_URL = "https://api.venice.ai/api/v1/images/generations";
+const MODEL = "fluently-xl";
+
+interface VeniceImageData {
+  b64_json?: string;
+  url?: string;
 }
 
 interface ImagenParameters {
@@ -76,74 +82,99 @@ async function callImagen(
 }
 
 export async function generateImage(prompt: string): Promise<string | null> {
-  const apiKey = process.env.GEMINI_API_KEY ?? process.env.GOOGLE_AI_API_KEY;
+  const apiKey = process.env.VENICE_API_KEY;
   if (!apiKey) {
-    throw new Error(
-      "GEMINI_API_KEY non configurata. Aggiungila nelle variabili d'ambiente."
-    );
-  }
-
-  try {
-    const data = await callImagen(apiKey, prompt);
-    const prediction = data.predictions?.[0];
-    if (!prediction?.bytesBase64Encoded) {
-      return null;
-    }
-    const mimeType = prediction.mimeType ?? "image/png";
-    return `data:${mimeType};base64,${prediction.bytesBase64Encoded}`;
-  } catch (err) {
-    console.error("Gemini Imagen fallito:", err);
+    console.warn(`${LOG} VENICE_API_KEY non configurata, skip image generation`);
     return null;
   }
-}
 
-export async function generateContent(prompt: string): Promise<string> {
-  const apiKey = process.env.GEMINI_API_KEY ?? process.env.GOOGLE_AI_API_KEY;
-  if (!apiKey) {
-    throw new Error(
-      "GEMINI_API_KEY non configurata. Aggiungila nelle variabili d'ambiente."
-    );
+  if (!prompt.trim()) {
+    console.warn(`${LOG} Empty prompt, skip image generation`);
+    return null;
   }
 
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 60000);
-
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/${REVIEW_MODEL}:generateContent?key=${apiKey}`;
-
-  const body = {
-    contents: [
-      {
-        parts: [{ text: prompt }],
-      },
-    ],
-    generationConfig: {
-      temperature: 0.7,
-      maxOutputTokens: 2048,
-    },
-  };
+  const timeout = setTimeout(() => controller.abort(), TIMEOUT_MS);
 
   try {
-    const response = await fetch(url, {
+    console.log(`${LOG} Generating image with ${MODEL}: "${prompt.slice(0, 80)}..."`);
+
+    const response = await fetch(API_URL, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body),
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: MODEL,
+        prompt,
+        response_format: "b64_json",
+        n: 1,
+      }),
       signal: controller.signal,
     });
 
     if (!response.ok) {
       const errorText = await response.text();
-      throw new Error(`Gemini API error ${response.status}: ${errorText}`);
+
+      // Rate limit — single retry
+      if (response.status === 429) {
+        console.warn(`${LOG} Rate limited (429), retrying in 3s`);
+        await new Promise((r) => setTimeout(r, 3000));
+
+        clearTimeout(timeout);
+        const retryController = new AbortController();
+        const retryTimeout = setTimeout(() => retryController.abort(), TIMEOUT_MS);
+
+        try {
+          const retryResponse = await fetch(API_URL, {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${apiKey}`,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              model: MODEL,
+              prompt,
+              response_format: "b64_json",
+              n: 1,
+            }),
+            signal: retryController.signal,
+          });
+
+          if (!retryResponse.ok) {
+            throw new Error(`${LOG} Retry failed: HTTP ${retryResponse.status}`);
+          }
+
+          const retryData = (await retryResponse.json()) as VeniceImageResponse;
+          const b64 = retryData.data?.[0]?.b64_json;
+          if (!b64) return null;
+          return `data:image/png;base64,${b64}`;
+        } finally {
+          clearTimeout(retryTimeout);
+        }
+      }
+
+      throw new Error(`${LOG} HTTP ${response.status}: ${errorText.slice(0, 400)}`);
     }
 
-    const data = (await response.json()) as GeminiResponse;
-    const text =
-      data.candidates?.[0]?.content?.parts?.[0]?.text ?? "";
+    const data = (await response.json()) as VeniceImageResponse;
+    const b64 = data.data?.[0]?.b64_json;
 
-    if (!text.trim()) {
-      throw new Error("Gemini ha restituito una risposta vuota.");
+    if (!b64) {
+      console.warn(`${LOG} No image data in response`);
+      return null;
     }
 
-    return text;
+    console.log(`${LOG} Image generated, base64 length: ${b64.length}`);
+    return `data:image/png;base64,${b64}`;
+  } catch (err) {
+    if (err instanceof DOMException && err.name === "AbortError") {
+      console.error(`${LOG} Timeout after ${TIMEOUT_MS}ms`);
+    } else {
+      console.error(`${LOG} Image generation failed:`, String(err));
+    }
+    return null;
   } finally {
     clearTimeout(timeout);
   }
