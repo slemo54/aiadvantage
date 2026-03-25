@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { Loader2, CheckCircle, Send, Sparkles, TrendingUp, ShieldCheck } from "lucide-react";
 
 const benefits = [
@@ -24,8 +24,6 @@ const benefits = [
 export function Newsletter() {
   const [email, setEmail] = useState("");
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
-  const [errorMsg, setErrorMsg] = useState("");
-  const sectionRef = useRef<HTMLDivElement>(null);
 
   // reveal-on-scroll observer
   useEffect(() => {
@@ -87,10 +85,10 @@ export function Newsletter() {
                 Newsletter ad alta utilità
               </span>
               <h2 className="mt-5 text-3xl font-black leading-tight text-white sm:text-4xl lg:text-5xl">
-                Ricevi il meglio dell'AI italiana prima degli altri
+                Ricevi il meglio dell&apos;AI italiana prima degli altri
               </h2>
               <p className="mt-5 max-w-2xl text-base leading-8 text-zinc-300">
-                Ogni settimana: analisi selezionate, tool realmente utili, tutorial applicabili e segnali di mercato per trasformare l'AI in crescita concreta.
+                Ogni settimana: analisi selezionate, tool realmente utili, tutorial applicabili e segnali di mercato per trasformare l&apos;AI in crescita concreta.
               </p>
 
               <div className="mt-8 grid gap-4 sm:grid-cols-3">

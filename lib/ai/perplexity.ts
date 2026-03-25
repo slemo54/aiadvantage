@@ -30,7 +30,10 @@ interface PerplexityResponse {
   choices: PerplexityChoice[];
 }
 
-const DEFAULT_RESEARCH_PROMPT = `Sei un ricercatore esperto di tecnologia e intelligenza artificiale.
+const LOG = "[ai/perplexity]";
+const TIMEOUT_MS = 30_000;
+
+const RESEARCH_PROMPT = `Sei un ricercatore esperto di tecnologia e intelligenza artificiale.
 Analizza le ultime tendenze AI degli ultimi 3 giorni.
 
 Trova 5 topic interessanti per un blog italiano sull'AI, focalizzandoti su:

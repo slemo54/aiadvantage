@@ -167,7 +167,8 @@ export async function generateDraft(
 
   let template: string;
   try {
-    template = await resolvePrompt("draft");
+    const resolved = await resolvePrompt("draft");
+    template = resolved.promptText || DEFAULT_DRAFT_PROMPT;
   } catch {
     console.warn(`${LOG} prompt-resolver fallback to default draft prompt`);
     template = DEFAULT_DRAFT_PROMPT;
@@ -190,7 +191,8 @@ export async function humanizeText(html: string): Promise<string> {
 
   let template: string;
   try {
-    template = await resolvePrompt("humanize");
+    const resolved = await resolvePrompt("humanize");
+    template = resolved.promptText || DEFAULT_HUMANIZE_PROMPT;
   } catch {
     console.warn(`${LOG} prompt-resolver fallback to default humanize prompt`);
     template = DEFAULT_HUMANIZE_PROMPT;
@@ -212,7 +214,8 @@ export async function generateSEO(
 
   let template: string;
   try {
-    template = await resolvePrompt("seo");
+    const resolved = await resolvePrompt("seo");
+    template = resolved.promptText || DEFAULT_SEO_PROMPT;
   } catch {
     console.warn(`${LOG} prompt-resolver fallback to default SEO prompt`);
     template = DEFAULT_SEO_PROMPT;

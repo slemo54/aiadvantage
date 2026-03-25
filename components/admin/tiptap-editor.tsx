@@ -31,11 +31,13 @@ interface TiptapEditorProps {
 function ToolbarButton({
   onClick,
   active,
+  disabled,
   children,
   title,
 }: {
   onClick: () => void;
   active?: boolean;
+  disabled?: boolean;
   children: React.ReactNode;
   title: string;
 }) {
@@ -46,6 +48,7 @@ function ToolbarButton({
       size="sm"
       onMouseDown={(e) => e.preventDefault()}
       onClick={onClick}
+      disabled={disabled}
       title={title}
       className={cn("h-8 w-8 p-0", active && "bg-accent text-accent-foreground")}
     >

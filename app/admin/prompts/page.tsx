@@ -295,7 +295,7 @@ function TabStagePrompt({ stage }: { stage: PipelineStage }) {
                     <div className="min-w-0">
                       <p className="text-sm font-medium truncate">{f.file_name}</p>
                       <p className="text-[11px] text-muted-foreground">
-                        {(f.file_size_bytes / 1024).toFixed(1)} KB &middot;{" "}
+                        {((f.file_size_bytes ?? 0) / 1024).toFixed(1)} KB &middot;{" "}
                         {new Date(f.created_at).toLocaleDateString("it-IT")}
                       </p>
                     </div>

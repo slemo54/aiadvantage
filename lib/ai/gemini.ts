@@ -5,80 +5,13 @@ const TIMEOUT_MS = 30_000;
 const API_URL = "https://api.venice.ai/api/v1/images/generations";
 const MODEL = "fluently-xl";
 
-interface VeniceImageData {
+interface VeniceImageItem {
   b64_json?: string;
   url?: string;
 }
 
-interface ImagenParameters {
-  sampleCount: number;
-  aspectRatio?: string;
-}
-
-interface ImagenPrediction {
-  bytesBase64Encoded: string;
-  mimeType: string;
-}
-
-interface ImagenResponse {
-  predictions: ImagenPrediction[];
-}
-
-interface GeminiContentPart {
-  text: string;
-}
-
-interface GeminiContent {
-  parts: GeminiContentPart[];
-}
-
-interface GeminiCandidate {
-  content: GeminiContent;
-}
-
-interface GeminiResponse {
-  candidates: GeminiCandidate[];
-}
-
-const IMAGEN_MODEL = "gemini-nano-banana-2";
-const REVIEW_MODEL = "gemini-1.5-pro";
-
-async function callImagen(
-  apiKey: string,
-  prompt: string,
-  attempt: number = 1
-): Promise<ImagenResponse> {
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 60000);
-
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/${IMAGEN_MODEL}:predict?key=${apiKey}`;
-
-  const body: { instances: ImagenInstance[]; parameters: ImagenParameters } = {
-    instances: [{ prompt }],
-    parameters: { sampleCount: 1, aspectRatio: "16:9" },
-  };
-
-  try {
-    const response = await fetch(url, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body),
-      signal: controller.signal,
-    });
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      if (response.status === 429 && attempt < 3) {
-        await new Promise((resolve) => setTimeout(resolve, attempt * 3000));
-        return callImagen(apiKey, prompt, attempt + 1);
-      }
-      throw new Error(`Gemini Imagen error ${response.status}: ${errorText}`);
-    }
-
-    return response.json() as Promise<ImagenResponse>;
-  } finally {
-    clearTimeout(timeout);
-  }
+interface VeniceImageResponse {
+  data?: VeniceImageItem[];
 }
 
 export async function generateImage(prompt: string): Promise<string | null> {

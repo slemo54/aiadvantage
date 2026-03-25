@@ -11,7 +11,13 @@ interface AnthropicResponse {
   content: AnthropicContentBlock[];
 }
 
-const DEFAULT_HUMANIZE_PROMPT = `Sei un editor esperto che rende i testi AI più naturali e coinvolgenti.
+const LOG = "[ai/claude]";
+const TIMEOUT_MS = 30_000;
+const MODEL = "claude-sonnet-4-20250514";
+const ANTHROPIC_VERSION = "2023-06-01";
+
+function buildHumanizePrompt(draft: string): string {
+  return `Sei un editor esperto che rende i testi AI più naturali e coinvolgenti.
 
 Riscrivi questo articolo mantenendo il contenuto ma migliorando:
 - Tono conversazionale naturale (non robotico)
@@ -22,10 +28,11 @@ Riscrivi questo articolo mantenendo il contenuto ma migliorando:
 - Aggiungi opinioni e prospettive personali dove possibile
 
 Articolo originale:
-{{html}}
+${draft}
 
 Mantieni il formato HTML. Non modificare i fatti o le fonti citate.
 Rispondi SOLO con l'HTML dell'articolo riscritto, senza markdown o testo aggiuntivo.`;
+}
 
 async function callAnthropic(
   apiKey: string,
