@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { useEffect, useRef } from "react";
 import { ArrowUpRight, CalendarDays, Clock } from "lucide-react";
 import type { Article } from "@/lib/types";
 import { CATEGORIES } from "@/lib/constants";
@@ -139,9 +140,30 @@ export function FeaturedArticles({ articles, isLoading = false }: FeaturedArticl
   const featured = articles.slice(0, 4);
   const mainArticle = featured[0];
   const sideArticles = featured.slice(1, 4);
+  const sectionRef = useRef<HTMLElement>(null);
 
+  useEffect(() => {
+    if (!sectionRef.current) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add("is-visible");
+            observer.unobserve(entry.target);
+          }
+        });
+      },
+      { threshold: 0.1, rootMargin: "0px 0px -40px 0px" }
+    );
+
+    const elements = sectionRef.current.querySelectorAll(".reveal-on-scroll");
+    elements.forEach((el) => observer.observe(el));
+
+    return () => observer.disconnect();
+  }, [articles, isLoading]);
   return (
-    <section id="articles" className="bg-black py-20">
+    <section ref={sectionRef} id="articles" className="bg-black py-20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="mb-10 flex flex-col gap-4 md:flex-row md:items-end md:justify-between reveal-on-scroll">
           <div>
