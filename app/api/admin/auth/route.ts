@@ -22,8 +22,6 @@ export async function POST(request: NextRequest) {
     const { password } = parsed.data;
     const adminPassword = process.env.ADMIN_PASSWORD;
 
-    console.log("[admin/auth] Login attempt, ADMIN_PASSWORD configured:", Boolean(adminPassword));
-
     if (!adminPassword) {
       console.error("[admin/auth] ADMIN_PASSWORD env var not set");
       return NextResponse.json(
