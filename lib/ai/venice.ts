@@ -1,10 +1,11 @@
-// Venice AI wrapper — draft, humanize, SEO generation
+// Venice AI wrapper — draft, humanize, SEO generation, image generation
 
 import { resolvePrompt, interpolatePrompt } from "./prompt-resolver";
 
 const LOG = "[ai/venice]";
 const TIMEOUT_MS = 30_000;
 const API_URL = "https://api.venice.ai/api/v1/chat/completions";
+const IMAGE_API_URL = "https://api.venice.ai/api/v1/image/generate";
 const MODEL = "venice-uncensored";
 
 interface VeniceMessage {
@@ -204,6 +205,90 @@ export async function humanizeText(html: string): Promise<string> {
   const result = await callVenice(apiKey, prompt, 4096);
   console.log(`${LOG} Humanized, output: ${result.length} chars`);
   return result;
+}
+
+// ---------------------------------------------------------------------------
+// Image Generation
+// ---------------------------------------------------------------------------
+
+export async function generateImageVenice(
+  prompt: string,
+  attempt: number = 1
+): Promise<string | null> {
+  const apiKey = getApiKey();
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 60_000);
+
+  try {
+    const response = await fetch(IMAGE_API_URL, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: "fluently-xl",
+        prompt,
+        width: 1792,
+        height: 1024,
+        steps: 30,
+        cfg_scale: 7,
+        safe_mode: false,
+        return_binary: false,
+      }),
+      signal: controller.signal,
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+
+      if (response.status === 429 && attempt < 3) {
+        const delay = attempt * 5000;
+        console.warn(`${LOG} Image rate limited (429), retry #${attempt + 1} in ${delay}ms`);
+        await new Promise((r) => setTimeout(r, delay));
+        return generateImageVenice(prompt, attempt + 1);
+      }
+
+      console.error(`${LOG} Image HTTP ${response.status}: ${errorText.slice(0, 400)}`);
+      return null;
+    }
+
+    const data = (await response.json()) as {
+      images?: Array<{ b64?: string; url?: string }>;
+      data?: Array<{ b64_json?: string; url?: string }>;
+    };
+
+    // Handle different response formats
+    const b64 =
+      data.images?.[0]?.b64 ||
+      data.data?.[0]?.b64_json ||
+      null;
+
+    const url =
+      data.images?.[0]?.url ||
+      data.data?.[0]?.url ||
+      null;
+
+    if (b64) {
+      return `data:image/png;base64,${b64}`;
+    }
+
+    if (url) {
+      return url;
+    }
+
+    console.warn(`${LOG} Image response has no b64 or url:`, JSON.stringify(data).slice(0, 200));
+    return null;
+  } catch (err) {
+    if (err instanceof DOMException && err.name === "AbortError") {
+      console.error(`${LOG} Image generation timeout after 60s`);
+      return null;
+    }
+    console.error(`${LOG} Image generation error:`, err);
+    return null;
+  } finally {
+    clearTimeout(timeout);
+  }
 }
 
 export async function generateSEO(

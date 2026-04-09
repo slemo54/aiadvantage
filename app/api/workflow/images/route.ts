@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { generateImage } from "@/lib/ai/gemini";
+import { generateImageVenice } from "@/lib/ai/venice";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { resolvePrompt, interpolatePrompt, appendKnowledgeBase } from "@/lib/ai/prompt-resolver";
 import { CATEGORIES, type CategoryKey } from "@/lib/constants";
@@ -194,11 +194,11 @@ export async function POST(request: NextRequest) {
         )
       : fallbackPrompt;
 
-    let imageDataUri = await generateImage(imagePrompt);
+    let imageDataUri = await generateImageVenice(imagePrompt);
 
     if (!imageDataUri) {
       console.warn(`[workflow/images] Prima generazione fallita per articolo ${articleId}, provo prompt alternativo.`);
-      imageDataUri = await generateImage(
+      imageDataUri = await generateImageVenice(
         dbImgPrompt
           ? appendKnowledgeBase(
               `${imagePrompt}\n\nRetry instructions: simplify the scene, improve focal clarity, increase realism, remove extra elements, preserve all no-text constraints.`,

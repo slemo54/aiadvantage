@@ -50,32 +50,59 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Find the idea that matches this article's title or any "selected" idea
-    const { data: idea, error: ideaError } = await supabase
+    const articleTitle = article.title as string;
+    const articleCategory = article.category as string;
+
+    // Try to find a 'selected' idea matching the article title (exact or partial)
+    const { data: matchingIdea } = await supabase
       .from("ideas")
       .select("*")
       .eq("status", "selected")
-      .order("freshness_score", { ascending: false })
+      .ilike("topic", `%${articleTitle.slice(0, 40)}%`)
       .limit(1)
       .single();
 
-    if (ideaError || !idea) {
-      return NextResponse.json(
-        { error: "Nessuna idea con status 'selected' trovata" },
-        { status: 404 }
-      );
+    // Fallback: any selected idea ordered by freshness
+    const { data: fallbackIdea } = matchingIdea
+      ? { data: null }
+      : await supabase
+          .from("ideas")
+          .select("*")
+          .eq("status", "selected")
+          .order("freshness_score", { ascending: false })
+          .limit(1)
+          .single();
+
+    const idea = (matchingIdea ?? fallbackIdea) as Idea | null;
+
+    let researchText: string;
+    let usedCategory: string;
+
+    if (idea) {
+      // Build research string from perplexity_research blob
+      const researchData = (idea.perplexity_research as Record<string, unknown>) ?? {};
+      researchText = [
+        `Titolo: ${idea.topic}`,
+        `Categoria: ${idea.category}`,
+        researchData.descrizione ? `Descrizione: ${String(researchData.descrizione)}` : "",
+        researchData.summary ? `Summary: ${String(researchData.summary)}` : "",
+        (researchData.fonti as string[] | undefined)?.length
+          ? `Fonti: ${(researchData.fonti as string[]).join(", ")}`
+          : "",
+      ]
+        .filter(Boolean)
+        .join("\n");
+      usedCategory = idea.category;
+    } else {
+      // No idea found — generate directly from article title + category
+      console.warn(`[workflow/draft] Nessuna idea trovata per articleId=${articleId}, genero dal titolo.`);
+      researchText = [
+        `Titolo: ${articleTitle}`,
+        `Categoria: ${articleCategory}`,
+        `Genera un articolo approfondito e professionale su questo argomento, con esempi pratici e casi d'uso reali per il pubblico italiano.`,
+      ].join("\n");
+      usedCategory = articleCategory;
     }
-
-    const typedIdea = idea as Idea;
-
-    // Build research string from perplexity_research blob
-    const researchData = typedIdea.perplexity_research ?? {};
-    const researchText = [
-      `Titolo: ${typedIdea.topic}`,
-      `Descrizione: ${(researchData as Record<string, unknown>).descrizione ?? ""}`,
-      `Fonti: ${((researchData as Record<string, unknown>).fonti as string[] | undefined)?.join(", ") ?? ""}`,
-      `Summary: ${(researchData as Record<string, unknown>).summary ?? ""}`,
-    ].join("\n");
 
     // Update status to 'drafting' before long AI call
     await supabase
@@ -83,7 +110,7 @@ export async function POST(request: NextRequest) {
       .update({ status: "drafting", updated_at: new Date().toISOString() })
       .eq("id", articleId);
 
-    const htmlDraft = await generateDraft(researchText, typedIdea.category);
+    const htmlDraft = await generateDraft(researchText, usedCategory);
 
     // Save content
     const { error: updateError } = await supabase
@@ -99,11 +126,13 @@ export async function POST(request: NextRequest) {
       throw new Error(`Supabase update error: ${updateError.message}`);
     }
 
-    // Mark idea as used
-    await supabase
-      .from("ideas")
-      .update({ status: "used" })
-      .eq("id", typedIdea.id);
+    // Mark idea as used if we found one
+    if (idea) {
+      await supabase
+        .from("ideas")
+        .update({ status: "used" })
+        .eq("id", idea.id);
+    }
 
     // Trigger next step (humanize) asynchronously - fire and forget
     const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";

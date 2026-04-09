@@ -13,164 +13,7 @@ import { FadeIn } from "@/components/animations/motion";
 
 // ─── Extended placeholder data ────────────────────────────────────────────────
 
-const ARTICLE_META: Record<string, { author: string; readTime: number }> = {
-  "1": { author: "Anselmo", readTime: 8 },
-  "2": { author: "Anselmo", readTime: 6 },
-  "3": { author: "Anselmo", readTime: 5 },
-  "4": { author: "Anselmo", readTime: 10 },
-  "5": { author: "Anselmo", readTime: 7 },
-  "6": { author: "Anselmo", readTime: 9 },
-  "7": { author: "Anselmo", readTime: 12 },
-  "8": { author: "Anselmo", readTime: 6 },
-  "9": { author: "Anselmo", readTime: 8 },
-};
-
-const PLACEHOLDER_ARTICLES: Article[] = [
-  {
-    id: "1",
-    title: "Automating Enterprise Workflows with Local LLMs",
-    slug: "automating-enterprise-workflows-local-llms",
-    content_html: null,
-    status: "published",
-    category: "casi_duso",
-    freshness_score: 95,
-    hero_image_url: null,
-    meta_description:
-      "Discover how to deploy Llama 3 for internal data processing without compromising privacy.",
-    keywords: ["LLM", "privacy", "enterprise"],
-    published_at: "2026-03-01T10:00:00Z",
-    created_at: "2026-03-01T08:00:00Z",
-    updated_at: "2026-03-01T10:00:00Z",
-  },
-  {
-    id: "2",
-    title: "The State of Generative AI: Q1 2024 Report",
-    slug: "state-generative-ai-q1-2024",
-    content_html: null,
-    status: "published",
-    category: "ai_news",
-    freshness_score: 90,
-    hero_image_url: null,
-    meta_description:
-      "A comprehensive look at the foundation models dominating the market this year.",
-    keywords: ["AI", "report", "generative"],
-    published_at: "2026-02-28T10:00:00Z",
-    created_at: "2026-02-28T08:00:00Z",
-    updated_at: "2026-02-28T10:00:00Z",
-  },
-  {
-    id: "3",
-    title: "Building Scalable Web Apps with AI-Ready APIs",
-    slug: "building-scalable-web-apps-ai-ready-apis",
-    content_html: null,
-    status: "published",
-    category: "web_dev",
-    freshness_score: 88,
-    hero_image_url: null,
-    meta_description:
-      "Architecting your frontend to handle real-time generative streaming responses.",
-    keywords: ["API", "web", "scalable"],
-    published_at: "2026-02-25T10:00:00Z",
-    created_at: "2026-02-25T08:00:00Z",
-    updated_at: "2026-02-25T10:00:00Z",
-  },
-  {
-    id: "4",
-    title: "AI in Healthcare: Beyond the Hype",
-    slug: "ai-healthcare-beyond-hype",
-    content_html: null,
-    status: "published",
-    category: "casi_duso",
-    freshness_score: 91,
-    hero_image_url: null,
-    meta_description:
-      "Practical implementations of diagnostic AI currently saving lives in clinics.",
-    keywords: ["healthcare", "AI", "diagnostic"],
-    published_at: "2026-02-20T10:00:00Z",
-    created_at: "2026-02-20T08:00:00Z",
-    updated_at: "2026-02-20T10:00:00Z",
-  },
-  {
-    id: "5",
-    title: "The Rise of Agentic AI Workflows",
-    slug: "rise-agentic-ai-workflows",
-    content_html: null,
-    status: "published",
-    category: "ai_news",
-    freshness_score: 85,
-    hero_image_url: null,
-    meta_description:
-      "Why the next shift in AI isn't better models, but autonomous agents.",
-    keywords: ["agents", "workflow", "autonomous"],
-    published_at: "2026-02-15T10:00:00Z",
-    created_at: "2026-02-15T08:00:00Z",
-    updated_at: "2026-02-15T10:00:00Z",
-  },
-  {
-    id: "6",
-    title: "Mastering JetBrains Mono for Modern Dev",
-    slug: "mastering-jetbrains-mono-modern-dev",
-    content_html: null,
-    status: "published",
-    category: "tutorial",
-    freshness_score: 82,
-    hero_image_url: null,
-    meta_description:
-      "A deep dive into why typography matters for coding speed and legibility.",
-    keywords: ["typography", "devtools", "fonts"],
-    published_at: "2026-02-10T10:00:00Z",
-    created_at: "2026-02-10T08:00:00Z",
-    updated_at: "2026-02-10T10:00:00Z",
-  },
-  {
-    id: "7",
-    title: "LLM Locali vs Cloud: Guida alla Scelta 2024",
-    slug: "llm-locali-vs-cloud-guida-2024",
-    content_html: null,
-    status: "published",
-    category: "tutorial",
-    freshness_score: 94,
-    hero_image_url: null,
-    meta_description:
-      "Quando conviene usare modelli locali e quando il cloud è la scelta migliore.",
-    keywords: ["LLM", "tutorial", "privacy"],
-    published_at: "2026-02-05T10:00:00Z",
-    created_at: "2026-02-05T08:00:00Z",
-    updated_at: "2026-02-05T10:00:00Z",
-  },
-  {
-    id: "8",
-    title: "L'Etica dell'AI: Dilemmi e Soluzioni",
-    slug: "etica-ai-dilemmi-soluzioni",
-    content_html: null,
-    status: "published",
-    category: "opinioni",
-    freshness_score: 87,
-    hero_image_url: null,
-    meta_description:
-      "Un'analisi critica su bias, fairness e responsabilità nei sistemi AI.",
-    keywords: ["etica", "bias", "fairness"],
-    published_at: "2026-02-01T10:00:00Z",
-    created_at: "2026-02-01T08:00:00Z",
-    updated_at: "2026-02-01T10:00:00Z",
-  },
-  {
-    id: "9",
-    title: "Cursor.sh: Il Futuro del Coding con AI",
-    slug: "cursor-sh-futuro-coding-ai",
-    content_html: null,
-    status: "published",
-    category: "tools",
-    freshness_score: 93,
-    hero_image_url: null,
-    meta_description:
-      "Come Cursor sta rivoluzionando il modo in cui scriviamo codice.",
-    keywords: ["cursor", "IDE", "coding"],
-    published_at: "2026-01-28T10:00:00Z",
-    created_at: "2026-01-28T08:00:00Z",
-    updated_at: "2026-01-28T10:00:00Z",
-  },
-];
+const ARTICLE_META: Record<string, { author: string; readTime: number }> = {};
 
 // ─── Components ───────────────────────────────────────────────────────────────
 
@@ -243,7 +86,7 @@ function BlogContent() {
   const searchParams = useSearchParams();
   const categoryParam = searchParams.get("category") as CategoryKey | null;
 
-  const [articles, setArticles] = useState<Article[]>(PLACEHOLDER_ARTICLES);
+  const [articles, setArticles] = useState<Article[]>([]);
   const [activeCategory, setActiveCategory] = useState<CategoryKey | "all">(
     categoryParam || "all"
   );
@@ -261,11 +104,11 @@ function BlogContent() {
         );
         if (!res.ok) throw new Error("fetch failed");
         const data = (await res.json()) as { articles?: Article[] };
-        if (Array.isArray(data.articles) && data.articles.length > 0) {
+        if (Array.isArray(data.articles)) {
           setArticles(data.articles);
         }
       } catch {
-        // Keep placeholders
+        // keep empty state
       } finally {
         setIsLoading(false);
       }
