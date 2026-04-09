@@ -224,15 +224,18 @@ export default function HomePage() {
   useEffect(() => {
     async function loadArticles() {
       try {
+        console.log("[Home] Fetching articles...");
         const res = await fetch("/api/articles?status=published&limit=20");
-        if (!res.ok) throw new Error("fetch failed");
+        console.log("[Home] Response status:", res.status);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = (await res.json()) as { articles?: Article[] };
+        console.log("[Home] Articles fetched:", data.articles?.length || 0, data.articles);
         if (Array.isArray(data.articles)) {
           setArticles(data.articles);
           setArticleCount(data.articles.length);
         }
-      } catch {
-        // keep empty state
+      } catch (err) {
+        console.error("[Home] Failed to load articles:", err);
       } finally {
         setIsLoading(false);
       }
