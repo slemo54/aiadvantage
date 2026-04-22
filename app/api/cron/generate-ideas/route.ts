@@ -52,7 +52,7 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    console.log("[cron] Avvio ricerca topic con Perplexity...");
+
     const research = await researchTopic("");
 
     const supabase = createAdminClient();
